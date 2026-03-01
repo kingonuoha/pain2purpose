@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import { AdSenseScript } from "@/components/adsense-script";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { ThemeShortcut } from "@/components/theme-shortcut";
+import { GTMHead, GTMBody } from "@/components/google-tag-manager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,6 +73,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${lora.variable} ${outfit.variable} antialiased font-sans bg-background`}
       >
+        <GTMBody />
+        <GTMHead />
         <ConvexClientProvider>
           <SmoothScroll>
             <Suspense fallback={null}>
