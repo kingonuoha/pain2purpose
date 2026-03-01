@@ -194,7 +194,9 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                     )}>
                                         {session?.user?.name?.split(' ')[0]}
                                     </span>
-                                    <span className="text-[8px] text-primary font-bold uppercase tracking-widest mt-0.5">Member</span>
+                                    <span className="text-[8px] text-primary font-bold uppercase tracking-widest mt-0.5">
+                                        {session?.user?.role === "admin" ? "Admin" : "Member"}
+                                    </span>
                                 </div>
                                 <ChevronDown size={14} className={cn(
                                     "transition-transform duration-300",
@@ -321,15 +323,19 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                             </div>
                                             <div>
                                                 <h3 className="font-serif text-lg font-bold text-zinc-900 dark:text-white">{session?.user?.name}</h3>
-                                                <p className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">Premium Member</p>
+                                                <p className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                                                    {session?.user?.role === "admin" ? "Administrator" : "Premium Member"}
+                                                </p>
                                             </div>
                                         </div>
                                         <Link
-                                            href="/dashboard"
+                                            href={session?.user?.role === "admin" ? "/admin" : "/dashboard"}
                                             onClick={() => setIsMenuOpen(false)}
                                             className="w-full flex items-center justify-between p-4 bg-white dark:bg-background-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 hover:border-blue-600 transition-all group"
                                         >
-                                            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">Access Dashboard</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                {session?.user?.role === "admin" ? "Admin Panel" : "Access Dashboard"}
+                                            </span>
                                             <ArrowRight size={16} className="text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform" />
                                         </Link>
                                     </div>
