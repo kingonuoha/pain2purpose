@@ -124,7 +124,7 @@ export function AuthorContent({ author, initialArticles }: AuthorContentProps) {
                                         transition={{ delay: idx * 0.1 }}
                                         className="group bg-white rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-lg shadow-zinc-200/40 border border-zinc-100/50 hover:shadow-xl hover:shadow-primary/5 transition-all"
                                     >
-                                        <Link href={`/articles/${article.slug}`} className="relative w-full md:w-64 h-48 rounded-2xl overflow-hidden shrink-0">
+                                        <Link href={`/${article.slug}`} className="relative w-full md:w-64 h-48 rounded-2xl overflow-hidden shrink-0">
                                             <Image
                                                 src={article.coverImage || ""}
                                                 alt={article.title}
@@ -138,7 +138,7 @@ export function AuthorContent({ author, initialArticles }: AuthorContentProps) {
                                         </Link>
 
                                         <div className="flex flex-col py-2">
-                                            <Link href={`/articles/${article.slug}`}>
+                                            <Link href={`/${article.slug}`}>
                                                 <h3 className="text-2xl font-serif font-bold text-zinc-900 mb-3 group-hover:text-primary transition-colors leading-tight">
                                                     {article.title}
                                                 </h3>

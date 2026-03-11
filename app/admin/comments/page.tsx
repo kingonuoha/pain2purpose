@@ -122,7 +122,7 @@ export default function CommentsPage() {
                                 </div>
                                 {group.slug && (
                                     <Link
-                                        href={`/articles/${group.slug}`}
+                                        href={`/${group.slug}`}
                                         target="_blank"
                                         className="hidden md:flex items-center gap-2.5 px-6 py-3 bg-gray-50 dark:bg-background-800 text-gray-950 dark:text-zinc-200 rounded-xl border border-gray-100 dark:border-zinc-700 text-[11px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm"
                                     >

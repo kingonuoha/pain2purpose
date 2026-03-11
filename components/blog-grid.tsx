@@ -3,15 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, ChevronDown, Eye } from "lucide-react";
+import { Calendar, ChevronDown, Eye, Search } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id, Doc } from "../convex/_generated/dataModel";
 import { BlogSkeleton } from "./skeletons";
-import { getCloudinaryUrl } from "@/lib/utils";
+import { getCloudinaryUrl, getAvatarUrl } from "@/lib/utils";
+import { EmptyState } from "./empty-state";
 
 interface BlogGridProps {
     categoryId?: Id<"categories">;
+    topic?: string;
+    pillar?: string;
+    type?: string;
 }
 
 export interface JoinedArticle extends Doc<"articles"> {
@@ -20,12 +24,31 @@ export interface JoinedArticle extends Doc<"articles"> {
     authorImage?: string;
 }
 
-export function BlogGrid({ categoryId, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
+export function BlogGrid({ categoryId, topic, pillar, type, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
     const [limit, setLimit] = useState(initialArticles?.length || 6);
-    const articles = useQuery(api.articles.list, { limit, categoryId }) || initialArticles;
+    const articles = useQuery(api.articles.list, { limit, categoryId, topic, pillar, type }) || initialArticles;
 
     if (articles === undefined) {
         return <BlogSkeleton />;
+    }
+
+    if (articles.length === 0) {
+        return (
+            <EmptyState 
+                title="No Insights Found" 
+                description="We couldn't find any articles matching your current filter. Try exploring a different pillar or topic."
+                illustration="No-results-found.svg"
+                action={
+                    <Link 
+                        href="/"
+                        className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+                    >
+                        <Search size={14} />
+                        Explore All Truths
+                    </Link>
+                }
+            />
+        );
     }
 
     const hasMore = articles.length >= limit;
@@ -55,7 +78,7 @@ export function BlogGrid({ categoryId, initialArticles }: BlogGridProps & { init
                         </div>
 
                         <div className="flex flex-col gap-3 px-2 flex-grow">
-                            <Link href={`/articles/${article.slug}`}>
+                            <Link href={`/${article.slug}`}>
                                 <h2 className="text-xl md:text-2xl font-serif font-black leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                     {article.title}
                                 </h2>
@@ -69,7 +92,7 @@ export function BlogGrid({ categoryId, initialArticles }: BlogGridProps & { init
                             <Link href={`/author/${article.authorId}`} className="flex items-center gap-2 group/author">
                                 <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 relative">
                                     <Image
-                                        src={article.authorImage || getAvatarUrl(article.authorName)}
+                                        src={getAvatarUrl(article.authorName, article.authorImage)}
                                         alt={article.authorName}
                                         fill
                                         className="object-cover"
@@ -86,8 +109,7 @@ export function BlogGrid({ categoryId, initialArticles }: BlogGridProps & { init
                                     <Calendar size={12} />
                                     <span className="text-[10px] font-bold uppercase tracking-widest">
                                         {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
+                                            month: 'short',day: 'numeric'
                                         })}
                                     </span>
                                 </div>
@@ -116,8 +138,4 @@ export function BlogGrid({ categoryId, initialArticles }: BlogGridProps & { init
             </div>
         </div>
     );
-}
-
-function getAvatarUrl(name: string) {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0ea5e9&color=fff`;
 }

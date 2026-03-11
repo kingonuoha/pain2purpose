@@ -132,13 +132,13 @@ export function HeroCarousel({ initialArticles }: { initialArticles?: JoinedArti
                         className="flex flex-wrap gap-4"
                     >
                         <Link
-                            href={`/articles/${currentItem.slug}`}
+                            href={`/${currentItem.slug}`}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full transition-all shadow-xl shadow-blue-600/20 active:scale-95 text-xs uppercase tracking-widest"
                         >
                             Read Article
                         </Link>
                         <Link
-                            href="/articles"
+                            href="/"
                             className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white font-bold py-4 px-10 rounded-full transition-all active:scale-95 text-xs uppercase tracking-widest"
                         >
                             Explore Feed

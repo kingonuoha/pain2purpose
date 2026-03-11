@@ -27,7 +27,7 @@ export function CategoryShowcase() {
             {categories.map((cat: CategoryWithCount) => (
                 <Link
                     key={cat.slug}
-                    href={`/categories/${cat.slug}`}
+                    href={`/category/${cat.slug}`}
                     className="group relative h-80 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-blue-500/20"
                 >
                     <DynamicCategoryImage

@@ -38,7 +38,17 @@ export default defineSchema({
     coverImageAlt: v.optional(v.string()),
     authorId: v.id("users"),
     categoryId: v.optional(v.id("categories")),
-    tags: v.optional(v.array(v.string())),
+    pillar: v.optional(v.string()), // One of the 5 pillars e.g. "Human Behaviour"
+    topics: v.optional(v.array(v.string())), // Array of topic strings
+    type: v.optional(
+      v.union(
+        v.literal("pillar"),
+        v.literal("cluster"),
+        v.literal("micro"),
+        v.literal("insight"),
+        v.literal("observant"),
+      ),
+    ),
     status: v.union(
       v.literal("draft"),
       v.literal("scheduled"),

@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { fetchQuery } from "convex/nextjs";
 import { Doc } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
+import { slugify } from "@/lib/utils";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
@@ -12,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     limit: 1000,
   })) as Doc<"articles">[];
   const articleUrls = articles.map((article: Doc<"articles">) => ({
-    url: `${baseUrl}/articles/${article.slug}`,
+    url: `${baseUrl}/${article.slug}`,
     lastModified: new Date(
       article.updatedAt || article.publishedAt || Date.now(),
     ),
@@ -26,27 +27,48 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {},
   )) as (Doc<"categories"> & { articleCount?: number })[];
   const categoryUrls = categories.map((category: Doc<"categories">) => ({
-    url: `${baseUrl}/categories/${category.slug}`,
+    url: `${baseUrl}/category/${category.slug}`,
     lastModified: new Date(category.createdAt || Date.now()),
     changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  // Fetch Topics
+  const topics = (await fetchQuery(api.articles.getAllTopics)) || [];
+  const topicEntries: MetadataRoute.Sitemap = topics.map((topic: string) => ({
+    url: `${baseUrl}/topics/${slugify(topic)}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
 
   // Static pages
-  const staticPages = [
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
+      changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${baseUrl}/search`,
       lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.3,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/topics`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
     },
   ];
 
-  return [...staticPages, ...categoryUrls, ...articleUrls];
+  // Combine entries
+  return [
+    ...staticPages,
+    ...categoryUrls,
+    ...articleUrls,
+    ...topicEntries,
+  ];
 }

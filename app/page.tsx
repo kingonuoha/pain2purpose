@@ -47,7 +47,7 @@ export default async function Home() {
       "name": "The Truth Pill",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://thetruthpill.org/logo.png",
+        "url": "https://thetruthpill.org/truthpill/logo-text-hor-dark.png",
       },
     },
     "potentialAction": {
