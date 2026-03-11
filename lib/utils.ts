@@ -62,7 +62,19 @@ export function getCloudinaryUrl(url: string, transform?: string) {
   // This is the most reliable way as Cloudinary expects transformations at this position
   return url.replace(/\/upload\//, `/upload/${transform}/`);
 }
-export function truncate(str: string, length: number) {
-  if (!str) return "";
-  return str.length > length ? str.substring(0, length - 3) + "..." : str;
+export function truncate(text: string, length: number) {
+  if (!text) return "";
+  return text.length > length ? text.substring(0, length - 3) + "..." : text;
+}
+
+export function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')      // Replace spaces with -
+    .replace(/[^\w-]+/g, '')    // Remove all non-word chars
+    .replace(/--+/g, '-')      // Replace multiple - with single -
+    .replace(/^-+/, '')         // Trim - from start of text
+    .replace(/-+$/, '');        // Trim - from end of text
 }

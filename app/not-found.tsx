@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Home, Search, Compass } from "lucide-react";
+import { Home, Search } from "lucide-react";
 
 export default function NotFound() {
     return (
@@ -29,12 +29,11 @@ export default function NotFound() {
 
                     <div>
                         <h2 className="text-3xl md:text-4xl font-serif font-black text-gray-950 mb-3 tracking-tight italic flex items-center justify-center gap-3">
-                            <Compass className="text-blue-600" size={32} />
-                            Dimension Uncharted
+                            Page Not Found
                         </h2>
                         <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full mb-6" />
                         <p className="text-gray-500 font-medium text-lg max-w-lg mx-auto leading-relaxed">
-                            The signal you&apos;re tracking has drifted into an unobservable spectrum of reality. The path may have shifted planes.
+                            The requested page could not be found. It may have been moved, deleted, or never existed in the first place.
                         </p>
                     </div>
 
@@ -45,14 +44,14 @@ export default function NotFound() {
                         >
                             <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             <Home size={16} className="relative z-10 group-hover:scale-110 transition-transform" />
-                            <span className="relative z-10">Return to Origin</span>
+                            <span className="relative z-10">Back to Home</span>
                         </Link>
                         <Link
-                            href="/search"
+                            href="/"
                             className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-white border border-gray-200 text-gray-900 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-50 hover:border-blue-600 hover:text-blue-600 transition-all duration-300 active:scale-95 hover:shadow-lg shadow-sm"
                         >
                             <Search size={16} />
-                            Search Reality
+                            Search Articles
                         </Link>
                     </div>
                 </div>

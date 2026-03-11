@@ -261,7 +261,11 @@ export const generateArticleFromTopic = action({
         title: String(data.title),
         content: String(data.content),
         excerpt: String(data.excerpt),
-        tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+        pillar: data.pillar ? String(data.pillar) : undefined,
+        topics: Array.isArray(data.topics) ? data.topics.map(String) : [],
+        type: data.type && ["pillar", "cluster", "micro", "insight", "observant"].includes(data.type.toString().toLowerCase()) 
+          ? data.type.toString().toLowerCase() 
+          : "cluster",
         topic: args.topic,
         metaTitle: data.metaTitle ? String(data.metaTitle) : undefined,
         metaDescription: data.metaDescription

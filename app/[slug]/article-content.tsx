@@ -66,13 +66,18 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
+    const [lastScrollY, setLastScrollY] = useState(0);
+
     useEffect(() => {
         const handleScroll = () => {
-            setShowScrollTop(window.scrollY > 1000);
+            const currentScrollY = window.scrollY;
+            const isScrollingUp = currentScrollY < lastScrollY;
+            setShowScrollTop(currentScrollY > 1000 && isScrollingUp);
+            setLastScrollY(currentScrollY);
         };
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    }, [lastScrollY]);
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -199,7 +204,7 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
                     <nav className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-widest mb-6">
                         <Link href="/" className="hover:text-sky-blue transition-colors">Home</Link>
                         <ChevronRight size={12} />
-                        <Link href={`/categories/${article.categorySlug}`} className="hover:text-sky-blue transition-colors">{article.categoryName}</Link>
+                        <Link href={`/category/${article.categorySlug}`} className="hover:text-sky-blue transition-colors">{article.categoryName}</Link>
                     </nav>
 
                     <motion.div
@@ -253,7 +258,7 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
                             </div>
                             <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 bg-white/50 dark:bg-card/50 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 dark:border-white/10 shadow-sm">
                                 <Eye size={14} className="text-blue-500" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">{article.viewCount || 0} Imperial Views</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">{article.viewCount || 0} Total Views</span>
                             </div>
                         </div>
                     </motion.div>

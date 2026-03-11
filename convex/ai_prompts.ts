@@ -51,10 +51,12 @@ follow this pattern: Hook → Explanation → Example → Action → Summary
       "title": "Provocative, High-CTR Title (approx 60 chars)",
       "excerpt": "A 2-sentence curiosity gap hook that summarizes the core thesis.",
       "content": "Full long-form article content in clean HTML.",
-      "tags": ["3-5 relevant lowercase seo-keywords"],
       "metaTitle": "SEO-optimized meta title (max 60 chars)",
       "metaDescription": "Compelling meta description (max 155-160 chars) including primary keyword.",
       "focusKeyword": "The primary keyword this article targets.",
+      "pillar": "One of: Human Behaviour, Relationships, Emotional Clarity, Power Dynamics, Observant Mind",
+      "topics": ["array of strategic subtopics"],
+      "type": "One of: pillar, cluster, micro, insight, observant",
       "wordCount": "approximate word count"  
     }
     

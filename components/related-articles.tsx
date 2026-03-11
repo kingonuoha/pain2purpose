@@ -43,7 +43,7 @@ export function RelatedArticles({ categoryId, excludeId, lean = false }: Related
                 {filteredArticles.map((article) => (
                     <Link
                         key={article._id}
-                        href={`/articles/${article.slug}`}
+                        href={`/${article.slug}`}
                         className="group flex gap-4 items-start"
                     >
                         <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
@@ -77,7 +77,7 @@ export function RelatedArticles({ categoryId, excludeId, lean = false }: Related
             {filteredArticles.map((article) => (
                 <Link
                     key={article._id}
-                    href={`/articles/${article.slug}`}
+                    href={`/${article.slug}`}
                     className="group"
                 >
                     <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all">

@@ -26,24 +26,29 @@ export const seedData = mutation({
     // 2. Create categories if not exist
     const categoryData = [
       {
-        name: "Philosophy",
-        slug: "philosophy",
-        description: "Deep dives into the nature of reality.",
+        name: "Human Behavior",
+        slug: "human-behavior",
+        description: "Decoding the psychological patterns, cognitive biases, and behavioral loops that shape our lives.",
       },
       {
-        name: "Science",
-        slug: "science",
-        description: "The verifiable truth about our universe.",
+        name: "Relationships",
+        slug: "relationships",
+        description: "Navigating the complexities of human connection, intimacy, and social dynamics.",
       },
       {
-        name: "Psychology",
-        slug: "psychology",
-        description: "Understanding the human mind.",
+        name: "Emotional Clarity",
+        slug: "emotional-clarity",
+        description: "Achieving mental focus and emotional intelligence through self-awareness and regulation.",
       },
       {
-        name: "Society",
-        slug: "society",
-        description: "Analyzing the structures we live in.",
+        name: "Power Dynamics",
+        slug: "power-dynamics",
+        description: "Understanding the invisible structures of influence, authority, and social hierarchy.",
+      },
+      {
+        name: "Observant Mind",
+        slug: "observant-mind",
+        description: "Cultivating a perspective of deep observation, presence, and philosophical inquiry.",
       },
     ];
 
@@ -77,7 +82,6 @@ export const seedData = mutation({
         coverImage:
           "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200",
         categoryId: savedCategories[0]._id,
-        tags: ["philosophy", "truth", "reality"],
       },
       {
         title: "Neuroscience of Belief",
@@ -89,7 +93,6 @@ export const seedData = mutation({
         coverImage:
           "https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=1200",
         categoryId: savedCategories[2]._id,
-        tags: ["science", "brain", "psychology"],
       },
       {
         title: "Quantum Reality: Beyond Observation",
@@ -101,7 +104,6 @@ export const seedData = mutation({
         coverImage:
           "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=1200",
         categoryId: savedCategories[1]._id,
-        tags: ["science", "physics", "quantum"],
       },
       {
         title: "The Architecture of Social Control",
@@ -113,7 +115,6 @@ export const seedData = mutation({
         coverImage:
           "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200",
         categoryId: savedCategories[3]._id,
-        tags: ["society", "tech", "control"],
       },
       {
         title: "Stoicism in the Age of Noise",
@@ -125,7 +126,6 @@ export const seedData = mutation({
         coverImage:
           "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200",
         categoryId: savedCategories[0]._id,
-        tags: ["philosophy", "stoicism", "mental-health"],
       },
     ];
 

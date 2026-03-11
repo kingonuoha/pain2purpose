@@ -43,7 +43,6 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
         content: initialData?.content || "",
         coverImage: initialData?.coverImage || "",
         categoryId: (initialData?.categoryId || undefined) as Id<"categories"> | undefined,
-        tags: initialData?.tags || [] as string[],
         status: initialData?.status || "draft" as "draft" | "published" | "scheduled",
         source: initialData?.source || "human" as "human" | "ai",
         isFeatured: initialData?.isFeatured || false,
@@ -52,6 +51,9 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
         focusKeyword: initialData?.focusKeyword || "",
         authorId: initialData?.authorId as Id<"users"> | undefined,
         coverImageAlt: initialData?.coverImageAlt || "",
+        pillar: initialData?.pillar || "",
+        topics: initialData?.topics || [] as string[],
+        type: initialData?.type || "cluster" as "pillar" | "cluster" | "micro" | "insight" | "observant",
     });
 
     // Handle scheduledFor date formatting
@@ -64,7 +66,6 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
         }
     }, [initialData]);
 
-    const [tagInput, setTagInput] = useState("");
     const [isUploading, setIsUploading] = useState(false);
     const [charCount, setCharCount] = useState(0);
     const [headingStructure, setHeadingStructure] = useState<{ hasH2: boolean; multipleH1: boolean }>({ hasH2: false, multipleH1: false });
@@ -131,12 +132,12 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
         }
     }, [formData.metaDescription, isExcerptTouched]);
 
-    // Sync Tags -> Focus Keyword
+    // Sync Topics -> Focus Keyword
     useEffect(() => {
-        if (!isFocusKeywordTouched && formData.tags.length > 0) {
-            setFormData(prev => ({ ...prev, focusKeyword: formData.tags[0] }));
+        if (!isFocusKeywordTouched && formData.topics.length > 0) {
+            setFormData(prev => ({ ...prev, focusKeyword: formData.topics[0] }));
         }
-    }, [formData.tags, isFocusKeywordTouched]);
+    }, [formData.topics, isFocusKeywordTouched]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -206,7 +207,6 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                     content: formData.content,
                     coverImage: formData.coverImage || "",
                     categoryId: formData.categoryId as Id<"categories">,
-                    tags: formData.tags,
                     status: formData.status,
                     source: formData.source,
                     isFeatured: formData.isFeatured,
@@ -215,6 +215,9 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                     focusKeyword: formData.focusKeyword,
                     coverImageAlt: formData.coverImageAlt,
                     authorId: formData.authorId,
+                    pillar: formData.pillar,
+                    topics: formData.topics,
+                    type: formData.type,
                     scheduledFor: scheduledTimestamp,
                     adminEmail: (session?.user?.email as string) || undefined,
                 });
@@ -227,7 +230,6 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                     content: formData.content,
                     coverImage: formData.coverImage || "",
                     categoryId: formData.categoryId,
-                    tags: formData.tags,
                     status: formData.status,
                     source: formData.source,
                     isFeatured: formData.isFeatured,
@@ -236,6 +238,9 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                     focusKeyword: formData.focusKeyword,
                     coverImageAlt: formData.coverImageAlt,
                     authorId: formData.authorId,
+                    pillar: formData.pillar,
+                    topics: formData.topics,
+                    type: formData.type,
                     scheduledFor: scheduledTimestamp,
                     adminEmail: (session?.user?.email as string) || undefined,
                 });
@@ -251,39 +256,6 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const addTag = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            // Handle comma separated pasting or typing
-            const inputs = tagInput.split(',').map(s => s.trim()).filter(Boolean);
-
-            setFormData(prev => {
-                const newTags = [...prev.tags];
-                inputs.forEach(t => {
-                    if (!newTags.includes(t)) newTags.push(t);
-                });
-                return { ...prev, tags: newTags };
-            });
-            setTagInput("");
-            // setShowTagSuggestions(false); // This state variable is not defined
-        }
-    };
-
-    // Also handle pasting CSV
-    const handleTagPaste = (e: React.ClipboardEvent) => {
-        e.preventDefault();
-        const paste = e.clipboardData.getData('text');
-        const inputs = paste.split(',').map(s => s.trim()).filter(Boolean);
-
-        setFormData(prev => {
-            const newTags = [...prev.tags];
-            inputs.forEach(t => {
-                if (!newTags.includes(t)) newTags.push(t);
-            });
-            return { ...prev, tags: newTags };
-        });
     };
 
     const createCategory = useMutation(api.categories.create);
@@ -344,10 +316,6 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = "";
         }
-    };
-
-    const removeTag = (tagToRemove: string) => {
-        setFormData(prev => ({ ...prev, tags: prev.tags.filter((t: string) => t !== tagToRemove) }));
     };
 
     const [activeTab, setActiveTab] = useState<"general" | "advanced">("general");
@@ -657,6 +625,7 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                                 {/* Categorization Card */}
                                 <div className="bg-white dark:bg-card p-8 rounded-3xl border border-zinc-200 dark:border-white/5 shadow-sm space-y-6">
                                     <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100 border-b border-zinc-50 dark:border-zinc-800 pb-4">Topic & Grouping</h3>
+                                    
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div>
                                             <div className="flex items-center justify-between mb-2">
@@ -683,27 +652,68 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                                             />
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Tags</label>
-                                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase">{formData.tags.length} added</span>
+
+                                    {/* New Metadata Fields */}
+                                    <div className="pt-6 border-t border-zinc-50 dark:border-zinc-800 space-y-6">
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Content Pillar</label>
+                                                <select
+                                                    value={formData.pillar}
+                                                    onChange={e => setFormData(prev => ({ ...prev, pillar: e.target.value }))}
+                                                    className="w-full bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 font-bold text-sm outline-none appearance-none cursor-pointer dark:text-zinc-100"
+                                                >
+                                                    <option value="">Select Pillar (Optional)</option>
+                                                    <option value="Human Behaviour">Human Behaviour</option>
+                                                    <option value="Relationships">Relationships</option>
+                                                    <option value="Emotional Clarity">Emotional Clarity</option>
+                                                    <option value="Power Dynamics">Power Dynamics</option>
+                                                    <option value="Observant Mind">Observant Mind</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Content Type</label>
+                                                <select
+                                                    value={formData.type}
+                                                    onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as "pillar" | "cluster" | "micro" | "insight" | "observant" }))}
+                                                    className="w-full bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 font-bold text-sm outline-none appearance-none cursor-pointer dark:text-zinc-100"
+                                                >
+                                                    <option value="cluster">Cluster (Standard Post)</option>
+                                                    <option value="pillar">Pillar (Core Guide)</option>
+                                                    <option value="micro">Micro Post (Short)</option>
+                                                    <option value="insight">Insight Page (Data-driven)</option>
+                                                    <option value="observant">Observant (Philosophical)</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <input
-                                            type="text"
-                                            value={tagInput}
-                                            onChange={e => setTagInput(e.target.value)}
-                                            onKeyDown={addTag}
-                                            onPaste={handleTagPaste}
-                                            placeholder="Type & press Enter..."
-                                            className="w-full bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none dark:text-zinc-100 dark:placeholder:text-zinc-600"
-                                        />
-                                        <div className="flex flex-wrap gap-2 mt-3">
-                                            {formData.tags.map(tag => (
-                                                <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-background-800/50 text-zinc-600 dark:text-zinc-100 rounded-lg text-[10px] font-black uppercase group">
-                                                    {tag}
-                                                    <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-500"><X size={10} strokeWidth={3} /></button>
-                                                </span>
-                                            ))}
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Core Topics</label>
+                                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase">{formData.topics.length} added</span>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Add topics (press Enter to add)..."
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        const val = e.currentTarget.value.trim();
+                                                        if (val && !formData.topics.includes(val)) {
+                                                            setFormData(prev => ({ ...prev, topics: [...prev.topics, val] }));
+                                                            e.currentTarget.value = "";
+                                                        }
+                                                    }
+                                                }}
+                                                className="w-full bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none dark:text-zinc-100 dark:placeholder:text-zinc-600"
+                                            />
+                                            <div className="flex flex-wrap gap-2 mt-3">
+                                                {formData.topics.map(topic => (
+                                                    <span key={topic} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase group">
+                                                        {topic}
+                                                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, topics: prev.topics.filter(t => t !== topic) }))} className="hover:text-red-500"><X size={10} strokeWidth={3} /></button>
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -754,7 +764,7 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                                                 }}
                                                 rows={4}
                                                 className="w-full resize-none bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-700 rounded-2xl p-4 focus:outline-none text-zinc-600 dark:text-zinc-200 text-sm leading-relaxed"
-                                            />
+                                            ></textarea>
                                         </div>
                                     </div>
                                 </div>
