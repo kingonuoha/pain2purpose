@@ -2,18 +2,32 @@ import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Doc, Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+ 
+ function slugify(text: string) {
+   return text
+     .toString()
+     .toLowerCase()
+     .trim()
+     .replace(/\s+/g, "-")
+     .replace(/[^\w-]+/g, "")
+     .replace(/--+/g, "-")
+     .replace(/^-+/, "")
+     .replace(/-+$/, "");
+ }
 
 export const list = query({
   args: {
     limit: v.optional(v.number()),
     categoryId: v.optional(v.id("categories")),
-    tag: v.optional(v.string()),
+    topic: v.optional(v.string()),
+    pillar: v.optional(v.string()),
+    type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     let articleQuery = ctx.db
       .query("articles")
       .withIndex("by_status", (q) => q.eq("status", "published"))
-      .filter((q) => q.eq(q.field("isArchived"), undefined));
+      .filter((q) => q.neq(q.field("isArchived"), true));
 
     if (args.categoryId) {
       articleQuery = ctx.db
@@ -24,13 +38,28 @@ export const list = query({
         .filter((q) => q.eq(q.field("status"), "published"));
     }
 
-    let articles = await articleQuery.order("desc").take(args.limit || 100);
+    let articles = await articleQuery.order("desc").collect();
 
-    if (args.tag) {
+    if (args.topic) {
+      const targetTopic = slugify(args.topic!);
       articles = articles.filter((article) =>
-        article.tags?.includes(args.tag!),
+        article.topics?.some(t => slugify(t) === targetTopic),
       );
     }
+
+    if (args.pillar) {
+      articles = articles.filter((article) =>
+        article.pillar === args.pillar
+      );
+    }
+
+    if (args.type) {
+      articles = articles.filter((article) =>
+        article.type === args.type
+      );
+    }
+
+    articles = articles.slice(0, args.limit || 10); // Default to 10 for better performance if not specified
 
     return await Promise.all(
       articles.map(async (article) => {
@@ -152,7 +181,7 @@ export const search = query({
   },
 });
 
-export const getPopularTags = query({
+export const getPopularTopics = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const articles = await ctx.db
@@ -160,17 +189,38 @@ export const getPopularTags = query({
       .withIndex("by_status", (q) => q.eq("status", "published"))
       .take(100);
 
-    const tagCounts: Record<string, number> = {};
+    const topicCounts: Record<string, number> = {};
     articles.forEach((article) => {
-      article.tags?.forEach((tag) => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      article.topics?.forEach((topic) => {
+        topicCounts[topic] = (topicCounts[topic] || 0) + 1;
       });
     });
 
-    return Object.entries(tagCounts)
+    return Object.entries(topicCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, args.limit || 20)
-      .map(([tag]) => tag);
+      .map(([topic]) => topic);
+  },
+});
+
+// getAllTags removed in favor of getAllTopics below
+
+export const getAllTopics = query({
+  args: {},
+  handler: async (ctx) => {
+    const articles = await ctx.db
+      .query("articles")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    const topics = new Set<string>();
+    articles.forEach((article) => {
+      article.topics?.forEach((topic) => topics.add(topic));
+    });
+ 
+    // Return unique topics, normalized for consistent display but mapped to actual strings if possible
+    // For now, we return them as they are, the frontend will handle display normalization if needed
+    return Array.from(topics).sort((a, b) => a.localeCompare(b));
   },
 });
 export const getById = query({
@@ -190,7 +240,17 @@ export const create = mutation({
     content: v.optional(v.string()),
     coverImage: v.optional(v.string()),
     categoryId: v.optional(v.id("categories")),
-    tags: v.optional(v.array(v.string())),
+    pillar: v.optional(v.string()),
+    topics: v.optional(v.array(v.string())),
+    type: v.optional(
+      v.union(
+        v.literal("pillar"),
+        v.literal("cluster"),
+        v.literal("micro"),
+        v.literal("insight"),
+        v.literal("observant"),
+      ),
+    ),
     status: v.union(
       v.literal("draft"),
       v.literal("scheduled"),
@@ -202,9 +262,11 @@ export const create = mutation({
     metaTitle: v.optional(v.string()),
     metaDescription: v.optional(v.string()),
     focusKeyword: v.optional(v.string()),
+    coverImageAlt: v.optional(v.string()),
     adminEmail: v.optional(v.string()),
+    authorId: v.optional(v.id("users")),
   },
-  handler: async (ctx, { adminEmail, ...args }) => {
+  handler: async (ctx, { adminEmail, authorId: providedAuthorId, ...args }) => {
     // Validation for non-drafts
     if (args.status !== "draft") {
       if (!args.excerpt) throw new Error("Excerpt is required for publishing");
@@ -213,8 +275,8 @@ export const create = mutation({
         throw new Error("Cover Image is required for publishing");
       if (!args.categoryId)
         throw new Error("Category is required for publishing");
-      if (!args.tags || args.tags.length === 0)
-        throw new Error("Tags are required for publishing");
+      if (!args.topics || args.topics.length === 0)
+        throw new Error("Topics are required for publishing");
 
       // Enhanced SEO checks
       if (!args.metaTitle)
@@ -254,7 +316,7 @@ export const create = mutation({
     const now = Date.now();
     const articleId = await ctx.db.insert("articles", {
       ...args,
-      authorId: user._id,
+      authorId: providedAuthorId || user._id,
       viewCount: 0,
       uniqueViewCount: 0,
       readingTime: Math.ceil((args.content || "").length / 1300),
@@ -282,7 +344,17 @@ export const update = mutation({
     content: v.optional(v.string()),
     coverImage: v.optional(v.string()),
     categoryId: v.optional(v.id("categories")),
-    tags: v.optional(v.array(v.string())),
+    pillar: v.optional(v.string()),
+    topics: v.optional(v.array(v.string())),
+    type: v.optional(
+      v.union(
+        v.literal("pillar"),
+        v.literal("cluster"),
+        v.literal("micro"),
+        v.literal("insight"),
+        v.literal("observant"),
+      ),
+    ),
     status: v.optional(
       v.union(
         v.literal("draft"),
@@ -296,7 +368,9 @@ export const update = mutation({
     metaTitle: v.optional(v.string()),
     metaDescription: v.optional(v.string()),
     focusKeyword: v.optional(v.string()),
+    coverImageAlt: v.optional(v.string()),
     adminEmail: v.optional(v.string()),
+    authorId: v.optional(v.id("users")),
   },
   handler: async (ctx, { id, adminEmail, ...args }) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -321,13 +395,13 @@ export const update = mutation({
       const content = args.content || existing.content;
       const coverImage = args.coverImage || existing.coverImage;
       const categoryId = args.categoryId || existing.categoryId;
-      const tags = args.tags || existing.tags;
+      const topics = args.topics || existing.topics;
 
       if (!excerpt) throw new Error("Excerpt is required");
       if (!content) throw new Error("Content is required");
       if (!coverImage) throw new Error("Cover Image is required");
       if (!categoryId) throw new Error("Category is required");
-      if (!tags || tags.length === 0) throw new Error("Tags are required");
+      if (!topics || topics.length === 0) throw new Error("Topics are required");
 
       // Enhanced SEO checks
       const metaTitle = args.metaTitle || existing.metaTitle;
@@ -522,15 +596,6 @@ export const listAdmin = query({
   },
 });
 
-export const getAllTags = query({
-  handler: async (ctx) => {
-    const articles = await ctx.db.query("articles").collect();
-    const tags = new Set<string>();
-    articles.forEach((a) => a.tags?.forEach((t) => tags.add(t)));
-    return Array.from(tags).sort();
-  },
-});
-
 export const listAuthors = query({
   args: {},
   handler: async (ctx) => {
@@ -546,7 +611,17 @@ export const saveAIDraft = internalMutation({
     title: v.string(),
     content: v.string(),
     excerpt: v.string(),
-    tags: v.array(v.string()),
+     pillar: v.optional(v.string()),
+    topics: v.optional(v.array(v.string())),
+    type: v.optional(
+      v.union(
+        v.literal("pillar"),
+        v.literal("cluster"),
+        v.literal("micro"),
+        v.literal("insight"),
+        v.literal("observant"),
+      ),
+    ),
     topic: v.string(),
     metaTitle: v.optional(v.string()),
     metaDescription: v.optional(v.string()),
@@ -557,9 +632,10 @@ export const saveAIDraft = internalMutation({
       metaTitle,
       metaDescription,
       focusKeyword,
-      topic: _,
+      topic,
       ...rest
     } = args;
+    void topic;
     const admins = await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "admin"))
@@ -686,3 +762,6 @@ export const getBookmarkedArticles = query({
     return articles.filter((a): a is NonNullable<typeof a> => a !== null);
   },
 });
+
+
+

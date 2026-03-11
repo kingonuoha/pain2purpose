@@ -160,6 +160,7 @@ export const generateContent = action({
                   : []),
                 { role: "user", content: args.prompt },
               ],
+              response_format: { type: "json_object" },
               temperature: 0.7,
             }),
           },
@@ -257,14 +258,20 @@ export const generateArticleFromTopic = action({
       }
 
       await ctx.runMutation(internal.articles.saveAIDraft, {
-        title: data.title,
-        content: data.content,
-        excerpt: data.excerpt,
-        tags: data.tags || [],
+        title: String(data.title),
+        content: String(data.content),
+        excerpt: String(data.excerpt),
+        pillar: data.pillar ? String(data.pillar) : undefined,
+        topics: Array.isArray(data.topics) ? data.topics.map(String) : [],
+        type: data.type && ["pillar", "cluster", "micro", "insight", "observant"].includes(data.type.toString().toLowerCase()) 
+          ? data.type.toString().toLowerCase() 
+          : "cluster",
         topic: args.topic,
-        metaTitle: data.metaTitle,
-        metaDescription: data.metaDescription,
-        focusKeyword: data.focusKeyword,
+        metaTitle: data.metaTitle ? String(data.metaTitle) : undefined,
+        metaDescription: data.metaDescription
+          ? String(data.metaDescription)
+          : undefined,
+        focusKeyword: data.focusKeyword ? String(data.focusKeyword) : undefined,
       });
 
       // Mark the research topic as processed if it exists

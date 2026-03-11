@@ -101,6 +101,32 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
     };
 
     const searchResults = useQuery(api.articles.search, { query: query.length > 2 ? query : "" });
+    const categoriesAll = useQuery(api.categories.listAll);
+
+    // Filter and sort categories: Top 3 by articleCount
+    const topCategories = [...(categoriesAll || [])]
+        .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
+        .slice(0, 3);
+
+    const navLinks = [
+        { label: "Home", href: "/" },
+        { 
+            label: "Human Behavior", 
+            href: "/category/human-behavior",
+            dropdown: [
+                { label: "Full Guide", href: "/category/human-behavior" },
+                { label: "Self Sabotage", href: "/topics/self-sabotage" },
+                { label: "Overthinking & Mental Loops", href: "/topics/overthinking" },
+                { label: "Perfectionism", href: "/topics/perfectionism" },
+                { label: "Fear & Psychological Avoidance", href: "/topics/fear" },
+                { label: "Identity & Self Concept", href: "/topics/identity" },
+            ]
+        },
+        { label: "Relationships", href: "/category/relationships" },
+        { label: "Emotional Clarity", href: "/category/emotional-clarity" },
+        { label: "Power Dynamics", href: "/category/power-dynamics" },
+        { label: "Observant Mind", href: "/category/observant-mind" },
+    ];
 
     return (
         <>
@@ -145,9 +171,38 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                 "hidden md:flex items-center gap-8 text-sm font-medium transition-colors duration-300",
                 isScrolled ? "text-gray-600 dark:text-gray-400" : "text-white/90"
             )}>
-                <Link href="/articles" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Articles</Link>
-                <Link href="/categories" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Categories</Link>
-                <Link href="/about" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">About</Link>
+                {navLinks.filter(l => l.label !== "Home").map((link) => (
+                    link.dropdown ? (
+                        <div key={link.label} className="relative group/nav">
+                            <Link 
+                                href={link.href} 
+                                className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-4"
+                            >
+                                {link.label}
+                                <ChevronDown size={14} className="group-hover/nav:rotate-180 transition-transform" />
+                            </Link>
+                            <div className="absolute top-full left-0 w-64 bg-white dark:bg-gray-950 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-800 opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-300 transform translate-y-2 group-hover/nav:translate-y-0 p-2 z-[70]">
+                                {link.dropdown.map(sub => (
+                                    <Link
+                                        key={sub.label}
+                                        href={sub.href}
+                                        className="block px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all"
+                                    >
+                                        {sub.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <Link 
+                            key={link.label} 
+                            href={link.href} 
+                            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        >
+                            {link.label}
+                        </Link>
+                    )
+                ))}
             </div>
 
             <div className="flex items-center gap-3">
@@ -194,7 +249,9 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                     )}>
                                         {session?.user?.name?.split(' ')[0]}
                                     </span>
-                                    <span className="text-[8px] text-primary font-bold uppercase tracking-widest mt-0.5">Member</span>
+                                    <span className="text-[8px] text-primary font-bold uppercase tracking-widest mt-0.5">
+                                        {session?.user?.role === "admin" ? "Admin" : "Member"}
+                                    </span>
                                 </div>
                                 <ChevronDown size={14} className={cn(
                                     "transition-transform duration-300",
@@ -321,15 +378,19 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                             </div>
                                             <div>
                                                 <h3 className="font-serif text-lg font-bold text-zinc-900 dark:text-white">{session?.user?.name}</h3>
-                                                <p className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">Premium Member</p>
+                                                <p className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                                                    {session?.user?.role === "admin" ? "Administrator" : "Premium Member"}
+                                                </p>
                                             </div>
                                         </div>
                                         <Link
-                                            href="/dashboard"
+                                            href={session?.user?.role === "admin" ? "/admin" : "/dashboard"}
                                             onClick={() => setIsMenuOpen(false)}
                                             className="w-full flex items-center justify-between p-4 bg-white dark:bg-background-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 hover:border-blue-600 transition-all group"
                                         >
-                                            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">Access Dashboard</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                {session?.user?.role === "admin" ? "Admin Panel" : "Access Dashboard"}
+                                            </span>
                                             <ArrowRight size={16} className="text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform" />
                                         </Link>
                                     </div>
@@ -337,12 +398,7 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
 
                                 <div className="space-y-2 mb-10">
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-4 px-2">Navigation</h4>
-                                    {[
-                                        { label: "Home", href: "/" },
-                                        { label: "Articles", href: "/articles" },
-                                        { label: "Categories", href: "/categories" },
-                                        { label: "About Us", href: "/about" }
-                                    ].map((item) => (
+                                    {navLinks.map((item) => (
                                         <Link
                                             key={item.label}
                                             href={item.href}

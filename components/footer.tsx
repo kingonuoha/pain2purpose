@@ -128,25 +128,25 @@ export function Footer() {
                         )}
                     </div>
 
-                    {/* Links - Platform */}
+                    {/* Links - Explore */}
                     <div>
-                        <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-blue-500 mb-8 pb-2 border-b border-blue-500/10 inline-block">Platform</h4>
+                        <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-blue-500 mb-8 pb-2 border-b border-blue-500/10 inline-block">Explore</h4>
                         <ul className="space-y-4 text-sm text-gray-400 font-semibold">
-                            <li><Link href="/articles" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Latest Articles</Link></li>
-                            <li><Link href="/categories" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Navigation by Reality</Link></li>
-                            <li><Link href="/articles?featured=true" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Featured Discoveries</Link></li>
-                            <li><Link href="/about" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Our Ethos</Link></li>
+                            <li><Link href="/articles" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Latest Insights</Link></li>
+                            <li><Link href="/category" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Browse Categories</Link></li>
+                            <li><Link href="/topics" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Topics Atlas</Link></li>
+                            <li><Link href="/articles?featured=true" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Featured Reads</Link></li>
                         </ul>
                     </div>
 
-                    {/* Links - Company */}
+                    {/* Links - Information */}
                     <div>
-                        <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-blue-500 mb-8 pb-2 border-b border-blue-500/10 inline-block">Methodology</h4>
+                        <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-blue-500 mb-8 pb-2 border-b border-blue-500/10 inline-block">Information</h4>
                         <ul className="space-y-4 text-sm text-gray-400 font-semibold">
-                            <li><Link href="/about" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> About the Mission</Link></li>
-                            <li><Link href="/privacy" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Privacy Paradigm</Link></li>
-                            <li><Link href="/terms" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Terms of Wisdom</Link></li>
-                            <li><Link href="/contact" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Secure Contact</Link></li>
+                            <li><Link href="/about" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> About Us</Link></li>
+                            <li><Link href="/privacy" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Terms of Service</Link></li>
+                            <li><Link href="/contact" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" /> Contact Us</Link></li>
                         </ul>
                     </div>
 
@@ -170,7 +170,7 @@ export function Footer() {
                                 className="absolute right-2 top-2 bottom-2 bg-blue-600 text-white rounded-xl px-5 text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 disabled:bg-gray-800 flex items-center justify-center min-w-[120px] shadow-lg shadow-blue-600/20"
                             >
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : (
-                                    <span className="flex items-center gap-2">Initiate <Send size={12} /></span>
+                                    <span className="flex items-center gap-2">Join <Send size={12} /></span>
                                 )}
                             </button>
                         </form>
