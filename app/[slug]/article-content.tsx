@@ -66,13 +66,18 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
+    const [lastScrollY, setLastScrollY] = useState(0);
+
     useEffect(() => {
         const handleScroll = () => {
-            setShowScrollTop(window.scrollY > 1000);
+            const currentScrollY = window.scrollY;
+            const isScrollingUp = currentScrollY < lastScrollY;
+            setShowScrollTop(currentScrollY > 1000 && isScrollingUp);
+            setLastScrollY(currentScrollY);
         };
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    }, [lastScrollY]);
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });

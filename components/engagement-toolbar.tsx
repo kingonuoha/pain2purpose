@@ -272,7 +272,7 @@ export function EngagementToolbar({ articleId, slug, vertical = false }: Engagem
                 {vertical ? (
                     <span className="text-[9px] font-black uppercase tracking-tighter">Share</span>
                 ) : (
-                    <span className="text-xs font-black uppercase tracking-widest">Share Truth</span>
+                    <span className="text-xs font-black uppercase tracking-widest hidden md:block">Share Truth</span>
                 )}
             </button>
         </div>
