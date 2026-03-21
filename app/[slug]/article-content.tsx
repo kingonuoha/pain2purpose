@@ -297,6 +297,21 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
                             )}
                         </article>
 
+                        {/* Article Tags */}
+                        {article.tags && article.tags.length > 0 && (
+                            <div className="mt-16 pt-8 border-t border-zinc-100 dark:border-white/5 flex flex-wrap gap-3">
+                                {article.tags.map((tag) => (
+                                    <Link
+                                        key={tag}
+                                        href={`/tags/${tag.toLowerCase().replace(/\s+/g, "-")}`}
+                                        className="px-6 py-2 bg-zinc-50 dark:bg-card/50 hover:bg-sky-blue hover:text-white dark:hover:bg-sky-blue dark:hover:text-white border border-zinc-100 dark:border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300"
+                                    >
+                                        #{tag}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+
                         <AdSlot position="showAdBottomOfArticle" className="mt-16 mb-8 flex justify-center" />
 
                         {/* Author Bio Card */}

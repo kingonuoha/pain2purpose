@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 import {
     Archive, Edit2, Eye, FileText,
     Plus, RotateCcw, Search, Trash2, X, Sparkles, Clock, Users,
-    LayoutGrid, List
+    LayoutGrid, List, Loader2
 } from "lucide-react";
 import { ArticleStatusBadge, ArticleSourceBadge } from "@/components/admin/article-badges";
 import Link from "next/link";
@@ -15,24 +15,31 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn, getCloudinaryUrl } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 export default function AdminArticlesPage() {
+    const { data: session } = useSession();
     const stats = useQuery(api.admin.getDashboardStats, {});
 
     // Filter States
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [sourceFilter, setSourceFilter] = useState("all");
+    const [categoryFilter, setCategoryFilter] = useState<string>("all");
     const [showArchived, setShowArchived] = useState(false);
     const [viewType, setViewType] = useState<"card" | "list">("card");
+    const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
 
     // Data Fetching
     const articles = useQuery(api.articles.listAdmin, {
         search: search || undefined,
         status: statusFilter === "all" ? undefined : statusFilter,
         source: sourceFilter === "all" ? undefined : sourceFilter,
+        categoryId: categoryFilter === "all" ? undefined : categoryFilter as Id<"categories">,
         isArchived: showArchived
     });
+
+    const categories = useQuery(api.categories.listAll);
 
     // Selection state
     const [selectedIds, setSelectedIds] = useState<Set<Id<"articles">>>(new Set());
@@ -54,6 +61,7 @@ export default function AdminArticlesPage() {
             await updateArticle({
                 id: switchingAuthorFor,
                 authorId: authorId,
+                adminEmail: session?.user?.email ?? undefined,
             });
             toast.success("Author updated successfully");
             setSwitchingAuthorFor(null);
@@ -184,7 +192,14 @@ export default function AdminArticlesPage() {
         });
     };
 
-    const isLoading = !articles || !stats;
+
+    // Track initial load
+    if (!hasInitialLoaded && articles !== undefined && stats !== undefined) {
+        setHasInitialLoaded(true);
+    }
+
+    const isLoading = !hasInitialLoaded;
+    const isRefetching = hasInitialLoaded && (articles === undefined || stats === undefined);
 
     if (isLoading) {
         return (
@@ -218,28 +233,28 @@ export default function AdminArticlesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <MiniStatCard
                     label="Total Posts"
-                    value={stats.articles.total.toString()}
+                    value={stats?.articles.total.toString() || "0"}
                     icon={FileText}
                     color="blue"
                     illustration="/illustrations/Notes.svg"
                 />
                 <MiniStatCard
                     label="AI Drafts"
-                    value={stats.articles.aiDrafts.toString()}
+                    value={stats?.articles.aiDrafts.toString() || "0"}
                     icon={Sparkles}
                     color="purple"
                     illustration="/illustrations/Idea.svg"
                 />
                 <MiniStatCard
                     label="Scheduled"
-                    value={stats.articles.scheduled.toString()}
+                    value={stats?.articles.scheduled.toString() || "0"}
                     icon={Clock}
                     color="blue"
                     illustration="/illustrations/Launch.svg"
                 />
                 <MiniStatCard
                     label="Total Reads"
-                    value={stats.totalViews.toLocaleString()}
+                    value={stats?.totalViews.toLocaleString() || "0"}
                     icon={Eye}
                     color="blue"
                     illustration="/illustrations/Visual-data.svg"
@@ -252,7 +267,7 @@ export default function AdminArticlesPage() {
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                         <input
                             type="checkbox"
-                            checked={articles && articles.length > 0 && selectedIds.size === articles.length}
+                            checked={!!(articles && articles.length > 0 && selectedIds.size === articles.length)}
                             onChange={toggleSelectAll}
                             className="w-5 h-5 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-transparent text-blue-600 focus:ring-blue-500/20 cursor-pointer transition-all"
                             title="Select All"
@@ -265,8 +280,13 @@ export default function AdminArticlesPage() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search posts..."
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-zinc-950/30 border border-gray-100 dark:border-white/5 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all font-medium text-sm text-gray-950 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                            className="w-full pl-11 pr-12 py-3 bg-gray-50 dark:bg-zinc-950/30 border border-gray-100 dark:border-white/5 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all font-medium text-sm text-gray-950 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                         />
+                        {isRefetching && (
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -334,11 +354,22 @@ export default function AdminArticlesPage() {
                         <option value="human">Human</option>
                         <option value="ai">AI Generated</option>
                     </select>
+
+                    <select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-black uppercase tracking-[0.1em] text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600/10 transition-all appearance-none cursor-pointer pr-10 relative bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlPSIjOTQ5NGEyIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik02IDlsNiA2IDYtNiIvPjwvc3ZnPg==')] bg-[length:16px] bg-[right_12px_center] bg-no-repeat min-w-[140px]"
+                    >
+                        <option value="all">Category</option>
+                        {categories?.map((cat) => (
+                            <option key={cat._id} value={cat._id}>{cat.name}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
 
             {/* Articles Grid/List */}
-            {articles.length === 0 ? (
+            {!articles || articles.length === 0 ? (
                 <div className="py-24 text-center bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm transition-all duration-500">
                     <FileText className="mx-auto mb-6 text-gray-200 dark:text-gray-800" size={80} />
                     <h3 className="text-xl font-serif font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest">No posts found</h3>
@@ -346,7 +377,7 @@ export default function AdminArticlesPage() {
                 </div>
             ) : viewType === "card" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {articles.map((article) => (
+                    {articles?.map((article) => (
                         <motion.div
                             key={article._id}
                             initial={{ opacity: 0, y: 20 }}
@@ -507,7 +538,7 @@ export default function AdminArticlesPage() {
                                         <div className="flex items-center justify-center">
                                             <input
                                                 type="checkbox"
-                                                checked={articles.length > 0 && selectedIds.size === articles.length}
+                                                checked={!!(articles && articles.length > 0 && selectedIds.size === articles.length)}
                                                 onChange={toggleSelectAll}
                                                 className="w-5 h-5 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-transparent text-blue-600 focus:ring-0 cursor-pointer transition-all"
                                             />
@@ -531,7 +562,7 @@ export default function AdminArticlesPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {articles.map((article) => (
+                                {articles?.map((article) => (
                                     <tr
                                         key={article._id}
                                         className={cn(

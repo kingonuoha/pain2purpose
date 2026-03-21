@@ -102,7 +102,7 @@ export function EngagementToolbar({ articleId, slug, vertical = false }: Engagem
     };
 
     const handleShare = () => {
-        const url = `${window.location.origin}/articles/${slug}`;
+        const url = `${window.location.origin}/${slug}`;
         navigator.clipboard.writeText(url);
         toast.success("Link copied", {
             description: "The article link has been copied to your clipboard.",

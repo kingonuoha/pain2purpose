@@ -259,8 +259,35 @@ h6 {
   background: #334155;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Specific Custom Scrollbar Class */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1e293b;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }
 
 .progress-bar {

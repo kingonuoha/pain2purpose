@@ -11,6 +11,7 @@ if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL);
 
 import { SessionProvider } from "next-auth/react";
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
     return (
@@ -18,6 +19,12 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
             <ConvexProvider client={convex}>
                 <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
                     {children}
+                    <ProgressBar
+                        height="4px"
+                        color="#3b82f6"
+                        options={{ showSpinner: true }}
+                        shallowRouting={false}
+                    />
                 </ThemeProvider>
             </ConvexProvider>
         </SessionProvider>

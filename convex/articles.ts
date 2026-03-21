@@ -2,6 +2,32 @@ import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Doc, Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+
+export const publishScheduledArticles = internalMutation({
+  args: { _dummy: v.optional(v.string()) },
+  handler: async (ctx) => {
+    const now = Date.now();
+    const scheduledArticles = await ctx.db
+      .query("articles")
+      .withIndex("by_status", (q) => q.eq("status", "scheduled"))
+      .filter((q) => q.lte(q.field("scheduledFor"), now))
+      .collect();
+
+    for (const article of scheduledArticles) {
+      await ctx.db.patch(article._id, {
+        status: "published",
+        publishedAt: now,
+      });
+
+      // Also queue alerts for the newly published article
+      await ctx.scheduler.runAfter(0, internal.articles.queueNewArticleAlerts, {
+        articleId: article._id,
+      });
+    }
+
+    return { publishedCount: scheduledArticles.length };
+  },
+});
  
  function slugify(text: string) {
    return text
@@ -21,7 +47,9 @@ export const list = query({
     categoryId: v.optional(v.id("categories")),
     topic: v.optional(v.string()),
     pillar: v.optional(v.string()),
+    tag: v.optional(v.string()),
     type: v.optional(v.string()),
+    _test: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     let articleQuery = ctx.db
@@ -50,6 +78,13 @@ export const list = query({
     if (args.pillar) {
       articles = articles.filter((article) =>
         article.pillar === args.pillar
+      );
+    }
+
+    if (args.tag) {
+      const targetTag = slugify(args.tag!);
+      articles = articles.filter((article) =>
+        article.tags?.some(t => slugify(t) === targetTag),
       );
     }
 
@@ -165,19 +200,59 @@ export const search = query({
   handler: async (ctx, args) => {
     if (!args.query) return [];
 
-    const articles = await ctx.db
-      .query("articles")
-      .withIndex("by_status", (q) => q.eq("status", "published"))
-      .filter((q) =>
-        q.or(
-          q.gt(q.field("title"), args.query), // Simple partial match hack for Convex or use search index
-          q.gt(q.field("excerpt"), args.query),
-        ),
-      )
-      .take(10);
+    const q = args.query.toLowerCase();
 
-    // Note: For real production, use Convex Search Indexes for better results
-    return articles;
+    // 1. Fetch all data needed for filtering and augmentation
+    const [articles, categories, allPillars] = await Promise.all([
+      ctx.db
+        .query("articles")
+        .withIndex("by_status", (qb) => qb.eq("status", "published"))
+        .filter((qb) => qb.neq(qb.field("isArchived"), true))
+        .collect(),
+      ctx.db.query("categories").collect(),
+      ctx.db.query("pillars").collect(),
+    ]);
+
+    // Create maps for quick lookup
+    const categoryMap = new Map(categories.map((c) => [c._id, c]));
+    const pillarMap = new Map(allPillars.map((p) => [p.slug, p]));
+
+    const matched = articles.filter((a) => {
+      const inTitle = a.title.toLowerCase().includes(q);
+      const inExcerpt = a.excerpt?.toLowerCase().includes(q) || false;
+      const inFocusKeyword = a.focusKeyword?.toLowerCase().includes(q) || false;
+      const inTopics = a.topics?.some((t) => t.toLowerCase().includes(q)) || false;
+      const inTags = a.tags?.some((t) => t.toLowerCase().includes(q)) || false;
+
+      // Check Category
+      const category = a.categoryId ? categoryMap.get(a.categoryId) : null;
+      const inCategory = category?.name.toLowerCase().includes(q) || false;
+
+      // Check Pillar
+      const pillar = a.pillar ? pillarMap.get(a.pillar) : null;
+      const inPillar = pillar?.name.toLowerCase().includes(q) || false;
+
+      return (
+        inTitle ||
+        inExcerpt ||
+        inFocusKeyword ||
+        inTopics ||
+        inTags ||
+        inCategory ||
+        inPillar
+      );
+    });
+
+    // Augment results with category/pillar names
+    return matched.slice(0, 10).map((a) => {
+      const category = a.categoryId ? categoryMap.get(a.categoryId) : null;
+      const pillar = a.pillar ? pillarMap.get(a.pillar) : null;
+      return {
+        ...a,
+        categoryName: category?.name || "Unknown",
+        pillarName: pillar?.name || null,
+      };
+    });
   },
 });
 
@@ -218,9 +293,43 @@ export const getAllTopics = query({
       article.topics?.forEach((topic) => topics.add(topic));
     });
  
-    // Return unique topics, normalized for consistent display but mapped to actual strings if possible
-    // For now, we return them as they are, the frontend will handle display normalization if needed
     return Array.from(topics).sort((a, b) => a.localeCompare(b));
+  },
+});
+
+export const getAllTags = query({
+  args: {},
+  handler: async (ctx) => {
+    const articles = await ctx.db
+      .query("articles")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    const tags = new Set<string>();
+    articles.forEach((article) => {
+      article.tags?.forEach((tag) => tags.add(tag));
+    });
+    return Array.from(tags).sort((a, b) => a.localeCompare(b));
+  },
+});
+
+export const getTopPostTags = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    // Get top N most viewed published articles
+    const articles = await ctx.db
+      .query("articles")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .filter((q) => q.neq(q.field("isArchived"), true))
+      .collect();
+
+    const topArticles = [...articles]
+      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+      .slice(0, 2); // Hardcoded to top 2 as per requirement
+
+    const tagSet = new Set<string>();
+    topArticles.forEach((a) => a.tags?.forEach((t) => tagSet.add(t)));
+    return Array.from(tagSet).slice(0, args.limit || 5);
   },
 });
 export const getById = query({
@@ -242,6 +351,7 @@ export const create = mutation({
     categoryId: v.optional(v.id("categories")),
     pillar: v.optional(v.string()),
     topics: v.optional(v.array(v.string())),
+    tags: v.optional(v.array(v.string())),
     type: v.optional(
       v.union(
         v.literal("pillar"),
@@ -277,6 +387,10 @@ export const create = mutation({
         throw new Error("Category is required for publishing");
       if (!args.topics || args.topics.length === 0)
         throw new Error("Topics are required for publishing");
+      if (args.topics.length > 1)
+        throw new Error("Only one topic is allowed per article.");
+      if (!args.tags || args.tags.length < 4)
+        throw new Error("At least 4 tags are required for publishing");
 
       // Enhanced SEO checks
       if (!args.metaTitle)
@@ -346,6 +460,7 @@ export const update = mutation({
     categoryId: v.optional(v.id("categories")),
     pillar: v.optional(v.string()),
     topics: v.optional(v.array(v.string())),
+    tags: v.optional(v.array(v.string())),
     type: v.optional(
       v.union(
         v.literal("pillar"),
@@ -402,6 +517,10 @@ export const update = mutation({
       if (!coverImage) throw new Error("Cover Image is required");
       if (!categoryId) throw new Error("Category is required");
       if (!topics || topics.length === 0) throw new Error("Topics are required");
+      if (topics.length > 1) throw new Error("Only one topic is allowed per article.");
+
+      const tagsVal = args.tags ?? existing.tags;
+      if (!tagsVal || tagsVal.length < 4) throw new Error("At least 4 tags are required for publishing");
 
       // Enhanced SEO checks
       const metaTitle = args.metaTitle || existing.metaTitle;
@@ -472,7 +591,7 @@ export const queueNewArticleAlerts = internalMutation({
         templateData: {
           articleTitle: article.title,
           excerpt: article.excerpt || "",
-          articleUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/articles/${article.slug}`,
+          articleUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/${article.slug}`,
           authorName: author?.name || "The Truth Pill",
           categoryName: category?.name || "Psychology",
           unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/unsubscribe?email=${encodeURIComponent(user.email)}`,
@@ -546,6 +665,7 @@ export const listAdmin = query({
     status: v.optional(v.string()),
     source: v.optional(v.string()),
     search: v.optional(v.string()),
+    categoryId: v.optional(v.id("categories")),
     isArchived: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -565,10 +685,20 @@ export const listAdmin = query({
       articles = articles.filter((a) => a.source === args.source);
     }
 
+    if (args.categoryId) {
+      articles = articles.filter((a) => a.categoryId === args.categoryId);
+    }
+
     if (args.search) {
       const query = args.search.toLowerCase();
       articles = articles.filter(
-        (a) => a.title.toLowerCase().includes(query) || a.slug.includes(query),
+        (a) => 
+          a.title.toLowerCase().includes(query) || 
+          a.slug.includes(query) ||
+          (a.excerpt || "").toLowerCase().includes(query) ||
+          a.topics?.some(t => t.toLowerCase().includes(query)) ||
+          a.tags?.some(t => t.toLowerCase().includes(query)) ||
+          (a.focusKeyword || "").toLowerCase().includes(query)
       );
     }
 
@@ -762,6 +892,8 @@ export const getBookmarkedArticles = query({
     return articles.filter((a): a is NonNullable<typeof a> => a !== null);
   },
 });
+
+
 
 
 
