@@ -243,7 +243,7 @@ export default function UserDashboard() {
                                                     {bookmarkedArticles.slice(0, 3).map((article: JoinedArticle) => (
                                                         <Link
                                                             key={article._id}
-                                                            href={`/articles/${article.slug}`}
+                                                            href={`/${article.slug}`}
                                                             className="flex items-center gap-6 p-5 rounded-xl border border-gray-50 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all duration-300 group"
                                                         >
                                                             <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -306,7 +306,7 @@ export default function UserDashboard() {
                                                         <div className="flex-1 min-w-0 flex flex-col py-1">
                                                             <div className="mb-4">
                                                                 <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">{article.categoryName}</span>
-                                                                <Link href={`/articles/${article.slug}`}>
+                                                                <Link href={`/${article.slug}`}>
                                                                     <h4 className="text-xl font-serif font-black text-gray-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 tracking-tight">{article.title}</h4>
                                                                 </Link>
                                                             </div>
@@ -323,7 +323,7 @@ export default function UserDashboard() {
                                                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">{article.authorName || "Central Bureau"}</span>
                                                                 </div>
                                                                 <Link
-                                                                    href={`/articles/${article.slug}`}
+                                                                    href={`/${article.slug}`}
                                                                     className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-all"
                                                                 >
                                                                     Access Portal <ExternalLink size={14} />

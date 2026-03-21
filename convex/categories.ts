@@ -28,11 +28,15 @@ export const listAll = query({
         const articles = await ctx.db
           .query("articles")
           .withIndex("by_categoryId", (q) => q.eq("categoryId", cat._id))
-          .filter((q) => q.eq(q.field("status"), "published"))
+          .collect();
+        const pillars = await ctx.db
+          .query("pillars")
+          .withIndex("by_categoryId", (q) => q.eq("categoryId", cat._id))
           .collect();
         return {
           ...cat,
           articleCount: articles.length,
+          pillarCount: pillars.length,
         };
       }),
     );
@@ -44,6 +48,7 @@ export const create = mutation({
     slug: v.string(),
     description: v.optional(v.string()),
     coverImage: v.optional(v.string()),
+    pexelsImages: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("categories", {
@@ -61,6 +66,7 @@ export const update = mutation({
     slug: v.optional(v.string()),
     description: v.optional(v.string()),
     coverImage: v.optional(v.string()),
+    pexelsImages: v.optional(v.array(v.string())),
   },
   handler: async (ctx, { id, ...args }) => {
     await ctx.db.patch(id, args);
@@ -70,6 +76,16 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("categories") },
   handler: async (ctx, args) => {
+    // Delete guard: cannot delete if articles are linked
+    const linked = await ctx.db
+      .query("articles")
+      .withIndex("by_categoryId", (q) => q.eq("categoryId", args.id))
+      .take(1);
+    if (linked.length > 0) {
+      throw new Error(
+        "Cannot delete this category — it has articles linked to it. Remove or reassign those articles first.",
+      );
+    }
     await ctx.db.delete(args.id);
   },
 });

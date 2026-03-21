@@ -8,6 +8,7 @@ crons.interval(
   "check-and-run-ai-schedule",
   { minutes: 15 },
   api.ai.processScheduleCheck,
+  {},
 );
 
 // Run the email queue processor every 5 minutes
@@ -23,6 +24,14 @@ crons.cron(
   "weekly-newsletter-digest",
   "0 8 * * 1", // 8:00 AM every Monday
   internal.emails.generateWeeklyNewsletter,
+  {},
+);
+
+crons.interval(
+  "publish-scheduled-articles",
+  { minutes: 1 },
+  internal.articles.publishScheduledArticles,
+  {},
 );
 
 export default crons;

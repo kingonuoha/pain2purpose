@@ -10,7 +10,7 @@ import { Id } from "@/convex/_generated/dataModel";
 
 export default function EditArticlePage() {
     const params = useParams();
-    const articleId = params.id as Id<"articles">;
+    const articleId = params.articleId as Id<"articles">;
     const article = useQuery(api.articles.getById, { id: articleId });
 
     if (!article) {

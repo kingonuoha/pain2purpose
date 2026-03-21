@@ -38,8 +38,9 @@ export default defineSchema({
     coverImageAlt: v.optional(v.string()),
     authorId: v.id("users"),
     categoryId: v.optional(v.id("categories")),
-    pillar: v.optional(v.string()), // One of the 5 pillars e.g. "Human Behaviour"
-    topics: v.optional(v.array(v.string())), // Array of topic strings
+    pillar: v.optional(v.string()), // Pillar slug e.g. "self-sabotage"
+    topics: v.optional(v.array(v.string())), // Single topic (kept as array for back-compat, max 1)
+    tags: v.optional(v.array(v.string())), // Cross-cutting tags (min 4 for publish)
     type: v.optional(
       v.union(
         v.literal("pillar"),
@@ -80,6 +81,7 @@ export default defineSchema({
     slug: v.string(),
     description: v.optional(v.string()),
     coverImage: v.optional(v.string()), // Cloudinary URL
+    pexelsImages: v.optional(v.array(v.string())), // Array of Pexels image URLs (2-10)
     articleCount: v.number(),
     createdAt: v.float64(),
   }).index("by_slug", ["slug"]),
@@ -113,7 +115,8 @@ export default defineSchema({
   })
     .index("by_articleId", ["articleId"])
     .index("by_userId", ["userId"])
-    .index("by_article_user", ["articleId", "userId"]),
+    .index("by_article_user", ["articleId", "userId"])
+    .index("by_createdAt", ["createdAt"]),
 
   bookmarks: defineTable({
     articleId: v.id("articles"),
@@ -244,4 +247,16 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_code", ["code"])
     .index("by_email_type", ["email", "type"]),
+
+  pillars: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    description: v.optional(v.string()),
+    coverImage: v.optional(v.string()),
+    pexelsImages: v.optional(v.array(v.string())),
+    categoryId: v.id("categories"), // ties pillar to a category
+    createdAt: v.float64(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_categoryId", ["categoryId"]),
 });
