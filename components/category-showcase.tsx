@@ -32,6 +32,9 @@ export function CategoryShowcase() {
                 >
                     <DynamicCategoryImage
                         categoryName={cat.name}
+                        categoryId={cat._id}
+                        coverImage={cat.coverImage}
+                        pexelsImages={cat.pexelsImages}
                         alt={cat.name}
                         className="transition-transform duration-700 group-hover:scale-105"
                     />

@@ -21,11 +21,25 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
         };
     }
 
-    // SEO Standards: Title ~60 chars, Description ~155 chars
-    const rawTitle = `${article.title} | The Truth Pill`;
-    const title = truncate(rawTitle, 60);
-    const rawDescription = article.excerpt || "A deep dive into psychology and human behavior.";
-    const description = truncate(rawDescription, 155);
+    // SEO Standards: Priority to Focus Keyword + Tags
+    const tagsArray = article.tags || [];
+    const focusKeyword = article.focusKeyword;
+    
+    let description = article.excerpt || "A deep dive into psychology and human behavior.";
+    
+    if (focusKeyword || tagsArray.length > 0) {
+        const parts = [
+            focusKeyword,
+            ...tagsArray.slice(0, 3)
+        ].filter(Boolean);
+        
+        if (parts.length > 0) {
+            description = `${parts.join(", ")} - ${truncate(description, 100)}`;
+        }
+    }
+
+    description = truncate(description, 155);
+    const title = truncate(`${article.title} | The Truth Pill`, 60);
     const image = article.coverImage || getOgImageUrl(article.title);
 
     return {
@@ -45,6 +59,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
             type: "article",
             publishedTime: new Date(article.publishedAt || article.createdAt).toISOString(),
             authors: [article.authorName],
+            tags: tagsArray,
         },
         twitter: {
             card: "summary_large_image",

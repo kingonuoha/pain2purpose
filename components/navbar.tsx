@@ -57,20 +57,17 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
-    // Body Scroll Lock
+    // Body Scroll Lock - for Mobile Menu AND Search Overlay
     useEffect(() => {
-        if (isSearchOpen || isMenuOpen) {
+        if (isMenuOpen || isSearchOpen) {
             document.body.style.overflow = "hidden";
-            document.documentElement.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "unset";
-            document.documentElement.style.overflow = "unset";
         }
         return () => {
             document.body.style.overflow = "unset";
-            document.documentElement.style.overflow = "unset";
         };
-    }, [isSearchOpen, isMenuOpen]);
+    }, [isMenuOpen, isSearchOpen]);
 
     const isAuthenticated = status === "authenticated";
 
@@ -102,30 +99,43 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
 
     const searchResults = useQuery(api.articles.search, { query: query.length > 2 ? query : "" });
     const categoriesAll = useQuery(api.categories.listAll);
+    const pillarsAll = useQuery(api.pillars.listAll);
+    const topTags = useQuery(api.articles.getTopPostTags, { limit: 5 });
 
     // Filter and sort categories: Top 3 by articleCount
     const topCategories = [...(categoriesAll || [])]
         .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
         .slice(0, 3);
 
-    const navLinks = [
+    // Dynamic Navigation Generation
+    interface NavLink {
+        label: string;
+        href: string;
+        dropdown?: { label: string; href: string; }[];
+    }
+
+    const navLinks: NavLink[] = [
         { label: "Home", href: "/" },
-        { 
-            label: "Human Behavior", 
-            href: "/category/human-behavior",
-            dropdown: [
-                { label: "Full Guide", href: "/category/human-behavior" },
-                { label: "Self Sabotage", href: "/topics/self-sabotage" },
-                { label: "Overthinking & Mental Loops", href: "/topics/overthinking" },
-                { label: "Perfectionism", href: "/topics/perfectionism" },
-                { label: "Fear & Psychological Avoidance", href: "/topics/fear" },
-                { label: "Identity & Self Concept", href: "/topics/identity" },
-            ]
-        },
-        { label: "Relationships", href: "/category/relationships" },
-        { label: "Emotional Clarity", href: "/category/emotional-clarity" },
-        { label: "Power Dynamics", href: "/category/power-dynamics" },
-        { label: "Observant Mind", href: "/category/observant-mind" },
+        ...(categoriesAll || [])
+            .filter(cat => (cat.articleCount || 0) > 0)
+            .map(cat => {
+                const categoryPillars = (pillarsAll || [])
+                    .filter(p => p.categoryId === cat._id);
+                
+                return {
+                    label: cat.name,
+                    href: `/category/${cat.slug}`,
+                    dropdown: categoryPillars.length > 0 
+                        ? [
+                            { label: "Full Guide", href: `/category/${cat.slug}` },
+                            ...categoryPillars.map(p => ({
+                                label: p.name,
+                                href: `/pillars/${p.slug}`
+                            }))
+                          ]
+                        : undefined
+                };
+            })
     ];
 
     return (
@@ -182,7 +192,7 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                 <ChevronDown size={14} className="group-hover/nav:rotate-180 transition-transform" />
                             </Link>
                             <div className="absolute top-full left-0 w-64 bg-white dark:bg-gray-950 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-800 opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-300 transform translate-y-2 group-hover/nav:translate-y-0 p-2 z-[70]">
-                                {link.dropdown.map(sub => (
+                                {link.dropdown?.map((sub: { label: string; href: string }) => (
                                     <Link
                                         key={sub.label}
                                         href={sub.href}
@@ -449,8 +459,9 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-white dark:bg-background-950 flex flex-col p-6 md:p-20 overflow-y-auto transition-colors duration-500"
+                        className="fixed inset-0 z-[100] bg-white dark:bg-gray-950 flex flex-col p-6 md:p-20 overflow-y-auto"
                         style={{ height: '100vh', top: 0 }}
+                        data-lenis-prevent
                     >
                         <div className="flex justify-between items-center mb-16">
                             <span className="font-serif text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white">Search Insights</span>
@@ -483,7 +494,7 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                     {searchResults?.map((article: Doc<"articles">) => (
                                         <Link
                                             key={article._id}
-                                            href={`/articles/${article.slug}`}
+                                            href={`/${article.slug}`}
                                             onClick={() => setIsSearchOpen(false)}
                                             className="group flex items-center gap-6 p-4 rounded-3xl hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800"
                                         >
@@ -499,24 +510,41 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                 </div>
                             </div>
 
-                            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-20">
+                            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
                                 <div>
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-8">Popular Searches</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-8 dark:text-zinc-500">Popular Searches</h4>
                                     <div className="flex flex-wrap gap-4">
-                                        {["Shadow Self", "Consciousness", "Stoicism", "Neuroscience", "Ego Death"].map(term => (
+                                        {(topTags && topTags.length > 0 ? topTags : ["Consciousness", "Stoicism", "Neuroscience", "Ego Death"]).map(term => (
                                             <button
                                                 key={term}
                                                 onClick={() => setQuery(term)}
-                                                className="px-6 py-3 rounded-2xl bg-zinc-50 dark:bg-cardhover:bg-blue-600 hover:text-white text-zinc-600 dark:text-zinc-400 font-bold text-sm transition-all"
+                                                className="px-6 py-3 rounded-2xl bg-zinc-50 dark:bg-gray-900 border border-transparent dark:border-gray-800 hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white dark:text-gray-400 text-zinc-600 font-bold text-sm transition-all shadow-sm"
                                             >
                                                 {term}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="bg-zinc-50 dark:bg-cardrounded-[40px] p-10 flex flex-col justify-center border border-transparent dark:border-zinc-800">
-                                    <h3 className="text-2xl font-serif font-bold mb-4 italic text-zinc-900 dark:text-zinc-100">&quot;The truth will set you free, but first it will piss you off.&quot;</h3>
-                                    <p className="text-zinc-400 dark:text-zinc-500 text-sm font-medium">— Gloria Steinem</p>
+                                <div>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-8 dark:text-zinc-500">Top Categories</h4>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {topCategories.map(cat => (
+                                            <Link
+                                                key={cat._id}
+                                                href={`/category/${cat.slug}`}
+                                                onClick={() => setIsSearchOpen(false)}
+                                                className="flex items-center justify-between p-5 rounded-3xl bg-zinc-50 dark:bg-gray-900 border border-transparent dark:border-gray-800 hover:border-blue-500 transition-all group shadow-sm"
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="text-lg font-serif font-bold text-zinc-900 dark:text-white group-hover:text-blue-600 transition-colors uppercase tracking-wider">{cat.name}</span>
+                                                    <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase mt-1">{cat.articleCount} Articles</span>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-zinc-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                                    <ArrowRight size={18} />
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -1,7 +1,7 @@
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Id } from "@/convex/_generated/dataModel";
 import { DynamicCategoryImage } from "@/components/dynamic-category-image";
@@ -27,6 +27,7 @@ interface Category {
     description?: string;
     coverImage?: string;
     articleCount: number;
+    pexelsImages?: string[];
 }
 
 export default async function CategoriesPage() {
@@ -70,31 +71,15 @@ export default async function CategoriesPage() {
                             illustration="Empty-folder.svg"
                             action={
                                 <Link 
-                                    href="/"
-                                    className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-zinc-900 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-600 transition-all shadow-xl shadow-zinc-200 active:scale-95"
+                                    href="/category"
+                                    className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gray-950 dark:bg-white text-white dark:text-gray-950 font-black uppercase tracking-widest text-[10px] hover:bg-blue-600 dark:hover:bg-blue-500 dark:hover:text-white transition-all shadow-xl active:scale-95"
                                 >
-                                    <Search size={14} />
-                                    Back to Home
+                                    Explore Other Pillars
                                 </Link>
                             }
                         />
                     )}
 
-                    {/* Linking to Topics */}
-                    <div className="mt-32 pt-20 border-t border-zinc-200">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                            <div>
-                                <h2 className="text-3xl font-serif font-bold text-zinc-900 mb-2">Detailed Topics</h2>
-                                <p className="text-zinc-500 font-medium">Explore specific behavioral patterns and psychological insights.</p>
-                            </div>
-                            <Link 
-                                href="/topics" 
-                                className="group flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-blue-600 transition-all shadow-xl shadow-zinc-200 active:scale-95"
-                            >
-                                View All Topics <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
-                            </Link>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
@@ -109,6 +94,9 @@ function CategoryCard({ category }: { category: Category }) {
         >
             <DynamicCategoryImage
                 categoryName={category.name}
+                categoryId={category._id}
+                coverImage={category.coverImage}
+                pexelsImages={category.pexelsImages}
                 alt={category.name}
                 className="transition-transform duration-[2000ms] group-hover:scale-125"
             />

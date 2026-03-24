@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 
 export const logPageVisit = mutation({
   args: {
@@ -332,4 +333,69 @@ export const getRealTimeActivity = query({
 
     return Array.from(uniqueVisitors.values());
   },
+});
+
+export const getRawVisits = query({
+    args: {
+        paginationOpts: paginationOptsValidator,
+        search: v.optional(v.string()),
+        type: v.optional(v.union(v.literal("all"), v.literal("visit"), v.literal("article"), v.literal("reaction"))),
+        days: v.optional(v.number())
+    },
+    handler: async (ctx, args) => {
+        const days = args.days || 30;
+        const type = args.type || "all";
+        const startTime = Date.now() - days * 24 * 60 * 60 * 1000;
+
+        if (type === "reaction") {
+            const q = ctx.db.query("reactions").withIndex("by_createdAt", (q) => q.gt("createdAt", startTime)).order("desc");
+            const result = await q.paginate(args.paginationOpts);
+            const page = await Promise.all(result.page.map(async (r) => {
+                const article = await ctx.db.get(r.articleId);
+                const user = await ctx.db.get(r.userId);
+                return {
+                    _id: r._id,
+                    timestamp: r.createdAt,
+                    type: "reaction",
+                    url: article?.title ? `Reaction: ${r.type} on "${article.title}"` : `Reaction: ${r.type}`,
+                    visitorId: user?.email || "User " + r.userId.substring(0, 8),
+                    ipAddress: "---",
+                    geoLocation: { country: "N/A", city: "N/A" },
+                    device: "user",
+                    browser: "---",
+                    os: "---"
+                };
+            }));
+
+            // Filter by search if provided (manual for reactions)
+            if (args.search) {
+                const s = args.search.toLowerCase();
+                const filteredPage = page.filter(p => p.url.toLowerCase().includes(s) || p.visitorId.toLowerCase().includes(s));
+                return { ...result, page: filteredPage };
+            }
+
+            return { ...result, page };
+        }
+
+        // Default to pageVisits for visits, articles, and all
+        const q = ctx.db.query("pageVisits").withIndex("by_timestamp", (q) => q.gt("timestamp", startTime)).order("desc");
+
+        const result = await q.paginate(args.paginationOpts);
+        let page = result.page;
+
+        if (type === "article") {
+            page = page.filter(v => v.url.toLowerCase().includes("/article/"));
+        }
+
+        if (args.search) {
+            const s = args.search.toLowerCase();
+            page = page.filter(v => 
+                v.url.toLowerCase().includes(s) || 
+                v.visitorId.toLowerCase().includes(s) ||
+                v.ipAddress.includes(s)
+            );
+        }
+
+        return { ...result, page };
+    },
 });

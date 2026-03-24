@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, usePaginatedQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import {
@@ -13,7 +13,9 @@ import {
     Calendar,
     ChevronDown,
     Activity,
-    Shield
+    Shield,
+    X,
+    Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, getTimeAgo } from "@/lib/utils";
@@ -73,6 +75,10 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 export default function AnalyticsPage() {
     const [days, setDays] = useState(30);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isSignalModalOpen, setIsSignalModalOpen] = useState(false);
+    const [signalSearch, setSignalSearch] = useState("");
+    const [signalType, setSignalType] = useState<"all" | "visit" | "article" | "reaction">("all");
+    const [signalDateRange, setSignalDateRange] = useState(7);
 
 
 
@@ -82,6 +88,16 @@ export default function AnalyticsPage() {
     const topContent = useQuery(api.analytics.getTopContent);
     const realTimeActivity = useQuery(api.analytics.getRealTimeActivity);
     const referrerStats = useQuery(api.analytics.getReferrerStats, { days });
+
+    const { results: rawVisits, status: paginationStatus, loadMore } = usePaginatedQuery(
+        api.analytics.getRawVisits,
+        { 
+            search: signalSearch,
+            type: signalType,
+            days: signalDateRange
+        },
+        { initialNumItems: 20 }
+    );
 
     const isLoading = !trafficStats || !geoStats || !deviceStats || !topContent || !realTimeActivity || !referrerStats;
 
@@ -243,7 +259,7 @@ export default function AnalyticsPage() {
                                 High impact content
                             </h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                             {topContent.map((article: PopularArticle, i: number) => (
                                 <div key={article.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
                                     <div className="flex items-center gap-4">
@@ -348,6 +364,225 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Raw Activity Stream Card */}
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 shadow-sm transition-all duration-500">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                            <Activity className="text-blue-500" size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-serif font-black text-gray-950 dark:text-white transition-colors">Raw Signal Stream</h2>
+                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Direct pulse from the network edge</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={() => setIsSignalModalOpen(true)}
+                        className="bg-gray-950 dark:bg-white text-white dark:text-gray-950 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:opacity-90 transition-all shadow-xl shadow-gray-950/20 dark:shadow-white/10"
+                    >
+                        View Full Spectrum
+                    </button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {realTimeActivity.slice(0, 4).map((visit: RealTimeVisit) => (
+                        <div key={visit._id} className="p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/20 border border-gray-100 dark:border-white/5">
+                            <div className="flex justify-between items-start mb-3">
+                                <span className="text-[8px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest">{visit.geoLocation?.country || "Earth"}</span>
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">{getTimeAgo(visit._creationTime)}</span>
+                            </div>
+                            <p className="text-[11px] font-serif font-black text-gray-900 dark:text-white line-clamp-1 mb-2">{visit.url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', '') || '/'}</p>
+                            <div className="flex gap-2">
+                                <span className="text-[7px] font-black uppercase px-2 py-0.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 rounded text-gray-400">
+                                    {visit.device}
+                                </span>
+                                <span className="text-[7px] font-black uppercase px-2 py-0.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 rounded text-gray-400">
+                                    {visit.os}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Signal Spectrum Modal */}
+            <AnimatePresence>
+                {isSignalModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 40 }}
+                            className="bg-white dark:bg-gray-900 w-full max-w-6xl h-[85vh] rounded-[3rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 flex flex-col"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-10 border-b border-gray-100 dark:border-white/5">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-[1.5rem] bg-gray-950 dark:bg-white flex items-center justify-center">
+                                            <Activity className="text-white dark:text-gray-950" size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-3xl font-serif font-black text-gray-950 dark:text-white tracking-tight italic">Signal Spectrum</h3>
+                                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Comprehensive raw intelligence database</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative group">
+                                            <input 
+                                                type="text" 
+                                                value={signalSearch}
+                                                onChange={(e) => setSignalSearch(e.target.value)}
+                                                placeholder="Filter by Signal ID or URL..."
+                                                className="bg-gray-50/50 dark:bg-gray-950/50 border border-gray-100 dark:border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-gray-900 dark:text-white outline-none w-full md:w-64 transition-all focus:ring-4 focus:ring-blue-500/10 placeholder:text-gray-400"
+                                            />
+                                        </div>
+                                        <div className="flex bg-gray-50 dark:bg-white/5 p-1.5 rounded-2xl border border-gray-100 dark:border-white/5">
+                                            {[
+                                                { id: 'all', label: 'All Signals' },
+                                                { id: 'visit', label: 'Page Visits' },
+                                                { id: 'article', label: 'Article Views' },
+                                                { id: 'reaction', label: 'Reactions' }
+                                            ].map((t) => (
+                                                <button
+                                                    key={t.id}
+                                                    onClick={() => setSignalType(t.id as "all" | "visit" | "article" | "reaction")}
+                                                    className={cn(
+                                                        "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
+                                                        signalType === t.id 
+                                                            ? "bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-500 shadow-sm" 
+                                                            : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <select 
+                                            value={signalDateRange}
+                                            onChange={(e) => setSignalDateRange(Number(e.target.value))}
+                                            className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none pr-10"
+                                        >
+                                            <option value={1}>Last 24 Hours</option>
+                                            <option value={7}>Last 7 Days</option>
+                                            <option value={30}>Last 30 Days</option>
+                                            <option value={90}>Last 3 Months</option>
+                                        </select>
+                                        <button 
+                                            onClick={() => setIsSignalModalOpen(false)}
+                                            className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                                        >
+                                            <X size={24} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Content - Table */}
+                            <div className="flex-1 overflow-auto p-10 custom-scrollbar">
+                                <table className="w-full text-left border-separate border-spacing-y-4">
+                                    <thead>
+                                        <tr className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+                                            <th className="px-6 py-4">Time Entry</th>
+                                            <th className="px-6 py-4">Destination</th>
+                                            <th className="px-6 py-4">Geographic Origin</th>
+                                            <th className="px-6 py-4">Node Profile</th>
+                                            <th className="px-6 py-4 text-right">Access Point</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rawVisits.map((visit) => (
+                                            <tr key={visit._id} className="group bg-gray-50/30 dark:bg-gray-800/10 hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all duration-300 rounded-[2rem]">
+                                                <td className="px-6 py-6 font-mono text-[10px] font-black text-gray-400 first:rounded-l-[2rem]">
+                                                    {new Date(visit.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                    <span className="block text-[8px] font-white mt-1 opacity-50 tracking-tighter">
+                                                        {new Date(visit.timestamp).toLocaleDateString()}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-6">
+                                                    <p className="text-xs font-serif font-black text-gray-900 dark:text-white underline decoration-blue-500/30 underline-offset-4 decoration-2">
+                                                        {visit.url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', '') || '/home'}
+                                                    </p>
+                                                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1 opacity-60">Entry Node Index</p>
+                                                </td>
+                                                <td className="px-6 py-6">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-[10px] text-gray-400">
+                                                            {(visit.geoLocation?.country || "??").substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-tight">{visit.geoLocation?.country || "Undisclosed"}</p>
+                                                            <p className="text-[8px] font-bold text-gray-400 leading-none">{visit.geoLocation?.city || "Satellite Link"}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-6">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <span className="text-[9px] font-black border border-gray-100 dark:border-white/5 bg-white dark:bg-gray-950 px-3 py-1 rounded-full text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                                                            {visit.browser}
+                                                        </span>
+                                                        <span className="text-[9px] font-black border border-gray-100 dark:border-white/5 bg-white dark:bg-gray-950 px-3 py-1 rounded-full text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                                                            {visit.os}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-6 text-right last:rounded-r-[2rem]">
+                                                    <p className="text-[10px] font-mono font-black text-blue-600 dark:text-blue-500 tracking-tighter">
+                                                        {visit.ipAddress === "127.0.0.1" ? "::INTERNAL_DOCK" : visit.ipAddress}
+                                                    </p>
+                                                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1 italic">{visit.device}</p>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                {/* Pagination Trigger */}
+                                {paginationStatus === "CanLoadMore" && (
+                                    <div className="mt-12 flex justify-center pb-12">
+                                        <button 
+                                            onClick={() => loadMore(20)}
+                                            className="flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 shadow-sm"
+                                        >
+                                            Retrieve Deeper Signals
+                                            <ChevronDown size={14} />
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                {paginationStatus === "LoadingMore" && (
+                                    <div className="mt-12 flex justify-center pb-12">
+                                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-blue-500 animate-pulse">
+                                            <Loader2 className="animate-spin" size={16} />
+                                            Synchronizing...
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-8 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-gray-950/20 backdrop-blur-md flex items-center justify-between">
+                                <div className="flex items-center gap-8">
+                                    <div>
+                                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Synchronized</p>
+                                        <p className="text-sm font-black text-gray-900 dark:text-white mt-1">{rawVisits.length} Events</p>
+                                    </div>
+                                    <div className="w-px h-8 bg-gray-200 dark:bg-zinc-800" />
+                                    <div>
+                                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Security Protocol</p>
+                                        <p className="text-sm font-black text-zinc-900 dark:text-zinc-100 mt-1 uppercase tracking-tighter">Level 4 Oversight</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-green-600 dark:text-green-500">Node Active</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
