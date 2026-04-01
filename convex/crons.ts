@@ -34,4 +34,12 @@ crons.interval(
   {},
 );
 
+// Daily Analytics Cleanup - 3:00 AM
+crons.cron(
+  "purge-old-analytics",
+  "0 3 * * *", // 3:00 AM daily
+  internal.analytics_cleanup.purgeOldAnalytics,
+  {},
+);
+
 export default crons;

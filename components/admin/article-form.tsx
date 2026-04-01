@@ -912,7 +912,7 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:opacity-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                                className="cursor-pointer w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:opacity-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                             >
                                 {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                                 {isEditing ? "Update Article" : "Publish Article"}

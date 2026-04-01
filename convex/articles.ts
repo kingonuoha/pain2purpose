@@ -1,5 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 
@@ -23,78 +24,103 @@ export const publishScheduledArticles = internalMutation({
       await ctx.scheduler.runAfter(0, internal.articles.queueNewArticleAlerts, {
         articleId: article._id,
       });
+
+      // Update globalStats
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          publishedArticles: 1,
+          scheduledArticles: -1,
+        },
+      });
     }
 
     return { publishedCount: scheduledArticles.length };
   },
 });
- 
- function slugify(text: string) {
-   return text
-     .toString()
-     .toLowerCase()
-     .trim()
-     .replace(/\s+/g, "-")
-     .replace(/[^\w-]+/g, "")
-     .replace(/--+/g, "-")
-     .replace(/^-+/, "")
-     .replace(/-+$/, "");
- }
+
 
 export const list = query({
   args: {
-    limit: v.optional(v.number()),
+    paginationOpts: paginationOptsValidator,
     categoryId: v.optional(v.id("categories")),
-    topic: v.optional(v.string()),
     pillar: v.optional(v.string()),
-    tag: v.optional(v.string()),
     type: v.optional(v.string()),
-    _test: v.optional(v.string()),
+    _test: v.optional(v.string()), // Kept for compat
   },
   handler: async (ctx, args) => {
     let articleQuery = ctx.db
       .query("articles")
-      .withIndex("by_status", (q) => q.eq("status", "published"))
-      .filter((q) => q.neq(q.field("isArchived"), true));
+      .withIndex("by_status", (q) => q.eq("status", "published"));
 
     if (args.categoryId) {
       articleQuery = ctx.db
         .query("articles")
-        .withIndex("by_categoryId", (q) =>
-          q.eq("categoryId", args.categoryId as Id<"categories">),
-        )
-        .filter((q) => q.eq(q.field("status"), "published"));
+        .withIndex("by_categoryId", (q) => q.eq("categoryId", args.categoryId as Id<"categories">));
     }
 
-    let articles = await articleQuery.order("desc").collect();
+    // Apply native DB filters
+    const qBase = articleQuery.filter((q) => {
+      const conditions: ReturnType<typeof q.eq>[] = [];
+      conditions.push(q.neq(q.field("isArchived"), true));
+      
+      if (args.categoryId) {
+         conditions.push(q.eq(q.field("status"), "published"));
+      }
+      
+      if (args.pillar) {
+         conditions.push(q.eq(q.field("pillar"), args.pillar));
+      }
+      if (args.type) {
+         conditions.push(q.eq(q.field("type"), args.type));
+      }
 
-    if (args.topic) {
-      const targetTopic = slugify(args.topic!);
-      articles = articles.filter((article) =>
-        article.topics?.some(t => slugify(t) === targetTopic),
-      );
-    }
+      return conditions.length > 1 ? q.and(...conditions) : conditions[0];
+    });
 
-    if (args.pillar) {
-      articles = articles.filter((article) =>
-        article.pillar === args.pillar
-      );
-    }
+    const result = await qBase.order("desc").paginate(args.paginationOpts);
 
-    if (args.tag) {
-      const targetTag = slugify(args.tag!);
-      articles = articles.filter((article) =>
-        article.tags?.some(t => slugify(t) === targetTag),
-      );
-    }
+    const projectedPage = await Promise.all(
+      result.page.map(async (article) => {
+        const author = await ctx.db.get(article.authorId);
+        const category = article.categoryId
+          ? await ctx.db.get(article.categoryId)
+          : null;
+        
+        return {
+          _id: article._id,
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt,
+          coverImage: article.coverImage,
+          publishedAt: article.publishedAt,
+          createdAt: article.createdAt,
+          viewCount: article.viewCount,
+          authorId: article.authorId,
+          categoryId: article.categoryId,
+          authorName: author?.name || "Unknown Author",
+          authorImage: author?.profileImage,
+          categoryName: category?.name || "Uncategorized",
+        };
+      }),
+    );
 
-    if (args.type) {
-      articles = articles.filter((article) =>
-        article.type === args.type
-      );
-    }
+    return { ...result, page: projectedPage };
+  },
+});
 
-    articles = articles.slice(0, args.limit || 10); // Default to 10 for better performance if not specified
+/**
+ * Lightweight query for recent articles targeting SSR callers (Home, Sitemap, etc.)
+ * Prevents full table scans by using .take(n) and projects only necessary fields.
+ */
+export const listRecent = query({
+  args: { limit: v.number() },
+  handler: async (ctx, args) => {
+    const articles = await ctx.db
+      .query("articles")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .filter((q) => q.neq(q.field("isArchived"), true))
+      .order("desc")
+      .take(Math.min(args.limit, 100)); // Hard cap at 100 for safety
 
     return await Promise.all(
       articles.map(async (article) => {
@@ -102,11 +128,19 @@ export const list = query({
         const category = article.categoryId
           ? await ctx.db.get(article.categoryId)
           : null;
+        
         return {
-          ...article,
+          _id: article._id,
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt,
+          coverImage: article.coverImage,
+          publishedAt: article.publishedAt,
+          updatedAt: article.updatedAt,
           authorName: author?.name || "Unknown Author",
           authorImage: author?.profileImage,
           categoryName: category?.name || "Uncategorized",
+          viewCount: article.viewCount || 0,
         };
       }),
     );
@@ -119,9 +153,10 @@ export const getBySlug = query({
     const article = await ctx.db
       .query("articles")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .filter((q) => q.neq(q.field("isArchived"), true))
       .unique();
 
-    if (!article) return null;
+    if (!article || article.status !== "published") return null;
 
     const author = await ctx.db.get(article.authorId);
     const category = article.categoryId
@@ -144,7 +179,12 @@ export const getFeatured = query({
     const articles = await ctx.db
       .query("articles")
       .withIndex("by_status", (q) => q.eq("status", "published"))
-      .filter((q) => q.eq(q.field("isFeatured"), true))
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("isFeatured"), true),
+          q.neq(q.field("isArchived"), true)
+        )
+      )
       .order("desc")
       .take(args.limit || 5);
 
@@ -155,10 +195,16 @@ export const getFeatured = query({
           ? await ctx.db.get(article.categoryId)
           : null;
         return {
-          ...article,
+          _id: article._id,
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt,
+          coverImage: article.coverImage,
+          publishedAt: article.publishedAt,
           authorName: author?.name || "Unknown Author",
           authorImage: author?.profileImage,
           categoryName: category?.name || "Uncategorized",
+          viewCount: article.viewCount || 0,
         };
       }),
     );
@@ -178,7 +224,12 @@ export const getByCategory = query({
     const articles = await ctx.db
       .query("articles")
       .withIndex("by_categoryId", (q) => q.eq("categoryId", category._id))
-      .filter((q) => q.eq(q.field("status"), "published"))
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("status"), "published"),
+          q.neq(q.field("isArchived"), true)
+        )
+      )
       .order("desc")
       .take(args.limit || 100);
 
@@ -186,9 +237,16 @@ export const getByCategory = query({
       articles.map(async (article) => {
         const author = await ctx.db.get(article.authorId);
         return {
-          ...article,
+          _id: article._id,
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt,
+          coverImage: article.coverImage,
+          publishedAt: article.publishedAt,
           authorName: author?.name || "Unknown Author",
+          authorImage: author?.profileImage,
           categoryName: category.name,
+          viewCount: article.viewCount || 0,
         };
       }),
     );
@@ -202,15 +260,16 @@ export const search = query({
 
     const q = args.query.toLowerCase();
 
-    // 1. Fetch all data needed for filtering and augmentation
+    // 1. Fetch data needed for filtering and augmentation with safety limits
     const [articles, categories, allPillars] = await Promise.all([
       ctx.db
         .query("articles")
         .withIndex("by_status", (qb) => qb.eq("status", "published"))
         .filter((qb) => qb.neq(qb.field("isArchived"), true))
-        .collect(),
-      ctx.db.query("categories").collect(),
-      ctx.db.query("pillars").collect(),
+        .order("desc")
+        .take(300), // Limit search scope to most recent 300
+      ctx.db.query("categories").take(100),
+      ctx.db.query("pillars").take(100),
     ]);
 
     // Create maps for quick lookup
@@ -243,16 +302,26 @@ export const search = query({
       );
     });
 
-    // Augment results with category/pillar names
-    return matched.slice(0, 10).map((a) => {
+    // Augment results with category/pillar names and author info
+    return await Promise.all(matched.slice(0, 10).map(async (a) => {
       const category = a.categoryId ? categoryMap.get(a.categoryId) : null;
       const pillar = a.pillar ? pillarMap.get(a.pillar) : null;
+      const author = await ctx.db.get(a.authorId);
+      
       return {
-        ...a,
+        _id: a._id,
+        title: a.title,
+        slug: a.slug,
+        excerpt: a.excerpt,
+        coverImage: a.coverImage,
+        publishedAt: a.publishedAt,
         categoryName: category?.name || "Unknown",
         pillarName: pillar?.name || null,
+        authorName: author?.name || "Unknown Author",
+        authorImage: author?.profileImage,
+        viewCount: a.viewCount || 0,
       };
-    });
+    }));
   },
 });
 
@@ -286,7 +355,7 @@ export const getAllTopics = query({
     const articles = await ctx.db
       .query("articles")
       .withIndex("by_status", (q) => q.eq("status", "published"))
-      .collect();
+      .take(500); // Limit topics analysis to most recent 500
 
     const topics = new Set<string>();
     articles.forEach((article) => {
@@ -303,7 +372,7 @@ export const getAllTags = query({
     const articles = await ctx.db
       .query("articles")
       .withIndex("by_status", (q) => q.eq("status", "published"))
-      .collect();
+      .take(500); // Limit tags analysis to recent articles
 
     const tags = new Set<string>();
     articles.forEach((article) => {
@@ -316,12 +385,12 @@ export const getAllTags = query({
 export const getTopPostTags = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    // Get top N most viewed published articles
+    // Get recent published articles to find top tags
     const articles = await ctx.db
       .query("articles")
       .withIndex("by_status", (q) => q.eq("status", "published"))
       .filter((q) => q.neq(q.field("isArchived"), true))
-      .collect();
+      .take(200);
 
     const topArticles = [...articles]
       .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
@@ -430,6 +499,7 @@ export const create = mutation({
     const now = Date.now();
     const articleId = await ctx.db.insert("articles", {
       ...args,
+      isArchived: false,
       authorId: providedAuthorId || user._id,
       viewCount: 0,
       uniqueViewCount: 0,
@@ -443,6 +513,26 @@ export const create = mutation({
       await ctx.scheduler.runAfter(0, internal.articles.queueNewArticleAlerts, {
         articleId,
       });
+    }
+
+    // Update globalStats
+    await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+      update: {
+        totalArticles: 1,
+        publishedArticles: args.status === "published" ? 1 : 0,
+        draftArticles: args.status === "draft" ? 1 : 0,
+        scheduledArticles: args.status === "scheduled" ? 1 : 0,
+      },
+    });
+
+    // Update Category Stats
+    if (args.categoryId) {
+      const category = await ctx.db.get(args.categoryId);
+      if (category) {
+        await ctx.db.patch(category._id, {
+          articleCount: (category.articleCount || 0) + 1,
+        });
+      }
     }
 
     return articleId;
@@ -564,6 +654,41 @@ export const update = mutation({
     }
 
     await ctx.db.patch(id, patch);
+
+    // Update Category Stats if category changed
+    if (args.categoryId && args.categoryId !== existing.categoryId) {
+      // Decrement old category
+      if (existing.categoryId) {
+        const oldCat = await ctx.db.get(existing.categoryId);
+        if (oldCat) {
+          await ctx.db.patch(oldCat._id, {
+            articleCount: Math.max(0, (oldCat.articleCount || 0) - 1),
+          });
+        }
+      }
+      // Increment new category
+      const newCat = await ctx.db.get(args.categoryId);
+      if (newCat) {
+        await ctx.db.patch(newCat._id, {
+          articleCount: (newCat.articleCount || 0) + 1,
+        });
+      }
+    }
+
+    // Update globalStats if status changed
+    if (args.status && args.status !== existing.status) {
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: 0,
+          publishedArticles:
+            args.status === "published" ? 1 : existing.status === "published" ? -1 : 0,
+          draftArticles:
+            args.status === "draft" ? 1 : existing.status === "draft" ? -1 : 0,
+          scheduledArticles:
+            args.status === "scheduled" ? 1 : existing.status === "scheduled" ? -1 : 0,
+        },
+      });
+    }
   },
 });
 
@@ -607,30 +732,143 @@ export const queueNewArticleAlerts = internalMutation({
 export const remove = mutation({
   args: { id: v.id("articles") },
   handler: async (ctx, args) => {
-    // Soft delete
-    await ctx.db.patch(args.id, { isArchived: true });
+    const article = await ctx.db.get(args.id);
+    if (article && !article.isArchived) {
+      // We don't delete for real here yet (it's called "remove" but archives)
+      await ctx.db.patch(args.id, { isArchived: true });
+
+      // Update globalStats (decrement counts as it's no longer 'active')
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: -1,
+          publishedArticles: article.status === "published" ? -1 : 0,
+          draftArticles: article.status === "draft" ? -1 : 0,
+          scheduledArticles: article.status === "scheduled" ? -1 : 0,
+          aiDraftCount: article.source === "ai" && article.status === "draft" ? -1 : 0,
+        },
+      });
+
+      // Update Category Stats
+      if (article.categoryId) {
+        const category = await ctx.db.get(article.categoryId);
+        if (category) {
+          await ctx.db.patch(category._id, {
+            articleCount: Math.max(0, (category.articleCount || 0) - 1),
+          });
+        }
+      }
+    }
   },
 });
 
 export const restore = mutation({
   args: { id: v.id("articles") },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { isArchived: undefined });
+    const article = await ctx.db.get(args.id);
+    if (article && article.isArchived) {
+      await ctx.db.patch(args.id, { isArchived: false });
+
+      // Update globalStats (increment counts as it's back to 'active')
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: 1,
+          publishedArticles: article.status === "published" ? 1 : 0,
+          draftArticles: article.status === "draft" ? 1 : 0,
+          scheduledArticles: article.status === "scheduled" ? 1 : 0,
+          aiDraftCount: article.source === "ai" && article.status === "draft" ? 1 : 0,
+        },
+      });
+
+      // Update Category Stats
+      if (article.categoryId) {
+        const category = await ctx.db.get(article.categoryId);
+        if (category) {
+          await ctx.db.patch(category._id, {
+            articleCount: (category.articleCount || 0) + 1,
+          });
+        }
+      }
+    }
   },
 });
 
 export const deleteForever = mutation({
   args: { id: v.id("articles") },
   handler: async (ctx, args) => {
-    await ctx.db.delete(args.id);
+    const article = await ctx.db.get(args.id);
+    if (article) {
+      await ctx.db.delete(args.id);
+      
+      // Update globalStats
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: -1,
+          publishedArticles: article.status === "published" ? -1 : 0,
+          draftArticles: article.status === "draft" ? -1 : 0,
+          scheduledArticles: article.status === "scheduled" ? -1 : 0,
+          aiDraftCount: article.source === "ai" && article.status === "draft" ? -1 : 0,
+        },
+      });
+
+      // Update Category Stats (only if not already archived)
+      if (article.categoryId && !article.isArchived) {
+        const category = await ctx.db.get(article.categoryId);
+        if (category) {
+          await ctx.db.patch(category._id, {
+            articleCount: Math.max(0, (category.articleCount || 0) - 1),
+          });
+        }
+      }
+    }
   },
 });
 
 export const bulkArchive = mutation({
   args: { ids: v.array(v.id("articles")) },
   handler: async (ctx, args) => {
+    let totalCount = 0;
+    let publishedCount = 0;
+    let draftCount = 0;
+    let scheduledCount = 0;
+    let aiDraftCount = 0;
+    const categoryUpdates = new Map<Id<"categories">, number>();
+
     for (const id of args.ids) {
-      await ctx.db.patch(id, { isArchived: true });
+      const article = await ctx.db.get(id);
+      if (article && !article.isArchived) {
+        await ctx.db.patch(id, { isArchived: true });
+        
+        totalCount++;
+        if (article.status === "published") publishedCount++;
+        if (article.status === "draft") draftCount++;
+        if (article.status === "scheduled") scheduledCount++;
+        if (article.source === "ai" && article.status === "draft") aiDraftCount++;
+
+        if (article.categoryId) {
+          categoryUpdates.set(article.categoryId, (categoryUpdates.get(article.categoryId) || 0) + 1);
+        }
+      }
+    }
+
+    if (totalCount > 0) {
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: -totalCount,
+          publishedArticles: -publishedCount,
+          draftArticles: -draftCount,
+          scheduledArticles: -scheduledCount,
+          aiDraftCount: -aiDraftCount,
+        },
+      });
+
+      for (const [catId, count] of categoryUpdates.entries()) {
+        const category = await ctx.db.get(catId);
+        if (category) {
+          await ctx.db.patch(catId, {
+            articleCount: Math.max(0, (category.articleCount || 0) - count),
+          });
+        }
+      }
     }
   },
 });
@@ -638,8 +876,49 @@ export const bulkArchive = mutation({
 export const bulkRestore = mutation({
   args: { ids: v.array(v.id("articles")) },
   handler: async (ctx, args) => {
+    let totalCount = 0;
+    let publishedCount = 0;
+    let draftCount = 0;
+    let scheduledCount = 0;
+    let aiDraftCount = 0;
+    const categoryUpdates = new Map<Id<"categories">, number>();
+
     for (const id of args.ids) {
-      await ctx.db.patch(id, { isArchived: undefined });
+      const article = await ctx.db.get(id);
+      if (article && article.isArchived) {
+        await ctx.db.patch(id, { isArchived: false });
+        
+        totalCount++;
+        if (article.status === "published") publishedCount++;
+        if (article.status === "draft") draftCount++;
+        if (article.status === "scheduled") scheduledCount++;
+        if (article.source === "ai" && article.status === "draft") aiDraftCount++;
+
+        if (article.categoryId) {
+          categoryUpdates.set(article.categoryId, (categoryUpdates.get(article.categoryId) || 0) + 1);
+        }
+      }
+    }
+
+    if (totalCount > 0) {
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: totalCount,
+          publishedArticles: publishedCount,
+          draftArticles: draftCount,
+          scheduledArticles: scheduledCount,
+          aiDraftCount: aiDraftCount,
+        },
+      });
+
+      for (const [catId, count] of categoryUpdates.entries()) {
+        const category = await ctx.db.get(catId);
+        if (category) {
+          await ctx.db.patch(catId, {
+            articleCount: (category.articleCount || 0) + count,
+          });
+        }
+      }
     }
   },
 });
@@ -647,8 +926,50 @@ export const bulkRestore = mutation({
 export const bulkDeleteForever = mutation({
   args: { ids: v.array(v.id("articles")) },
   handler: async (ctx, args) => {
+    let totalCount = 0;
+    let publishedCount = 0;
+    let draftCount = 0;
+    let scheduledCount = 0;
+    let aiDraftCount = 0;
+    const categoryUpdates = new Map<Id<"categories">, number>();
+
     for (const id of args.ids) {
-      await ctx.db.delete(id);
+      const article = await ctx.db.get(id);
+      if (article) {
+        await ctx.db.delete(id);
+        
+        totalCount++;
+        if (article.status === "published") publishedCount++;
+        if (article.status === "draft") draftCount++;
+        if (article.status === "scheduled") scheduledCount++;
+        if (article.source === "ai" && article.status === "draft") aiDraftCount++;
+
+        // Only decrement category count if it wasn't already archived
+        if (article.categoryId && !article.isArchived) {
+          categoryUpdates.set(article.categoryId, (categoryUpdates.get(article.categoryId) || 0) + 1);
+        }
+      }
+    }
+
+    if (totalCount > 0) {
+      await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+        update: {
+          totalArticles: -totalCount,
+          publishedArticles: -publishedCount,
+          draftArticles: -draftCount,
+          scheduledArticles: -scheduledCount,
+          aiDraftCount: -aiDraftCount,
+        },
+      });
+
+      for (const [catId, count] of categoryUpdates.entries()) {
+        const category = await ctx.db.get(catId);
+        if (category) {
+          await ctx.db.patch(catId, {
+            articleCount: Math.max(0, (category.articleCount || 0) - count),
+          });
+        }
+      }
     }
   },
 });
@@ -662,67 +983,104 @@ export const toggleFeatured = mutation({
 
 export const listAdmin = query({
   args: {
+    paginationOpts: paginationOptsValidator,
+    categoryId: v.optional(v.id("categories")),
     status: v.optional(v.string()),
     source: v.optional(v.string()),
     search: v.optional(v.string()),
-    categoryId: v.optional(v.id("categories")),
     isArchived: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    let articles = await ctx.db.query("articles").order("desc").collect();
-
-    if (args.isArchived) {
-      articles = articles.filter((a) => a.isArchived === true);
-    } else {
-      articles = articles.filter((a) => !a.isArchived);
-    }
-
-    if (args.status && args.status !== "all") {
-      articles = articles.filter((a) => a.status === args.status);
-    }
-
-    if (args.source && args.source !== "all") {
-      articles = articles.filter((a) => a.source === args.source);
-    }
-
-    if (args.categoryId) {
-      articles = articles.filter((a) => a.categoryId === args.categoryId);
-    }
-
+    // 1. Handle Search Case (Highest Priority & Performance)
     if (args.search) {
-      const query = args.search.toLowerCase();
-      articles = articles.filter(
-        (a) => 
-          a.title.toLowerCase().includes(query) || 
-          a.slug.includes(query) ||
-          (a.excerpt || "").toLowerCase().includes(query) ||
-          a.topics?.some(t => t.toLowerCase().includes(query)) ||
-          a.tags?.some(t => t.toLowerCase().includes(query)) ||
-          (a.focusKeyword || "").toLowerCase().includes(query)
-      );
+      const result = await ctx.db
+        .query("articles")
+        .withSearchIndex("search_title", (q) => {
+          let searchQ = q.search("title", args.search!);
+          if (args.status && args.status !== "all") searchQ = searchQ.eq("status", args.status as Doc<"articles">["status"]);
+          if (args.categoryId) searchQ = searchQ.eq("categoryId", args.categoryId);
+          if (args.isArchived === true) {
+            searchQ = searchQ.eq("isArchived", true);
+          } else {
+            searchQ = searchQ.eq("isArchived", false);
+          }
+          return searchQ;
+        })
+        .paginate(args.paginationOpts);
+
+      return {
+        ...result,
+        page: await Promise.all(
+          result.page.map(async (article) => {
+            const author = await ctx.db.get(article.authorId);
+            const category = article.categoryId
+              ? await ctx.db.get(article.categoryId)
+              : null;
+            return {
+              ...article,
+              authorName: author?.name || "Unknown Author",
+              authorImage: author?.profileImage,
+              categoryName: category?.name || "Uncategorized",
+            };
+          }),
+        ),
+      };
     }
 
-    return await Promise.all(
-      articles.map(async (article) => {
-        const author = await ctx.db.get(article.authorId);
-        let categoryName = "Uncategorized";
-        if (article.categoryId) {
-          const category = await ctx.db.get(article.categoryId);
-          if (category) categoryName = category.name;
-        }
+    // 2. Handle Browsing Case (Indexed)
+    let articleQuery;
 
-        // Safe access
-        const authorName = author?.name || "Unknown Author";
-        const authorImage = author?.profileImage;
+    if (args.status && args.status !== "all" && args.categoryId) {
+      articleQuery = ctx.db.query("articles").withIndex("by_status_category", (q) => q.eq("status", args.status as Doc<"articles">["status"]).eq("categoryId", args.categoryId!));
+    } else if (args.categoryId) {
+      articleQuery = ctx.db.query("articles").withIndex("by_categoryId", (q) => q.eq("categoryId", args.categoryId!));
+    } else if (args.status && args.status !== "all") {
+      articleQuery = ctx.db.query("articles").withIndex("by_status", (q) => q.eq("status", args.status as Doc<"articles">["status"]));
+    } else {
+      articleQuery = ctx.db.query("articles");
+    }
 
-        return {
-          ...article,
-          authorName,
-          authorImage,
-          categoryName,
-        };
-      }),
-    );
+    // Apply filters for non-indexable fields
+    const filteredQuery = articleQuery.filter((q) => {
+      const conditions = [];
+      
+      if (args.isArchived === true) {
+        conditions.push(q.eq(q.field("isArchived"), true));
+      } else {
+        conditions.push(q.neq(q.field("isArchived"), true));
+      }
+
+      if (args.source && args.source !== "all") {
+        conditions.push(q.eq(q.field("source"), args.source as Doc<"articles">["source"]));
+      }
+
+      if (args.status && args.status !== "all") {
+        conditions.push(q.eq(q.field("status"), args.status as Doc<"articles">["status"]));
+      }
+
+      // If no filters, match all (using a non-existent ID for neq)
+      return conditions.length > 0 ? q.and(...conditions) : q.neq(q.field("_id"), "00000000000000000000000000" as Id<"articles">);
+    });
+
+    const result = await filteredQuery.order("desc").paginate(args.paginationOpts);
+
+    return {
+      ...result,
+      page: await Promise.all(
+        result.page.map(async (article) => {
+          const author = await ctx.db.get(article.authorId);
+          const category = article.categoryId
+            ? await ctx.db.get(article.categoryId)
+            : null;
+          return {
+            ...article,
+            authorName: author?.name || "Unknown Author",
+            authorImage: author?.profileImage,
+            categoryName: category?.name || "Uncategorized",
+          };
+        }),
+      ),
+    };
   },
 });
 
@@ -732,7 +1090,7 @@ export const listAuthors = query({
     return await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "admin"))
-      .collect();
+      .take(100);
   },
 });
 
@@ -807,11 +1165,12 @@ export const saveAIDraft = internalMutation({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
 
-    return await ctx.db.insert("articles", {
+    const newArticleId = await ctx.db.insert("articles", {
       ...rest,
       metaTitle,
       metaDescription,
       focusKeyword,
+      isArchived: false,
       slug: slug + "-" + Math.random().toString(36).substring(2, 7),
       coverImage:
         "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
@@ -825,6 +1184,22 @@ export const saveAIDraft = internalMutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+    // Update global stats
+    await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+      update: {
+        totalArticles: 1,
+        draftArticles: 1,
+        aiDraftCount: 1,
+      },
+    });
+
+    // Update category stats
+    await ctx.db.patch(category._id, {
+      articleCount: (category.articleCount || 0) + 1,
+    });
+
+    return newArticleId;
   },
 });
 export const getByAuthor = query({
@@ -868,7 +1243,7 @@ export const getBookmarkedArticles = query({
     const bookmarks = await ctx.db
       .query("bookmarks")
       .withIndex("by_user_article", (q) => q.eq("userId", user._id))
-      .collect();
+      .take(200); // Safety cap for bookmarks per user
 
     const articles = await Promise.all(
       bookmarks.map(async (b) => {

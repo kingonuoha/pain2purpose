@@ -8,11 +8,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org";
 
+  interface ArticleWithMeta {
+    slug: string;
+    updatedAt: number;
+    publishedAt?: number;
+  }
+
   // Fetch articles
-  const articles = (await fetchQuery(api.articles.list, {
+  const articles = (await fetchQuery(api.articles.listRecent, {
     limit: 1000,
-  })) as Doc<"articles">[];
-  const articleUrls = articles.map((article: Doc<"articles">) => ({
+  })) as ArticleWithMeta[];
+
+  const articleUrls = articles.map((article) => ({
     url: `${baseUrl}/${article.slug}`,
     lastModified: new Date(
       article.updatedAt || article.publishedAt || Date.now(),

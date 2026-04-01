@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, ChevronDown, Eye, Search } from "lucide-react";
-import { useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id, Doc } from "../convex/_generated/dataModel";
 import { BlogSkeleton } from "./skeletons";
@@ -25,14 +24,19 @@ export interface JoinedArticle extends Doc<"articles"> {
 }
 
 export function BlogGrid({ categoryId, topic, pillar, type, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
-    const [limit, setLimit] = useState(initialArticles?.length || 6);
-    const articles = useQuery(api.articles.list, { limit, categoryId, topic, pillar, type }) || initialArticles;
+    const { results, status, loadMore } = usePaginatedQuery(
+        api.articles.list,
+        { categoryId, topic, pillar, type },
+        { initialNumItems: initialArticles?.length || 6 }
+    );
 
-    if (articles === undefined) {
+    const articles = results.length > 0 ? results : initialArticles;
+
+    if (articles === undefined && status === "LoadingFirstPage") {
         return <BlogSkeleton />;
     }
 
-    if (articles.length === 0) {
+    if (!articles || articles.length === 0) {
         return (
             <EmptyState 
                 title="No Insights Found" 
@@ -51,10 +55,10 @@ export function BlogGrid({ categoryId, topic, pillar, type, initialArticles }: B
         );
     }
 
-    const hasMore = articles.length >= limit;
+    const hasMore = status === "CanLoadMore";
 
     const handleLoadMore = () => {
-        setLimit(prev => prev + 6);
+        loadMore(6);
     };
 
     return (

@@ -4,48 +4,39 @@ import { v } from "convex/values";
 /**
  * Get overall dashboard statistics for the admin overview.
  */
+/**
+ * Get overall dashboard statistics for the admin overview.
+ * Uses the pre-calculated globalStats counter document to prevent full table scans.
+ */
 export const getDashboardStats = query({
   args: {},
   handler: async (ctx) => {
-    // Basic counts
-    const articles = await ctx.db.query("articles").collect();
-    const usersCount = (await ctx.db.query("users").collect()).length;
-    const comments = await ctx.db.query("comments").collect();
-
-    const publishedCount = articles.filter(
-      (a) => a.status === "published",
-    ).length;
-    const draftCount = articles.filter((a) => a.status === "draft").length;
-    const scheduledCount = articles.filter(
-      (a) => a.status === "scheduled",
-    ).length;
-    const aiDraftsCount = articles.filter(
-      (a) => a.source === "ai" && a.status === "draft",
-    ).length;
-
-    const totalReach = (await ctx.db.query("visitorTracking").collect()).length;
-    const totalViews = articles.reduce((sum, a) => sum + (a.viewCount || 0), 0);
-    const totalUniqueViews = articles.reduce(
-      (sum, a) => sum + (a.uniqueViewCount || 0),
-      0,
-    );
-    const pendingCommentsCount = comments.filter(
-      (c) => c.status === "pending",
-    ).length;
+    const stats = await ctx.db.query("globalStats").first();
+    
+    if (!stats) {
+      return {
+        articles: { total: 0, published: 0, draft: 0, scheduled: 0, aiDrafts: 0 },
+        usersCount: 0,
+        totalViews: 0,
+        totalUniqueViews: 0,
+        totalReach: 0,
+        pendingCommentsCount: 0,
+      };
+    }
 
     return {
       articles: {
-        total: articles.length,
-        published: publishedCount,
-        draft: draftCount,
-        scheduled: scheduledCount,
-        aiDrafts: aiDraftsCount,
+        total: stats.articleCount,
+        published: stats.publishedArticleCount,
+        draft: stats.draftArticleCount,
+        scheduled: stats.scheduledArticleCount,
+        aiDrafts: stats.aiDraftCount,
       },
-      usersCount,
-      totalViews,
-      totalUniqueViews,
-      totalReach,
-      pendingCommentsCount,
+      usersCount: stats.usersCount,
+      totalViews: stats.totalViews,
+      totalUniqueViews: stats.totalUniqueViews,
+      totalReach: 0, // visitorTracking is too large to .collect(), needs a counter
+      pendingCommentsCount: stats.pendingCommentsCount,
     };
   },
 });
@@ -98,44 +89,5 @@ export const getRecentActivity = query({
     ];
 
     return activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
-  },
-});
-
-/**
- * List all articles with optional filtering for the admin table.
- */
-export const listAllArticles = query({
-  args: {
-    status: v.optional(v.string()),
-    source: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const articlesQuery = ctx.db.query("articles");
-
-    const articles = await articlesQuery.order("desc").collect();
-
-    let filtered = articles;
-    if (args.status && args.status !== "all") {
-      filtered = filtered.filter((a) => a.status === args.status);
-    }
-    if (args.source && args.source !== "all") {
-      filtered = filtered.filter((a) => a.source === args.source);
-    }
-
-    return await Promise.all(
-      filtered.map(async (article) => {
-        const author = article.authorId
-          ? await ctx.db.get(article.authorId)
-          : null;
-        const category = article.categoryId
-          ? await ctx.db.get(article.categoryId)
-          : null;
-        return {
-          ...article,
-          authorName: author?.name || "Unknown",
-          categoryName: category?.name || "Uncategorized",
-        };
-      }),
-    );
   },
 });

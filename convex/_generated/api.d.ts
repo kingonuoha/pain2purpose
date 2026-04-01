@@ -14,6 +14,7 @@ import type * as ai from "../ai.js";
 import type * as ai_actions from "../ai_actions.js";
 import type * as ai_prompts from "../ai_prompts.js";
 import type * as analytics from "../analytics.js";
+import type * as analytics_cleanup from "../analytics_cleanup.js";
 import type * as articles from "../articles.js";
 import type * as categories from "../categories.js";
 import type * as crons from "../crons.js";
@@ -25,6 +26,7 @@ import type * as pillars from "../pillars.js";
 import type * as quotes from "../quotes.js";
 import type * as seed from "../seed.js";
 import type * as site_settings from "../site_settings.js";
+import type * as stats from "../stats.js";
 import type * as users from "../users.js";
 
 import type {
@@ -40,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   ai_actions: typeof ai_actions;
   ai_prompts: typeof ai_prompts;
   analytics: typeof analytics;
+  analytics_cleanup: typeof analytics_cleanup;
   articles: typeof articles;
   categories: typeof categories;
   crons: typeof crons;
@@ -51,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   quotes: typeof quotes;
   seed: typeof seed;
   site_settings: typeof site_settings;
+  stats: typeof stats;
   users: typeof users;
 }>;
 

@@ -2,6 +2,19 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  globalStats: defineTable({
+    articleCount: v.number(),
+    publishedArticleCount: v.number(),
+    draftArticleCount: v.number(),
+    scheduledArticleCount: v.number(),
+    aiDraftCount: v.number(),
+    usersCount: v.number(),
+    commentsCount: v.number(),
+    pendingCommentsCount: v.number(),
+    totalViews: v.number(),
+    totalUniqueViews: v.number(),
+  }),
+
   users: defineTable({
     name: v.string(),
     email: v.string(),
@@ -74,7 +87,12 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_publishedAt", ["publishedAt"])
     .index("by_categoryId", ["categoryId"])
-    .index("by_authorId", ["authorId"]),
+    .index("by_authorId", ["authorId"])
+    .index("by_status_category", ["status", "categoryId"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["status", "categoryId", "isArchived"],
+    }),
 
   categories: defineTable({
     name: v.string(),

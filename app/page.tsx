@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const featuredArticles = await fetchQuery(api.articles.getFeatured, { limit: 5 });
-  const latestArticles = await fetchQuery(api.articles.list, { limit: 6 });
+  const latestArticles = await fetchQuery(api.articles.listRecent, { limit: 6 });
 
   const jsonLd = {
     "@context": "https://schema.org",
