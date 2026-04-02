@@ -29,6 +29,7 @@ export const logPageVisit = mutation({
       .withIndex("by_trackingCode", (q) => q.eq("trackingCode", args.visitorId))
       .unique();
 
+    let isNewVisitor = false;
     if (tracking) {
       await ctx.db.patch(tracking._id, {
         lastVisit: now,
@@ -36,6 +37,7 @@ export const logPageVisit = mutation({
         userId: args.userId || tracking.userId,
       });
     } else {
+      isNewVisitor = true;
       await ctx.db.insert("visitorTracking", {
         trackingCode: args.visitorId,
         userId: args.userId,
@@ -61,7 +63,7 @@ export const logPageVisit = mutation({
 
     // 3. Update Global Stats
     await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
-      update: { totalViews: 1 },
+      update: { totalViews: 1, totalUniqueViews: isNewVisitor ? 1 : 0 },
     });
   },
 });
@@ -114,10 +116,6 @@ export const logArticleView = mutation({
           userId: args.userId || existingView.userId, // Update UID if they just logged in
         });
 
-        // 3. Update Global Stats
-        await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
-          update: { totalViews: 1 },
-        });
       }
     }
   },

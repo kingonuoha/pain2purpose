@@ -438,3 +438,27 @@ export const updateUserRole = mutation({
     await ctx.db.patch(args.id, { role: args.role });
   },
 });
+
+export const completeTour = mutation({
+  args: {
+    tourId: v.string(),
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const currentTours = user.completedTours || [];
+    if (!currentTours.includes(args.tourId)) {
+      await ctx.db.patch(user._id, {
+        completedTours: [...currentTours, args.tourId],
+      });
+    }
+
+    return { success: true };
+  },
+});

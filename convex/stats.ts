@@ -21,6 +21,9 @@ export const initGlobalStats = mutation({
     const scheduledCount = activeArticles.filter((a) => a.status === "scheduled").length;
     const aiDraftsCount = activeArticles.filter((a) => a.source === "ai" && a.status === "draft").length;
 
+    const pendingCommentsCount = comments.filter((c) => c.status === "pending").length;
+    const totalUniqueViews = (await ctx.db.query("visitorTracking").collect()).length;
+
     // Sum all page visits for total view count
     // Using simple collect() since the dev dataset is small, but theoretically this could be paginated.
     const pageVisits = await ctx.db.query("pageVisits").collect();
@@ -34,9 +37,9 @@ export const initGlobalStats = mutation({
       aiDraftCount: aiDraftsCount,
       usersCount,
       commentsCount: comments.length,
-      pendingCommentsCount: 0,
+      pendingCommentsCount,
       totalViews,
-      totalUniqueViews: 0, // We could count unique visitorIds if needed
+      totalUniqueViews,
     };
 
     // --- NEW: Recalculate Category articleCounts ---
@@ -67,6 +70,7 @@ export const incrementStats = internalMutation({
       aiDraftCount: v.optional(v.number()),
       usersCount: v.optional(v.number()),
       commentsCount: v.optional(v.number()),
+      pendingCommentsCount: v.optional(v.number()),
       totalViews: v.optional(v.number()),
       totalUniqueViews: v.optional(v.number()),
     }),
@@ -85,6 +89,7 @@ export const incrementStats = internalMutation({
     if (update.aiDraftCount !== undefined) patch.aiDraftCount = (stats.aiDraftCount || 0) + update.aiDraftCount;
     if (update.usersCount !== undefined) patch.usersCount = (stats.usersCount || 0) + update.usersCount;
     if (update.commentsCount !== undefined) patch.commentsCount = (stats.commentsCount || 0) + update.commentsCount;
+    if (update.pendingCommentsCount !== undefined) patch.pendingCommentsCount = (stats.pendingCommentsCount || 0) + update.pendingCommentsCount;
     if (update.totalViews !== undefined) patch.totalViews = (stats.totalViews || 0) + update.totalViews;
     if (update.totalUniqueViews !== undefined) patch.totalUniqueViews = (stats.totalUniqueViews || 0) + update.totalUniqueViews;
 
@@ -92,4 +97,75 @@ export const incrementStats = internalMutation({
       await ctx.db.patch(stats._id, patch);
     }
   },
+});
+
+export const distributeViews = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Get accurate totals from actual tracking collections
+    const totalUniqueViews = (await ctx.db.query("visitorTracking").collect()).length;
+    const pageVisits = await ctx.db.query("pageVisits").collect();
+    const totalViews = pageVisits.length;
+
+    // 2. Fetch published articles
+    const articles = await ctx.db
+      .query("articles")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    if (articles.length === 0) return { message: "No articles to distribute views to." };
+
+    // 3. Calculate current totals
+    let currentArticleViews = 0;
+    let currentArticleUniqueViews = 0;
+    for (const article of articles) {
+      currentArticleViews += article.viewCount || 0;
+      currentArticleUniqueViews += article.uniqueViewCount || 0;
+    }
+
+    // 4. Calculate missing views
+    const missingViews = Math.max(0, totalViews - currentArticleViews);
+    const missingUniqueViews = Math.max(0, totalUniqueViews - currentArticleUniqueViews);
+
+    // 5. Randomly distribute missing views
+    const addViewsTo = new Array(articles.length).fill(0);
+    const addUniqueTo = new Array(articles.length).fill(0);
+
+    for (let i = 0; i < missingViews; i++) {
+      const idx = Math.floor(Math.random() * articles.length);
+      addViewsTo[idx]++;
+    }
+
+    for (let i = 0; i < missingUniqueViews; i++) {
+      const idx = Math.floor(Math.random() * articles.length);
+      addUniqueTo[idx]++;
+    }
+
+    // 6. Apply updates to individual articles
+    for (let i = 0; i < articles.length; i++) {
+      if (addViewsTo[i] > 0 || addUniqueTo[i] > 0) {
+        await ctx.db.patch(articles[i]._id, {
+          viewCount: (articles[i].viewCount || 0) + addViewsTo[i],
+          uniqueViewCount: (articles[i].uniqueViewCount || 0) + addUniqueTo[i],
+        });
+      }
+    }
+
+    // 7. Make sure globalStats reflects exactly DB totals
+    const existing = await ctx.db.query("globalStats").first();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        totalViews,
+        totalUniqueViews
+      });
+    }
+
+    return {
+      message: "Distribution complete",
+      distributedViews: missingViews,
+      distributedUniqueViews: missingUniqueViews,
+      newTotalViews: totalViews,
+      newTotalUniqueViews: totalUniqueViews,
+    };
+  }
 });
