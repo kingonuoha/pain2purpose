@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
+import { internal } from "./_generated/api";
 
 export const logPageVisit = mutation({
   args: {
@@ -57,6 +58,11 @@ export const logPageVisit = mutation({
       referrer: args.referrer,
       timestamp: now,
     });
+
+    // 3. Update Global Stats
+    await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+      update: { totalViews: 1 },
+    });
   },
 });
 
@@ -107,6 +113,11 @@ export const logArticleView = mutation({
           viewedAt: now,
           userId: args.userId || existingView.userId, // Update UID if they just logged in
         });
+
+        // 3. Update Global Stats
+        await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+          update: { totalViews: 1 },
+        });
       }
     }
   },
@@ -123,14 +134,14 @@ export const getTrafficStats = query({
     const currentVisits = await ctx.db
       .query("pageVisits")
       .withIndex("by_timestamp", (q) => q.gt("timestamp", startTime))
-      .collect();
+      .take(5000); // Safety cap for bandwidth
 
     const prevVisits = await ctx.db
       .query("pageVisits")
       .withIndex("by_timestamp", (q) =>
         q.gt("timestamp", prevStartTime).lt("timestamp", startTime),
       )
-      .collect();
+      .take(5000); // Safety cap for bandwidth
 
     // Group by day for the chart
     const stats: Record<string, { date: string; visits: number }> = {};
@@ -171,7 +182,7 @@ export const getReferrerStats = query({
     const visits = await ctx.db
       .query("pageVisits")
       .withIndex("by_timestamp", (q) => q.gt("timestamp", startTime))
-      .collect();
+      .take(5000); // Safety cap for bandwidth
 
     const referrers: Record<string, number> = {};
 
@@ -199,7 +210,7 @@ export const getReferrerStats = query({
 
 export const getGeographicStats = query({
   handler: async (ctx) => {
-    const visits = await ctx.db.query("pageVisits").collect();
+    const visits = await ctx.db.query("pageVisits").take(5000);
     const counts: Record<string, { country: string; count: number }> = {};
 
     visits.forEach((v) => {
@@ -216,7 +227,7 @@ export const getGeographicStats = query({
 
 export const getDeviceStats = query({
   handler: async (ctx) => {
-    const visits = await ctx.db.query("pageVisits").collect();
+    const visits = await ctx.db.query("pageVisits").take(5000);
     const devices: Record<string, number> = {
       mobile: 0,
       tablet: 0,
@@ -349,7 +360,19 @@ export const getRawVisits = query({
 
         if (type === "reaction") {
             const q = ctx.db.query("reactions").withIndex("by_createdAt", (q) => q.gt("createdAt", startTime)).order("desc");
-            const result = await q.paginate(args.paginationOpts);
+            
+            let result;
+            try {
+                result = await q.paginate(args.paginationOpts);
+            } catch (error) {
+                // If cursor is invalid (e.g. from a different query type), reset to first page
+                if (args.paginationOpts.cursor) {
+                    result = await q.paginate({ ...args.paginationOpts, cursor: null });
+                } else {
+                    throw error;
+                }
+            }
+
             const page = await Promise.all(result.page.map(async (r) => {
                 const article = await ctx.db.get(r.articleId);
                 const user = await ctx.db.get(r.userId);
@@ -380,7 +403,18 @@ export const getRawVisits = query({
         // Default to pageVisits for visits, articles, and all
         const q = ctx.db.query("pageVisits").withIndex("by_timestamp", (q) => q.gt("timestamp", startTime)).order("desc");
 
-        const result = await q.paginate(args.paginationOpts);
+        let result;
+        try {
+            result = await q.paginate(args.paginationOpts);
+        } catch (error) {
+            // Fallback for invalid cursors
+            if (args.paginationOpts.cursor) {
+                result = await q.paginate({ ...args.paginationOpts, cursor: null });
+            } else {
+                throw error;
+            }
+        }
+
         let page = result.page;
 
         if (type === "article") {

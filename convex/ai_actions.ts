@@ -293,15 +293,15 @@ export const learnAuthorStyle = action({
     model: v.string(),
   },
   handler: async (ctx, args): Promise<string> => {
-    const articles = await ctx.runQuery(api.articles.list, { limit: 3 });
-    if (articles.length === 0) {
+    const articles = await ctx.runQuery(api.articles.getFeatured, { limit: 3 });
+    if (!articles || articles.length === 0) {
       throw new Error("No articles found to learn style from");
     }
 
     const contentSample = articles
       .map(
-        (a: Doc<"articles">) =>
-          `TITLE: ${a.title}\nCONTENT: ${a.content?.substring(0, 1000)}`,
+        (a) =>
+          `TITLE: ${a.title}\nCONTENT: ${a.excerpt?.substring(0, 1000) || ""}`,
       )
       .join("\n\n---\n\n");
 

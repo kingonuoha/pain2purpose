@@ -78,15 +78,20 @@ export default function CategoriesPage() {
     const [selectedInModal, setSelectedInModal] = useState<string[]>([]);
     const [activeImageTarget, setActiveImageTarget] = useState<"category" | "pillar" | null>(null);
 
-    // Prevent body scroll when Pexels modal is open
+    // Prevent body scroll when any modal is open
     useEffect(() => {
-        if (isPexelsModalOpen) {
+        if (isPexelsModalOpen || isModalOpen || isPillarModalOpen) {
             document.body.style.overflow = "hidden";
+            document.body.style.overscrollBehavior = "none";
         } else {
             document.body.style.overflow = "unset";
+            document.body.style.overscrollBehavior = "unset";
         }
-        return () => { document.body.style.overflow = "unset"; };
-    }, [isPexelsModalOpen]);
+        return () => { 
+            document.body.style.overflow = "unset"; 
+            document.body.style.overscrollBehavior = "unset";
+        };
+    }, [isPexelsModalOpen, isModalOpen, isPillarModalOpen]);
 
     const resetForm = () => {
         setFormData({ name: "", slug: "", description: "", coverImage: "", pexelsImages: [] });
@@ -248,14 +253,28 @@ export default function CategoriesPage() {
         setSelectedInModal([]);
     };
 
-    const filteredCategories = (categories || []).filter(cat => 
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredCategories = (categories || []).filter(cat => {
+        const query = searchQuery.toLowerCase().trim();
+        if (!query) return true;
+        return (
+            cat.name.toLowerCase().includes(query) ||
+            cat.slug.toLowerCase().includes(query) ||
+            (cat.description || "").toLowerCase().includes(query)
+        );
+    });
 
-    const filteredPillars = (pillars || []).filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        categories?.find(c => c._id === p.categoryId)?.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredPillars = (pillars || []).filter(p => {
+        const query = searchQuery.toLowerCase().trim();
+        if (!query) return true;
+        const category = categories?.find(c => c._id === p.categoryId);
+        const categoryName = category?.name.toLowerCase() || "";
+        return (
+            p.name.toLowerCase().includes(query) ||
+            p.slug.toLowerCase().includes(query) ||
+            (p.description || "").toLowerCase().includes(query) ||
+            categoryName.includes(query)
+        );
+    });
 
     if (!categories || !pillars) {
         return (
@@ -397,10 +416,10 @@ export default function CategoriesPage() {
                                     />
                                 ) : (
                                     <Image
-                                        src={`https://placehold.co/600x400/0f172a/white?text=${encodeURIComponent(cat.name)}+Asset`}
+                                        src={`https://placehold.co/600x400/2563eb/white?text=${encodeURIComponent(cat.name)}`}
                                         alt={cat.name}
                                         fill
-                                        className="object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700"
+                                        className="object-cover opacity-60 group-hover:opacity-80 transition-all duration-700"
                                     />
                                 )}
                                 
@@ -500,9 +519,9 @@ export default function CategoriesPage() {
                             initial={{ opacity: 0, scale: 0.95, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden"
+                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden overscroll-contain"
                         >
-                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar overscroll-contain">
                                 <div className="flex justify-between items-center mb-10">
                                     <div>
                                         <h2 className="text-3xl font-black dark:text-white">Category Setup</h2>
@@ -589,14 +608,16 @@ export default function CategoriesPage() {
                                                             key={idx}
                                                             onClick={() => setFormData({ ...formData, coverImage: img })}
                                                             className={cn(
-                                                                "relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all",
-                                                                formData.coverImage === img ? "border-blue-600 ring-2 ring-blue-600/20" : "border-transparent opacity-60 hover:opacity-100"
+                                                                "group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all",
+                                                                formData.coverImage === img ? "border-blue-600 ring-4 ring-blue-600/10 scale-95" : "border-transparent opacity-70 hover:opacity-100 hover:scale-105"
                                                             )}
                                                         >
                                                             <Image src={img} alt="Library" fill className="object-cover" />
                                                             {formData.coverImage === img && (
-                                                                <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                                                                    <Check className="text-white" size={16} strokeWidth={3} />
+                                                                <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center">
+                                                                    <div className="bg-blue-600 rounded-full p-1 shadow-lg">
+                                                                        <Check className="text-white" size={12} strokeWidth={4} />
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                             <button
@@ -610,9 +631,10 @@ export default function CategoriesPage() {
                                                                         coverImage: formData.coverImage === img ? (updated?.[0] || "") : formData.coverImage
                                                                     });
                                                                 }}
-                                                                className="absolute top-1 right-1 p-1 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:scale-110 z-10"
+                                                                title="Remove Asset"
                                                             >
-                                                                <X size={8} />
+                                                                <X size={10} strokeWidth={3} />
                                                             </button>
                                                         </div>
                                                     ))}
@@ -651,9 +673,9 @@ export default function CategoriesPage() {
                             initial={{ opacity: 0, scale: 0.95, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden"
+                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden overscroll-contain"
                         >
-                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar overscroll-contain">
                                 <div className="flex justify-between items-center mb-10">
                                     <div>
                                         <h2 className="text-3xl font-black dark:text-white">Pillar Construction</h2>
@@ -772,14 +794,16 @@ export default function CategoriesPage() {
                                                             key={idx}
                                                             onClick={() => setPillarFormData({ ...pillarFormData, coverImage: img })}
                                                             className={cn(
-                                                                "relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all",
-                                                                pillarFormData.coverImage === img ? "border-purple-600 ring-2 ring-purple-600/20" : "border-transparent opacity-60 hover:opacity-100"
+                                                                "group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all",
+                                                                pillarFormData.coverImage === img ? "border-purple-600 ring-4 ring-purple-600/10 scale-95" : "border-transparent opacity-70 hover:opacity-100 hover:scale-105"
                                                             )}
                                                         >
                                                             <Image src={img} alt="Library" fill className="object-cover" />
                                                             {pillarFormData.coverImage === img && (
-                                                                <div className="absolute inset-0 bg-purple-600/20 flex items-center justify-center">
-                                                                    <Check className="text-white" size={16} strokeWidth={3} />
+                                                                <div className="absolute inset-0 bg-purple-600/10 flex items-center justify-center">
+                                                                    <div className="bg-purple-600 rounded-full p-1 shadow-lg">
+                                                                        <Check className="text-white" size={12} strokeWidth={4} />
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                             <button

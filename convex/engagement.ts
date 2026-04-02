@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 export const getEngagement = query({
   args: {
@@ -10,18 +11,18 @@ export const getEngagement = query({
     const reactions = await ctx.db
       .query("reactions")
       .withIndex("by_article_user", (q) => q.eq("articleId", args.articleId))
-      .collect();
+      .take(1000); // Safety cap
 
     const bookmarksCountList = await ctx.db
       .query("bookmarks")
       .filter((q) => q.eq(q.field("articleId"), args.articleId))
-      .collect();
+      .take(1000); // Safety cap
 
     const commentsCountList = await ctx.db
       .query("comments")
       .withIndex("by_articleId", (q) => q.eq("articleId", args.articleId))
       .filter((q) => q.eq(q.field("status"), "approved"))
-      .collect();
+      .take(1000); // Safety cap
 
     let userReaction = null;
     let isBookmarked = false;
@@ -163,6 +164,13 @@ export const addComment = mutation({
       createdAt: Date.now(),
     });
 
+    // Update globalStats
+    await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+      update: {
+        commentsCount: 1,
+      },
+    });
+
     // Notify Admin
     const article = await ctx.db.get(args.articleId);
     await ctx.db.insert("emailQueue", {
@@ -192,7 +200,7 @@ export const listComments = query({
       .withIndex("by_articleId", (q) => q.eq("articleId", args.articleId))
       .filter((q) => q.eq(q.field("status"), "approved"))
       .order("desc")
-      .collect();
+      .take(1000); // Safety cap
 
     return await Promise.all(
       comments.map(async (c) => {
@@ -209,7 +217,7 @@ export const listComments = query({
 export const listAllComments = query({
   args: {},
   handler: async (ctx) => {
-    const comments = await ctx.db.query("comments").order("desc").collect();
+    const comments = await ctx.db.query("comments").order("desc").take(100);
     return await Promise.all(
       comments.map(async (c) => {
         const user = await ctx.db.get(c.userId);
@@ -255,5 +263,12 @@ export const deleteComment = mutation({
   args: { id: v.id("comments") },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
+    
+    // Update globalStats
+    await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+      update: {
+        commentsCount: -1,
+      },
+    });
   },
 });
