@@ -686,6 +686,10 @@ export const update = mutation({
             args.status === "draft" ? 1 : existing.status === "draft" ? -1 : 0,
           scheduledArticles:
             args.status === "scheduled" ? 1 : existing.status === "scheduled" ? -1 : 0,
+          aiDraftCount:
+            existing.source === "ai"
+              ? (args.status === "draft" ? 1 : existing.status === "draft" ? -1 : 0)
+              : 0,
         },
       });
     }

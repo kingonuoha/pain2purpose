@@ -255,7 +255,23 @@ export const updateCommentStatus = mutation({
 
     if (user?.role !== "admin") throw new Error("Forbidden");
 
-    await ctx.db.patch(args.id, { status: args.status });
+    const existing = await ctx.db.get(args.id);
+    if (!existing) throw new Error("Comment not found");
+
+    if (existing.status !== args.status) {
+      await ctx.db.patch(args.id, { status: args.status });
+
+      // Update globalStats pending counter
+      let pendingUpdate = 0;
+      if (existing.status === "pending") pendingUpdate = -1;
+      if (args.status === "pending") pendingUpdate = 1;
+
+      if (pendingUpdate !== 0) {
+        await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+          update: { pendingCommentsCount: pendingUpdate }
+        });
+      }
+    }
   },
 });
 

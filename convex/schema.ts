@@ -28,6 +28,7 @@ export default defineSchema({
     confirmationToken: v.optional(v.string()),
     resetToken: v.optional(v.string()),
     resetTokenExpires: v.optional(v.float64()),
+    completedTours: v.optional(v.array(v.string())),
     createdAt: v.float64(),
   })
     .index("by_email", ["email"])

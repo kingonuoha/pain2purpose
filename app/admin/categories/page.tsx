@@ -21,10 +21,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Doc, Id } from "@/convex/_generated/dataModel";
-import { AnimatePresence, motion } from "framer-motion";
 import { fetchCategoryImages } from "@/app/actions/pexels";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useTour } from "@/hooks/use-tour";
 
 type CategoryWithCount = Doc<"categories"> & {
     articleCount: number;
@@ -48,6 +49,7 @@ export default function CategoriesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPillarModalOpen, setIsPillarModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [searchFilter, setSearchFilter] = useState<"name" | "category">("name");
 
     // Form states
     const [editingCategory, setEditingCategory] = useState<CategoryWithCount | null>(null);
@@ -77,6 +79,9 @@ export default function CategoriesPage() {
     const [pexelsPage, setPexelsPage] = useState(1);
     const [selectedInModal, setSelectedInModal] = useState<string[]>([]);
     const [activeImageTarget, setActiveImageTarget] = useState<"category" | "pillar" | null>(null);
+
+    // Initialize Tour
+    const { startTour } = useTour("admin-categories", true);
 
     // Prevent body scroll when any modal is open
     useEffect(() => {
@@ -256,18 +261,31 @@ export default function CategoriesPage() {
     const filteredCategories = (categories || []).filter(cat => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return true;
+        
+        if (searchFilter === "category") {
+            return cat.name.toLowerCase().includes(query) || cat.slug.toLowerCase().includes(query);
+        }
+
+        const matchingPillar = pillars?.some(p => p.categoryId === cat._id && p.name.toLowerCase().includes(query));
         return (
             cat.name.toLowerCase().includes(query) ||
             cat.slug.toLowerCase().includes(query) ||
-            (cat.description || "").toLowerCase().includes(query)
+            (cat.description || "").toLowerCase().includes(query) ||
+            matchingPillar
         );
     });
 
     const filteredPillars = (pillars || []).filter(p => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return true;
+        
         const category = categories?.find(c => c._id === p.categoryId);
         const categoryName = category?.name.toLowerCase() || "";
+
+        if (searchFilter === "category") {
+            return categoryName.includes(query);
+        }
+
         return (
             p.name.toLowerCase().includes(query) ||
             p.slug.toLowerCase().includes(query) ||
@@ -290,7 +308,7 @@ export default function CategoriesPage() {
     return (
         <div className="max-w-[1600px] mx-auto space-y-8 pb-20 px-4 sm:px-6 lg:px-8">
             {/* NEW: Sticky Header for quick access */}
-            <div className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 py-4 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 transition-all">
+            <div id="tour-categories-top" className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 py-4 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 transition-all">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
@@ -302,31 +320,50 @@ export default function CategoriesPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <div className="relative flex-1 sm:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search everything..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm transition-all focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 dark:text-white"
-                            />
+                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                        <button
+                            id="tour-categories-restart"
+                            onClick={startTour}
+                            className="mr-2 text-[10px] font-black uppercase tracking-widest text-blue-600 border border-blue-600/30 bg-blue-600/10 px-4 py-2 rounded-xl hover:bg-blue-600/20 transition-colors"
+                        >
+                            Restart Tour
+                        </button>
+                        <div id="tour-categories-search" className="relative flex items-center bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl transition-all focus-within:ring-2 focus-within:ring-blue-600/20 focus-within:border-blue-600 w-full sm:w-auto">
+                            <select 
+                                value={searchFilter}
+                                onChange={e => setSearchFilter(e.target.value as "name" | "category")}
+                                className="pl-4 pr-8 py-2 bg-transparent text-xs font-bold border-r border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 focus:outline-none appearance-none cursor-pointer"
+                            >
+                                <option value="name" className="dark:bg-zinc-900">Name</option>
+                                <option value="category" className="dark:bg-zinc-900">Category</option>
+                            </select>
+                            <div className="relative flex-1 sm:w-48">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder={searchFilter === "name" ? "Search by name..." : "Search by category..."}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 bg-transparent text-sm focus:outline-none dark:text-white"
+                                />
+                            </div>
                         </div>
-                        <button
-                            onClick={() => { resetForm(); setIsModalOpen(true); }}
-                            className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
-                            title="New Category"
-                        >
-                            <Plus size={20} />
-                        </button>
-                        <button
-                            onClick={() => { resetPillarForm(); setIsPillarModalOpen(true); }}
-                            className="p-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/20"
-                            title="New Pillar"
-                        >
-                            <Layers size={20} />
-                        </button>
+                        <div id="tour-categories-creation" className="flex items-center gap-2">
+                            <button
+                                onClick={() => { resetForm(); setIsModalOpen(true); }}
+                                className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                                title="New Category"
+                            >
+                                <Plus size={20} />
+                            </button>
+                            <button
+                                onClick={() => { resetPillarForm(); setIsPillarModalOpen(true); }}
+                                className="p-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/20"
+                                title="New Pillar"
+                            >
+                                <Layers size={20} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -366,7 +403,7 @@ export default function CategoriesPage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex items-center gap-1 bg-gray-50 dark:bg-white/5 p-1 rounded-2xl w-fit">
+            <div id="tour-categories-tabs" className="flex items-center gap-1 bg-gray-50 dark:bg-white/5 p-1 rounded-2xl w-fit">
                 <button
                     onClick={() => setActiveTab("categories")}
                     className={cn(
@@ -416,7 +453,7 @@ export default function CategoriesPage() {
                                     />
                                 ) : (
                                     <Image
-                                        src={`https://placehold.co/600x400/2563eb/white?text=${encodeURIComponent(cat.name)}`}
+                                        src={`https://placehold.co/600x400/2563eb/ffffff?text=${encodeURIComponent(cat.name)}`}
                                         alt={cat.name}
                                         fill
                                         className="object-cover opacity-60 group-hover:opacity-80 transition-all duration-700"
@@ -519,9 +556,9 @@ export default function CategoriesPage() {
                             initial={{ opacity: 0, scale: 0.95, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden overscroll-contain"
+                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden"
                         >
-                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar overscroll-contain">
+                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar pointer-events-auto" data-lenis-prevent="true">
                                 <div className="flex justify-between items-center mb-10">
                                     <div>
                                         <h2 className="text-3xl font-black dark:text-white">Category Setup</h2>
@@ -601,7 +638,7 @@ export default function CategoriesPage() {
                                         {/* Visual Library */}
                                         {formData.pexelsImages && formData.pexelsImages.length > 0 && (
                                             <div className="space-y-3">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Visual Library</label>
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Asset Gallery (Preselected Images)</label>
                                                 <div className="grid grid-cols-4 gap-3">
                                                     {formData.pexelsImages.map((img, idx) => (
                                                         <div 
@@ -673,9 +710,9 @@ export default function CategoriesPage() {
                             initial={{ opacity: 0, scale: 0.95, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden overscroll-contain"
+                            className="bg-white dark:bg-zinc-950 w-full max-w-xl rounded-[2.5rem] shadow-huge relative z-10 border border-white/10 flex flex-col max-h-[90vh] overflow-hidden"
                         >
-                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar overscroll-contain">
+                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar pointer-events-auto" data-lenis-prevent="true">
                                 <div className="flex justify-between items-center mb-10">
                                     <div>
                                         <h2 className="text-3xl font-black dark:text-white">Pillar Construction</h2>
@@ -772,10 +809,10 @@ export default function CategoriesPage() {
                                         ) : (
                                             <div className="relative aspect-video rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 flex items-center justify-center">
                                                 <Image 
-                                                    src={`https://placehold.co/600x400/0f172a/white?text=${encodeURIComponent(pillarFormData.name || "Pillar")}+Preview`}
+                                                    src={`https://placehold.co/600x400/2563eb/ffffff?text=${encodeURIComponent(pillarFormData.name || "Pillar")}`}
                                                     alt="Placeholder"
                                                     fill
-                                                    className="object-cover opacity-20 grayscale"
+                                                    className="object-cover opacity-60 grayscale transition-all"
                                                 />
                                                 <div className="relative z-10 flex flex-col items-center gap-2 text-gray-400">
                                                     <ImageIcon size={32} />
@@ -787,7 +824,7 @@ export default function CategoriesPage() {
                                         {/* Visual Library */}
                                         {pillarFormData.pexelsImages && pillarFormData.pexelsImages.length > 0 && (
                                             <div className="space-y-3">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Asset Gallery</label>
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Asset Gallery (Preselected Images)</label>
                                                 <div className="grid grid-cols-4 gap-3">
                                                     {pillarFormData.pexelsImages.map((img, idx) => (
                                                         <div 
@@ -936,7 +973,7 @@ export default function CategoriesPage() {
                             </AnimatePresence>
 
                             {/* Pexels Scrollable Grid */}
-                            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
+                            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar relative" data-lenis-prevent="true">
                                 {isSearchingPexels ? (
                                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                                         {Array.from({ length: 12 }).map((_, i) => (
