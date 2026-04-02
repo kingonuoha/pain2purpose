@@ -12,9 +12,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Doc } from "@/convex/_generated/dataModel";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
+import { JoinedArticle } from "./blog-grid";
 
 interface NavbarProps {
     solid?: boolean;
@@ -491,7 +491,7 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                     <p className="text-zinc-400 font-medium">No results found for &quot;{query}&quot;</p>
                                 )}
                                 <div className="grid grid-cols-1 gap-4">
-                                    {searchResults?.map((article: Doc<"articles">) => (
+                                    {searchResults?.map((article: JoinedArticle) => (
                                         <Link
                                             key={article._id}
                                             href={`/${article.slug}`}

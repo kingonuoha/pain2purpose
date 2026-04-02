@@ -59,7 +59,7 @@ export function RelatedArticles({ categoryId, excludeId, lean = false }: Related
                                 {article.title}
                             </h4>
                             <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                                {new Date(article.publishedAt || article._creationTime).toLocaleDateString(undefined, {
+                                {new Date(article.publishedAt || 0).toLocaleDateString(undefined, {
                                     month: 'long',
                                     day: 'numeric',
                                     year: 'numeric'

@@ -8,7 +8,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/empty-state";
 import { Metadata } from "next";
-import { Doc } from "@/convex/_generated/dataModel";
+import { JoinedArticle } from "@/components/blog-grid";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
@@ -43,11 +43,12 @@ export default async function PillarPage({
     }
 
     const typeFilter = type || undefined;
-    const articles = await fetchQuery(api.articles.list, { 
+    const listResult = await fetchQuery(api.articles.list, { 
         pillar: pillar.slug,
         type: typeFilter,
-        limit: 50
-    }) || [];
+        paginationOpts: { numItems: 50, cursor: null }
+    });
+    const articles = listResult?.page || [];
 
     const postTypes = [
         { label: "All Insights", value: "", icon: <Compass size={14} /> },
@@ -98,7 +99,7 @@ export default async function PillarPage({
 
                 {articles.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {articles.map((article: Doc<"articles"> & { authorName?: string, authorImage?: string, readingTime?: number }) => (
+                        {articles.map((article: JoinedArticle) => (
                             <ArticleCard key={article._id} article={article} />
                         ))}
                     </div>
@@ -124,7 +125,7 @@ export default async function PillarPage({
     );
 }
 
-function ArticleCard({ article }: { article: Doc<"articles"> & { authorName?: string, authorImage?: string, readingTime?: number } }) {
+function ArticleCard({ article }: { article: JoinedArticle }) {
     return (
         <Link 
             href={`/${article.slug}`}

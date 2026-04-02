@@ -583,7 +583,7 @@ function RawSignalStream({ search, type, days }: { search: string; type: "all" |
                 </div>
             )}
             
-            {paginationStatus === "LoadingMore" && (
+            {(paginationStatus as string) === "LoadingMore" && (
                 <div className="mt-12 flex justify-center pb-12">
                     <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-blue-500 animate-pulse">
                         <Loader2 className="animate-spin" size={16} />

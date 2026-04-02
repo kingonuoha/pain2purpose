@@ -67,7 +67,7 @@ export default async function Home() {
 
       {/* Hero Section */}
       <section id="hero">
-        <HeroCarousel initialArticles={featuredArticles} />
+        <HeroCarousel initialArticles={featuredArticles as JoinedArticle[]} />
       </section>
 
       {/* Methodology Section */}

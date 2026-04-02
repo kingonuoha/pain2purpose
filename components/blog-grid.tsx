@@ -5,28 +5,39 @@ import Image from "next/image";
 import { Calendar, ChevronDown, Eye, Search } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Id, Doc } from "../convex/_generated/dataModel";
+import { Id } from "../convex/_generated/dataModel";
 import { BlogSkeleton } from "./skeletons";
 import { getCloudinaryUrl, getAvatarUrl } from "@/lib/utils";
 import { EmptyState } from "./empty-state";
 
 interface BlogGridProps {
     categoryId?: Id<"categories">;
-    topic?: string;
     pillar?: string;
     type?: string;
 }
 
-export interface JoinedArticle extends Doc<"articles"> {
-    categoryName: string;
-    authorName: string;
+export type JoinedArticle = {
+    _id: Id<"articles">;
+    title: string;
+    slug: string;
+    excerpt?: string;
+    coverImage?: string;
+    publishedAt?: number;
+    createdAt?: number;
+    viewCount?: number;
+    categoryId?: Id<"categories">;
+    categoryName?: string;
+    authorName?: string;
     authorImage?: string;
-}
+    authorId?: string;
+    type?: string;
+    readingTime?: number;
+};
 
-export function BlogGrid({ categoryId, topic, pillar, type, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
+export function BlogGrid({ categoryId, pillar, type, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
     const { results, status, loadMore } = usePaginatedQuery(
         api.articles.list,
-        { categoryId, topic, pillar, type },
+        { categoryId, pillar, type },
         { initialNumItems: initialArticles?.length || 6 }
     );
 
@@ -96,13 +107,13 @@ export function BlogGrid({ categoryId, topic, pillar, type, initialArticles }: B
                             <Link href={`/author/${article.authorId}`} className="flex items-center gap-2 group/author">
                                 <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 relative">
                                     <Image
-                                        src={getAvatarUrl(article.authorName, article.authorImage)}
-                                        alt={article.authorName}
+                                        src={getAvatarUrl(article.authorName || "Author", article.authorImage)}
+                                        alt={article.authorName || "Author"}
                                         fill
                                         className="object-cover"
                                     />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-gray-100 group-hover/author:text-blue-600 transition-colors">{article.authorName}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-gray-100 group-hover/author:text-blue-600 transition-colors">{article.authorName || "Author"}</span>
                             </Link>
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1.5 text-gray-400">
@@ -112,7 +123,7 @@ export function BlogGrid({ categoryId, topic, pillar, type, initialArticles }: B
                                 <div className="flex items-center gap-1.5 text-gray-400">
                                     <Calendar size={12} />
                                     <span className="text-[10px] font-bold uppercase tracking-widest">
-                                        {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-US', {
+                                        {new Date(article.publishedAt || article.createdAt || 0).toLocaleDateString('en-US', {
                                             month: 'short',day: 'numeric'
                                         })}
                                     </span>
