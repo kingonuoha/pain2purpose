@@ -19,7 +19,7 @@ export default function AboutPage() {
                         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600 dark:text-blue-400 mb-4 block">The Mission</span>
                         <h1 className="text-5xl md:text-7xl font-serif font-bold mb-8 italic text-gray-900 dark:text-white">Learn the Truth.</h1>
                         <p className="text-gray-500 dark:text-gray-400 text-lg md:text-xl font-medium leading-relaxed">
-                            The Truth Pill is a place where we learn why people do what they do.
+                            The Pain2Purpose is a place where we learn why people do what they do.
                             We help you understand your own mind and the world around you in a simple way.
                         </p>
                     </motion.div>
@@ -77,3 +77,5 @@ function Feature({ icon, title, description }: { icon: React.ReactNode; title: s
         </div>
     );
 }
+
+

@@ -23,3 +23,5 @@ export const clearAuthRedirect = () => {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem("tp_auth_redirect");
 };
+
+

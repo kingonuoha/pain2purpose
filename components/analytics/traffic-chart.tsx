@@ -78,3 +78,5 @@ export function TrafficChart({ data, days, customTooltip }: TrafficChartProps) {
         </ResponsiveContainer>
     );
 }
+
+

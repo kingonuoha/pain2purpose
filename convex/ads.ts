@@ -69,3 +69,5 @@ export const updateAdsSettings = mutation({
     return { success: true };
   },
 });
+
+

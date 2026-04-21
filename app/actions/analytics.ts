@@ -68,3 +68,5 @@ export async function trackVisit(data: {
     console.error("Failed to track visit:", error);
   }
 }
+
+

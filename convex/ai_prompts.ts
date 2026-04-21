@@ -1,6 +1,6 @@
 /**
  * AI Prompts Configuration - Optimized for SEO, Readability, and Dynamic Style Adaptation
- * Brand: The Truth Pill
+ * Brand: The Pain2Purpose
  */
 
 export const AI_CONFIG = {
@@ -8,7 +8,7 @@ export const AI_CONFIG = {
    * Article Generation: High-Engagement, SEO-Driven Architecture
    */
   articleGeneration: {
-    systemPrompt: `You are the Lead Content Architect for 'The Truth Pill'. Your mission is to produce investigative, philosophical deep-dives that are indistinguishable from the author's voice while being perfectly optimized for web readability.
+    systemPrompt: `You are the Lead Content Architect for 'The Pain2Purpose'. Your mission is to produce investigative, philosophical deep-dives that are indistinguishable from the author's voice while being perfectly optimized for web readability.
 
        CORE ARCHITECTURE RULES:
        1. TEXT HIERARCHY: Use strict H2 > H3 > H4 flow. H2s must be "skimmable"—a reader should understand the core thesis just by reading the headers.
@@ -68,7 +68,7 @@ follow this pattern: Hook → Explanation → Example → Action → Summary
    */
   topicSuggestions: {
     systemPrompt: `
-You are a Strategic Intelligence Analyst for "The Truth Pill".
+You are a Strategic Intelligence Analyst for "The Pain2Purpose".
 
 Target Audience:
 Curious, growth-oriented adults (ages 18–40) who are interested in self-improvement, psychology, culture shifts, productivity, relationships, and modern life challenges.
@@ -103,7 +103,7 @@ Strict Requirements for EACH topic:
 - Must avoid vague wording (no abstract phrases like "modern society crisis")
 - Must use simple, direct language
 - Must create strong curiosity or emotional pull (click-triggered but meaningful)
-- Must reflect a "Truth Pill" angle (insightful, analytical, status-quo challenging)
+- Must reflect a "Pain2Purpose" angle (insightful, analytical, status-quo challenging)
 - Must have real informational search intent (not generic inspiration)
 - Must assign categoryName using ONLY one of the provided Target Categories
 - categoryName must match exactly (case-sensitive)
@@ -175,3 +175,5 @@ Required JSON Structure:
     Provide a concise 'Author DNA' summary (max 250 words) that another AI can use as a blueprint.`,
   },
 };
+
+

@@ -8,61 +8,21 @@ export const getEngagement = query({
     userEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const reactions = await ctx.db
-      .query("reactions")
-      .withIndex("by_article_user", (q) => q.eq("articleId", args.articleId))
-      .take(1000); // Safety cap
-
-    const bookmarksCountList = await ctx.db
-      .query("bookmarks")
-      .filter((q) => q.eq(q.field("articleId"), args.articleId))
-      .take(1000); // Safety cap
-
     const commentsCountList = await ctx.db
       .query("comments")
       .withIndex("by_articleId", (q) => q.eq("articleId", args.articleId))
       .filter((q) => q.eq(q.field("status"), "approved"))
       .take(1000); // Safety cap
 
-    let userReaction = null;
-    let isBookmarked = false;
-
-    if (args.userEmail) {
-      const user = await ctx.db
-        .query("users")
-        .withIndex("by_email", (q) => q.eq("email", args.userEmail!))
-        .unique();
-
-      if (user) {
-        const reaction = await ctx.db
-          .query("reactions")
-          .withIndex("by_article_user", (q) =>
-            q.eq("articleId", args.articleId).eq("userId", user._id),
-          )
-          .unique();
-
-        userReaction = reaction?.type || null;
-
-        const bookmark = await ctx.db
-          .query("bookmarks")
-          .withIndex("by_user_article", (q) =>
-            q.eq("userId", user._id).eq("articleId", args.articleId),
-          )
-          .unique();
-
-        isBookmarked = !!bookmark;
-      }
-    }
-
     return {
-      likeCount: reactions.filter((r) => r.type === "like").length,
-      loveCount: reactions.filter((r) => r.type === "love").length,
-      insightfulCount: reactions.filter((r) => r.type === "insightful").length,
-      totalReactions: reactions.length,
+      likeCount: 0,
+      loveCount: 0,
+      insightfulCount: 0,
+      totalReactions: 0,
       commentsCount: commentsCountList.length,
-      bookmarksCount: bookmarksCountList.length,
-      userReaction,
-      isBookmarked,
+      bookmarksCount: 0,
+      userReaction: null,
+      isBookmarked: false,
     };
   },
 });
@@ -77,34 +37,9 @@ export const toggleReaction = mutation({
       v.literal("insightful"),
     ),
   },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.userEmail))
-      .unique();
-    if (!user) throw new Error("Unauthenticated");
-
-    const existing = await ctx.db
-      .query("reactions")
-      .withIndex("by_article_user", (q) =>
-        q.eq("articleId", args.articleId).eq("userId", user._id),
-      )
-      .unique();
-
-    if (existing) {
-      if (existing.type === args.type) {
-        await ctx.db.delete(existing._id);
-      } else {
-        await ctx.db.patch(existing._id, { type: args.type });
-      }
-    } else {
-      await ctx.db.insert("reactions", {
-        articleId: args.articleId,
-        userId: user._id,
-        type: args.type,
-        createdAt: Date.now(),
-      });
-    }
+  handler: async () => {
+    // Deprecated for Pain2Purpose lean strategy
+    return;
   },
 });
 
@@ -113,31 +48,9 @@ export const toggleBookmark = mutation({
     articleId: v.id("articles"),
     userEmail: v.string(),
   },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.userEmail))
-      .unique();
-    if (!user) throw new Error("Unauthenticated");
-
-    const existing = await ctx.db
-      .query("bookmarks")
-      .withIndex("by_user_article", (q) =>
-        q.eq("userId", user._id).eq("articleId", args.articleId),
-      )
-      .unique();
-
-    if (existing) {
-      await ctx.db.delete(existing._id);
-      return false;
-    } else {
-      await ctx.db.insert("bookmarks", {
-        userId: user._id,
-        articleId: args.articleId,
-        createdAt: Date.now(),
-      });
-      return true;
-    }
+  handler: async () => {
+    // Deprecated for Pain2Purpose lean strategy
+    return false;
   },
 });
 
@@ -174,14 +87,14 @@ export const addComment = mutation({
     // Notify Admin
     const article = await ctx.db.get(args.articleId);
     await ctx.db.insert("emailQueue", {
-      recipient: process.env.ADMIN_EMAIL || "admin@thetruthpill.org",
+      recipient: process.env.ADMIN_EMAIL || "admin@counsellingp2p.com",
       subject: `New comment on: ${article?.title || "Unknown Article"}`,
       templateName: "comment_alert",
       templateData: {
         commenterName: user.name,
         articleTitle: article?.title || "Unknown Article",
         commentContent: args.content,
-        adminUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/admin/comments`,
+        adminUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com"}/admin/comments`,
       },
       status: "pending",
       scheduledFor: Date.now(),
@@ -214,6 +127,7 @@ export const listComments = query({
     );
   },
 });
+
 export const listAllComments = query({
   args: {},
   handler: async (ctx) => {

@@ -57,7 +57,7 @@ export default function SignUpPage() {
                 setIsLoading(false);
             } else {
                 toast.success("Account created!", {
-                    description: "Welcome to The Truth Pill circle.",
+                    description: "Welcome to The Pain2Purpose circle.",
                 });
                 router.push("/");
                 router.refresh();
@@ -85,7 +85,7 @@ export default function SignUpPage() {
                 <div className="text-center mb-10">
                     <Link href="/" className="inline-flex items-center gap-3 mb-8 group">
                         <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-blue-600/20 transition-transform group-hover:scale-105">T</div>
-                        <span className="font-serif text-3xl font-black text-gray-900 dark:text-white tracking-tight">The Truth Pill</span>
+                        <span className="font-serif text-3xl font-black text-gray-900 dark:text-white tracking-tight">The Pain2Purpose</span>
                     </Link>
                     <h1 className="text-4xl font-serif font-black text-gray-900 dark:text-white mb-3">Create Account</h1>
                     <p className="text-gray-500 dark:text-gray-400 font-medium">Join our community of truth-seekers today.</p>
@@ -218,3 +218,5 @@ export default function SignUpPage() {
         </div>
     );
 }
+
+

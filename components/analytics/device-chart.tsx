@@ -35,3 +35,5 @@ export function DeviceChart({ data, colors }: DeviceChartProps) {
         </ResponsiveContainer>
     );
 }
+
+

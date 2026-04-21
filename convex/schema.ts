@@ -122,26 +122,6 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_parentId", ["parentId"]),
 
-  reactions: defineTable({
-    articleId: v.id("articles"),
-    userId: v.id("users"),
-    type: v.union(
-      v.literal("like"),
-      v.literal("love"),
-      v.literal("insightful"),
-    ),
-    createdAt: v.float64(),
-  })
-    .index("by_articleId", ["articleId"])
-    .index("by_userId", ["userId"])
-    .index("by_article_user", ["articleId", "userId"])
-    .index("by_createdAt", ["createdAt"]),
-
-  bookmarks: defineTable({
-    articleId: v.id("articles"),
-    userId: v.id("users"),
-    createdAt: v.float64(),
-  }).index("by_user_article", ["userId", "articleId"]),
 
   pageVisits: defineTable({
     visitorId: v.string(), // tracking code
@@ -278,4 +258,34 @@ export default defineSchema({
   })
     .index("by_slug", ["slug"])
     .index("by_categoryId", ["categoryId"]),
+
+  // ─── PAIN2PURPOSE NEW TABLES ───────────────────────────────────────────────
+
+  services: defineTable({
+    title: v.string(),
+    slug: v.string(),
+    shortDescription: v.string(),
+    fullDescription: v.string(), // rich text / HTML
+    icon: v.string(), // lucide icon name
+    coverImage: v.optional(v.string()), // Cloudinary URL
+    order: v.number(), // display order
+    isActive: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_order", ["order"]),
+
+  contactSubmissions: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    serviceInterest: v.optional(v.string()), // service slug or name
+    message: v.string(),
+    status: v.union(v.literal("new"), v.literal("read"), v.literal("responded")),
+    createdAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_createdAt", ["createdAt"]),
 });
+
+

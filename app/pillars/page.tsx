@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import { EmptyState } from "@/components/empty-state";
 
 export const metadata: Metadata = {
-    title: "Research Pillars | The Truth Pill",
+    title: "Research Pillars | The Pain2Purpose",
     description: "Explore our core research pillars, each representing a primary dimension of human behavior and psychological reality.",
 };
 
@@ -112,3 +112,5 @@ export default async function PillarsPage() {
         </main>
     );
 }
+
+

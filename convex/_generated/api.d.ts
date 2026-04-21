@@ -17,6 +17,7 @@ import type * as analytics from "../analytics.js";
 import type * as analytics_cleanup from "../analytics_cleanup.js";
 import type * as articles from "../articles.js";
 import type * as categories from "../categories.js";
+import type * as contact from "../contact.js";
 import type * as crons from "../crons.js";
 import type * as email_actions from "../email_actions.js";
 import type * as emails from "../emails.js";
@@ -26,6 +27,7 @@ import type * as otp from "../otp.js";
 import type * as pillars from "../pillars.js";
 import type * as quotes from "../quotes.js";
 import type * as seed from "../seed.js";
+import type * as services from "../services.js";
 import type * as site_settings from "../site_settings.js";
 import type * as stats from "../stats.js";
 import type * as users from "../users.js";
@@ -46,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   analytics_cleanup: typeof analytics_cleanup;
   articles: typeof articles;
   categories: typeof categories;
+  contact: typeof contact;
   crons: typeof crons;
   email_actions: typeof email_actions;
   emails: typeof emails;
@@ -55,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   pillars: typeof pillars;
   quotes: typeof quotes;
   seed: typeof seed;
+  services: typeof services;
   site_settings: typeof site_settings;
   stats: typeof stats;
   users: typeof users;
@@ -87,3 +91,5 @@ export declare const internal: FilterApi<
 >;
 
 export declare const components: {};
+
+

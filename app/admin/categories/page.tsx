@@ -1051,3 +1051,5 @@ export default function CategoriesPage() {
         </div>
     );
 }
+
+

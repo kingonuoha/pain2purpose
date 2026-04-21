@@ -14,13 +14,13 @@ import { JoinedArticle } from "@/components/blog-grid";
 export const revalidate = 60; // ISR: Revalidate every 60 seconds
 
 export const metadata: Metadata = {
-  title: "The Truth Pill | Learning Why People Do What They Do",
+  title: "The Pain2Purpose | Learning Why People Do What They Do",
   description: "Join 50,000+ people who want to understand life and human behavior better.",
   openGraph: {
-    title: "The Truth Pill | Simple Insights into Human Nature",
+    title: "The Pain2Purpose | Simple Insights into Human Nature",
     description: "Easy-to-read articles that help you understand yourself and others better.",
-    url: "https://thetruthpill.org",
-    siteName: "The Truth Pill",
+    url: "https://thePain2Purpose.org",
+    siteName: "The Pain2Purpose",
     images: [
       {
         url: "/the-truth-pill-og.jpg",
@@ -39,20 +39,20 @@ export default async function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "The Truth Pill",
-    "url": "https://thetruthpill.org",
+    "name": "The Pain2Purpose",
+    "url": "https://thePain2Purpose.org",
     "description": "Unfiltered insight into human behavior and psychology.",
     "publisher": {
       "@type": "Organization",
-      "name": "The Truth Pill",
+      "name": "The Pain2Purpose",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://thetruthpill.org/truthpill/logo-text-hor-dark.png",
+        "url": "https://thePain2Purpose.org/Pain2Purpose/logo-text-hor-dark.png",
       },
     },
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://thetruthpill.org/search?q={search_term_string}",
+      "target": "https://thePain2Purpose.org/search?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
   };
@@ -121,3 +121,5 @@ export default async function Home() {
     </main>
   );
 }
+
+

@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/navbar";
 
 export const metadata = {
-    title: "Privacy Policy | The Truth Pill",
+    title: "Privacy Policy | The Pain2Purpose",
     description: "Our commitment to protecting your data and privacy."
 };
 
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
                     <section className="mt-12">
                         <h2 className="text-2xl font-bold text-zinc-900 mb-4">4. Contact Us</h2>
                         <p>
-                            If you have any questions about this Privacy Policy, please contact us at privacy@thetruthpill.org.
+                            If you have any questions about this Privacy Policy, please contact us at privacy@thePain2Purpose.org.
                         </p>
                     </section>
                 </div>
@@ -53,3 +53,5 @@ export default function PrivacyPolicyPage() {
         </main>
     );
 }
+
+
