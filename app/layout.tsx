@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Lora, Outfit } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "./providers";
 import { AnalyticsTracker } from "@/components/analytics-tracker";
@@ -7,59 +7,52 @@ import { AuthRedirect } from "@/components/auth-redirect";
 import { FooterWrapper } from "@/components/footer-wrapper";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
-import { AdSenseScript } from "@/components/adsense-script";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { ThemeShortcut } from "@/components/theme-shortcut";
-import { GTMHead, GTMBody } from "@/components/google-tag-manager";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
-const lora = Lora({
-  variable: "--font-lora",
-  subsets: ["latin"],
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://thetruthpill.org'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://counsellingp2p.com'),
   title: {
-    default: "The Truth Pill | Insight into Human Behavior",
-    template: "%s | The Truth Pill"
+    default: "Pain2Purpose | From Pain to Purpose Counselling Practice",
+    template: "%s | Pain2Purpose"
   },
-  description: "A psychology-focused content platform for living a full life and understanding human behavior.",
+  description: "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through grief, loss, and family challenges.",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://thetruthpill.org",
-    siteName: "The Truth Pill",
-    title: "The Truth Pill | Insight into Human Behavior",
-    description: "A psychology-focused content platform for living a full life and understanding human behavior.",
+    url: "https://counsellingp2p.com",
+    siteName: "Pain2Purpose",
+    title: "Pain2Purpose | From Pain to Purpose Counselling Practice",
+    description: "Therapeutic counselling support for healing, growth, and finding meaning.",
     images: [
       {
-        url: "/truthpill/logo-icon.png",
+        url: "/p2p-og-image.png",
         width: 1200,
         height: 630,
-        alt: "The Truth Pill - Insight into Human Behavior",
+        alt: "Pain2Purpose Counselling Practice",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Truth Pill | Insight into Human Behavior",
-    description: "A psychology-focused content platform for living a full life and understanding human behavior.",
-    images: ["/truthpill/logo-icon.png"],
+    title: "Pain2Purpose | From Pain to Purpose Counselling Practice",
+    description: "Therapeutic counselling support for healing, growth, and finding meaning.",
+    images: ["/p2p-og-image.png"],
   },
   icons: {
-    icon: "/truthpill/logo-icon-svg.ico",
-    shortcut: "/truthpill/logo-icon-svg.svg",
-    apple: "/truthpill/logo-icon.png",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   }
 };
 
@@ -71,16 +64,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${lora.variable} ${outfit.variable} antialiased font-sans bg-background`}
+        className={`${dmSans.variable} ${playfair.variable} antialiased font-sans bg-background`}
       >
-        <GTMBody />
-        <GTMHead />
         <ConvexClientProvider>
           <SmoothScroll>
             <Suspense fallback={null}>
               <AnalyticsTracker />
               <AuthRedirect />
-              <AdSenseScript />
               <Toaster position="top-right" richColors />
               <ThemeShortcut />
             </Suspense>
