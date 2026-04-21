@@ -271,7 +271,7 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
                     {/* Left Sidebar - Engagement */}
                     <aside className="hidden lg:block w-20 relative">
                         <div className="sticky top-32">
-                            <EngagementToolbar articleId={article._id} slug={article.slug} vertical={true} />
+                            <EngagementToolbar slug={article.slug} vertical={true} />
                         </div>
                     </aside>
 
@@ -341,7 +341,7 @@ export function ArticleContent({ initialArticle, slug }: { initialArticle: Artic
 
                         {/* Mobile/Tablet Engagement Bar */}
                         <div className="lg:hidden mt-16 mb-8">
-                            <EngagementToolbar articleId={article._id} slug={article.slug} />
+                            <EngagementToolbar slug={article.slug} />
                         </div>
 
                         {/* Newsletter Subscription */}

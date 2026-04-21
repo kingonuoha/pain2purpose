@@ -49,7 +49,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Electronic Mail</p>
-                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">connect@thetruthpill.org</p>
+                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">connect@thePain2Purpose.org</p>
                                     </div>
                                 </div>
 
@@ -59,7 +59,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Encoded Frequency</p>
-                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">@truthpill_hq</p>
+                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">@Pain2Purpose_hq</p>
                                     </div>
                                 </div>
                             </div>
@@ -125,3 +125,5 @@ export default function ContactPage() {
         </div>
     );
 }
+
+

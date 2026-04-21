@@ -21,19 +21,23 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://counsellingp2p.com'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com",
+  ),
   title: {
     default: "Pain2Purpose | From Pain to Purpose Counselling Practice",
-    template: "%s | Pain2Purpose"
+    template: "%s | Pain2Purpose",
   },
-  description: "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through grief, loss, and family challenges.",
+  description:
+    "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through grief, loss, and family challenges.",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://counsellingp2p.com",
     siteName: "Pain2Purpose",
     title: "Pain2Purpose | From Pain to Purpose Counselling Practice",
-    description: "Therapeutic counselling support for healing, growth, and finding meaning.",
+    description:
+      "Therapeutic counselling support for healing, growth, and finding meaning.",
     images: [
       {
         url: "/p2p-og-image.png",
@@ -46,14 +50,15 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Pain2Purpose | From Pain to Purpose Counselling Practice",
-    description: "Therapeutic counselling support for healing, growth, and finding meaning.",
+    description:
+      "Therapeutic counselling support for healing, growth, and finding meaning.",
     images: ["/p2p-og-image.png"],
   },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
-  }
+  },
 };
 
 export default function RootLayout({
@@ -82,3 +87,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+

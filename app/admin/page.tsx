@@ -84,7 +84,7 @@ export default function AdminDashboard() {
                             </h1>
                         </div>
                         <p className="text-zinc-500 dark:text-zinc-400 font-sans max-w-lg text-sm leading-relaxed">
-                            Command & Control center for <span className="text-zinc-900 dark:text-white font-bold underline decoration-blue-500/30 underline-offset-4">The Truth Pill</span>.
+                            Command & Control center for <span className="text-zinc-900 dark:text-white font-bold underline decoration-blue-500/30 underline-offset-4">The Pain2Purpose</span>.
                             Greetings, <span className="text-blue-600 dark:text-blue-400 font-black tracking-tight">{session?.user?.name || 'Administrator'}</span>.
                         </p>
                     </div>
@@ -403,3 +403,5 @@ function ActivityItem({ item, index }: { item: { type: string; content: string; 
         </motion.div>
     );
 }
+
+

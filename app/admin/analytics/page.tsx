@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isSignalModalOpen, setIsSignalModalOpen] = useState(false);
     const [signalSearch, setSignalSearch] = useState("");
-    const [signalType, setSignalType] = useState<"all" | "visit" | "article" | "reaction">("all");
+    const [signalType, setSignalType] = useState<"all" | "visit" | "article">("all");
     const [signalDateRange, setSignalDateRange] = useState(7);
 
 
@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
                 <div>
                     <h1 className="text-4xl font-serif font-black text-gray-950 dark:text-white tracking-tight italic transition-colors">Signals</h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium font-sans flex items-center gap-2">
-                        Real-time intelligence from <span className="text-blue-600 dark:text-blue-500 font-bold">The Truth Pill</span> network.
+                        Real-time intelligence from <span className="text-blue-600 dark:text-blue-500 font-bold">The Pain2Purpose</span> network.
                     </p>
                 </div>
 
@@ -432,12 +432,11 @@ export default function AnalyticsPage() {
                                             {[
                                                 { id: 'all', label: 'All Signals' },
                                                 { id: 'visit', label: 'Page Visits' },
-                                                { id: 'article', label: 'Article Views' },
-                                                { id: 'reaction', label: 'Reactions' }
+                                                { id: 'article', label: 'Article Views' }
                                             ].map((t) => (
                                                 <button
                                                     key={t.id}
-                                                    onClick={() => setSignalType(t.id as "all" | "visit" | "article" | "reaction")}
+                                                    onClick={() => setSignalType(t.id as "all" | "visit" | "article")}
                                                     className={cn(
                                                         "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                                                         signalType === t.id 
@@ -486,7 +485,7 @@ export default function AnalyticsPage() {
     );
 }
 
-function RawSignalStream({ search, type, days }: { search: string; type: "all" | "visit" | "article" | "reaction"; days: number }) {
+function RawSignalStream({ search, type, days }: { search: string; type: "all" | "visit" | "article"; days: number }) {
     const { results: rawVisits, status: paginationStatus, loadMore, isLoading } = usePaginatedQuery(
         api.analytics.getRawVisits,
         { search, type, days },
@@ -634,3 +633,5 @@ function StatCard({ label, value, icon: Icon, trend, color }: { label: string, v
         </div>
     );
 }
+
+

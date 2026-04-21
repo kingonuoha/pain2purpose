@@ -71,3 +71,5 @@ export function ReferrerChart({ data }: ReferrerChartProps) {
         </ResponsiveContainer>
     );
 }
+
+

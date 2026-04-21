@@ -57,7 +57,7 @@ function UnsubscribeContent() {
                         </div>
                     </div>
 
-                    <h1 className="text-2xl font-bold text-white mb-2">The Truth Pill</h1>
+                    <h1 className="text-2xl font-bold text-white mb-2">The Pain2Purpose</h1>
 
                     <div className="py-8">
                         {status === "loading" && (
@@ -133,3 +133,5 @@ export default function UnsubscribePage() {
         </Suspense>
     );
 }
+
+

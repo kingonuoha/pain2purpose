@@ -8,7 +8,7 @@ export default function TermsPage() {
         {
             icon: Scale,
             title: "Intellectual Sovereignty",
-            content: "All content produced by The Truth Pill, whether human or AI-assisted, is the property of the network. We grant you a limited frequency license to consume and reflect upon these truths for personal evolution."
+            content: "All content produced by The Pain2Purpose, whether human or AI-assisted, is the property of the network. We grant you a limited frequency license to consume and reflect upon these truths for personal evolution."
         },
         {
             icon: Shield,
@@ -82,3 +82,5 @@ export default function TermsPage() {
         </div>
     );
 }
+
+

@@ -263,11 +263,6 @@ export const getTopContent = query({
 
     const stats = await Promise.all(
       articles.map(async (a) => {
-        const reactions = await ctx.db
-          .query("reactions")
-          .withIndex("by_article_user", (q) => q.eq("articleId", a._id))
-          .collect();
-
         const avgReadTime =
           a.actualReadingTime && a.uniqueViewCount > 0
             ? Math.round(a.actualReadingTime / a.uniqueViewCount)
@@ -278,12 +273,9 @@ export const getTopContent = query({
           title: a.title,
           views: a.viewCount,
           uniqueViews: a.uniqueViewCount,
-          reactions: reactions.length,
+          reactions: 0,
           avgReadTime, // in seconds
-          engagementRate:
-            a.uniqueViewCount > 0
-              ? (reactions.length / a.uniqueViewCount) * 100
-              : 0,
+          engagementRate: 0,
         };
       }),
     );
@@ -348,55 +340,13 @@ export const getRawVisits = query({
     args: {
         paginationOpts: paginationOptsValidator,
         search: v.optional(v.string()),
-        type: v.optional(v.union(v.literal("all"), v.literal("visit"), v.literal("article"), v.literal("reaction"))),
+        type: v.optional(v.union(v.literal("all"), v.literal("visit"), v.literal("article"))),
         days: v.optional(v.number())
     },
     handler: async (ctx, args) => {
         const days = args.days || 30;
         const type = args.type || "all";
         const startTime = Date.now() - days * 24 * 60 * 60 * 1000;
-
-        if (type === "reaction") {
-            const q = ctx.db.query("reactions").withIndex("by_createdAt", (q) => q.gt("createdAt", startTime)).order("desc");
-            
-            let result;
-            try {
-                result = await q.paginate(args.paginationOpts);
-            } catch (error) {
-                // If cursor is invalid (e.g. from a different query type), reset to first page
-                if (args.paginationOpts.cursor) {
-                    result = await q.paginate({ ...args.paginationOpts, cursor: null });
-                } else {
-                    throw error;
-                }
-            }
-
-            const page = await Promise.all(result.page.map(async (r) => {
-                const article = await ctx.db.get(r.articleId);
-                const user = await ctx.db.get(r.userId);
-                return {
-                    _id: r._id,
-                    timestamp: r.createdAt,
-                    type: "reaction",
-                    url: article?.title ? `Reaction: ${r.type} on "${article.title}"` : `Reaction: ${r.type}`,
-                    visitorId: user?.email || "User " + r.userId.substring(0, 8),
-                    ipAddress: "---",
-                    geoLocation: { country: "N/A", city: "N/A" },
-                    device: "user",
-                    browser: "---",
-                    os: "---"
-                };
-            }));
-
-            // Filter by search if provided (manual for reactions)
-            if (args.search) {
-                const s = args.search.toLowerCase();
-                const filteredPage = page.filter(p => p.url.toLowerCase().includes(s) || p.visitorId.toLowerCase().includes(s));
-                return { ...result, page: filteredPage };
-            }
-
-            return { ...result, page };
-        }
 
         // Default to pageVisits for visits, articles, and all
         const q = ctx.db.query("pageVisits").withIndex("by_timestamp", (q) => q.gt("timestamp", startTime)).order("desc");

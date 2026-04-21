@@ -58,3 +58,5 @@ export type Id<TableName extends TableNames | SystemTableNames> =
  * `mutationGeneric` to make them type-safe.
  */
 export type DataModel = DataModelFromSchemaDefinition<typeof schema>;
+
+

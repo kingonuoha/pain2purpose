@@ -152,25 +152,12 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                 </button>
 
                 <Link href="/" className="flex items-center gap-2.5 group">
-                    <div className="relative h-9 w-40">
+                    <div className="relative h-10 w-40">
                         <Image
-                            src="/truthpill/logo-text-hor-dark.png"
-                            alt="The Truth Pill"
+                            src="/p2p/logo.png" 
+                            alt="Pain2Purpose"
                             fill
-                            className={cn(
-                                "object-contain transition-all",
-                                isScrolled ? "block dark:hidden" : "hidden"
-                            )}
-                            priority
-                        />
-                        <Image
-                            src="/truthpill/logo-text-hor-light.png"
-                            alt="The Truth Pill"
-                            fill
-                            className={cn(
-                                "object-contain transition-all",
-                                isScrolled ? "hidden dark:block" : "block"
-                            )}
+                            className="object-contain"
                             priority
                         />
                     </div>
@@ -186,17 +173,17 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                         <div key={link.label} className="relative group/nav">
                             <Link 
                                 href={link.href} 
-                                className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-4"
+                                className="flex items-center gap-1 hover:text-p2p-sage transition-colors py-4"
                             >
                                 {link.label}
                                 <ChevronDown size={14} className="group-hover/nav:rotate-180 transition-transform" />
                             </Link>
-                            <div className="absolute top-full left-0 w-64 bg-white dark:bg-gray-950 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-800 opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-300 transform translate-y-2 group-hover/nav:translate-y-0 p-2 z-[70]">
+                            <div className="absolute top-full left-0 w-64 bg-white shadow-2xl rounded-2xl border border-gray-100 opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-300 transform translate-y-2 group-hover/nav:translate-y-0 p-2 z-[70]">
                                 {link.dropdown?.map((sub: { label: string; href: string }) => (
                                     <Link
                                         key={sub.label}
                                         href={sub.href}
-                                        className="block px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all"
+                                        className="block px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-p2p-sage hover:bg-gray-50 transition-all"
                                     >
                                         {sub.label}
                                     </Link>
@@ -207,7 +194,7 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                         <Link 
                             key={link.label} 
                             href={link.href} 
-                            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            className="hover:text-p2p-sage transition-colors"
                         >
                             {link.label}
                         </Link>
@@ -321,7 +308,7 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                             className={cn(
                                 "flex items-center gap-2 px-5 py-2 rounded-full font-semibold text-xs transition-all shadow-sm active:scale-95",
                                 isScrolled
-                                    ? "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/20"
+                                    ? "bg-p2p-sage text-white hover:bg-p2p-sage/90 hover:shadow-lg hover:shadow-p2p-sage/20"
                                     : "bg-white text-gray-900 hover:bg-gray-100"
                             )}
                         >
@@ -354,14 +341,14 @@ function NavbarContent({ isScrolled }: { isScrolled: boolean }) {
                                     <div className="flex items-center gap-3">
                                         <div className="relative h-8 w-32">
                                             <Image
-                                                src="/truthpill/logo-text-hor-dark.png"
-                                                alt="The Truth Pill"
+                                                src="/Pain2Purpose/logo-text-hor-dark.png"
+                                                alt="The Pain2Purpose"
                                                 fill
                                                 className="object-contain dark:hidden"
                                             />
                                             <Image
-                                                src="/truthpill/logo-text-hor-light.png"
-                                                alt="The Truth Pill"
+                                                src="/Pain2Purpose/logo-text-hor-light.png"
+                                                alt="The Pain2Purpose"
                                                 fill
                                                 className="object-contain hidden dark:block"
                                             />
@@ -605,3 +592,5 @@ function ThemeToggle({ isScrolled }: { isScrolled: boolean }) {
 }
 
 export default Navbar;
+
+

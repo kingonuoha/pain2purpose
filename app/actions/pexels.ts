@@ -9,3 +9,5 @@ export async function fetchCategoryImage(categoryName: string) {
 export async function fetchCategoryImages(categoryName: string, limit: number = 5, page: number = 1) {
   return await getDynamicImages(categoryName, limit, page);
 }
+
+

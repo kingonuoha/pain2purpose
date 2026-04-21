@@ -10,7 +10,7 @@ import { CategoryShowcase } from "@/components/category-showcase";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Insights & Articles | The Truth Pill",
+  title: "Insights & Articles | The Pain2Purpose",
   description: "Explore our full archive of insights into human behavior and psychology.",
 };
 
@@ -63,3 +63,5 @@ export default async function ArticlesPage() {
     </main>
   );
 }
+
+

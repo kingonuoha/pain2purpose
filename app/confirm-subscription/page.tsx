@@ -57,7 +57,7 @@ function ConfirmSubscriptionContent() {
                         </div>
                     </div>
 
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-sky-400 to-white bg-clip-text text-transparent mb-2">The Truth Pill</h1>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-sky-400 to-white bg-clip-text text-transparent mb-2">The Pain2Purpose</h1>
 
                     <div className="py-6">
                         {status === "loading" && (
@@ -77,7 +77,7 @@ function ConfirmSubscriptionContent() {
                                     Your subscription is confirmed. Prepare yourself for deep truths and psychological insights delivered to your inbox every Monday.
                                 </p>
                                 <Button asChild size="lg" className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold tracking-wide shadow-lg shadow-sky-500/20">
-                                    <Link href="/">Enter The Truth Pill</Link>
+                                    <Link href="/">Enter The Pain2Purpose</Link>
                                 </Button>
                             </div>
                         )}
@@ -125,3 +125,5 @@ export default function ConfirmSubscriptionPage() {
         </Suspense>
     );
 }
+
+

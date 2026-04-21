@@ -99,7 +99,7 @@ export function DynamicCategoryImage({
                         {categoryName}
                     </span>
                     <div className="mt-2 text-[8px] font-black uppercase tracking-[0.4em] text-blue-400 opacity-60">
-                        The Truth Pill
+                        The Pain2Purpose
                     </div>
                 </div>
             )}
@@ -114,3 +114,5 @@ export function DynamicCategoryImage({
         </div>
     );
 }
+
+

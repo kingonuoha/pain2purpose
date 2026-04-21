@@ -88,7 +88,7 @@ const NavContent = ({
                 <Link href="/" className="flex items-center gap-3 group">
                     {isCollapsed ? (
                         <Image
-                            src="/truthpill/logo-icon.png"
+                            src="/Pain2Purpose/logo-icon.png"
                             alt="Logo"
                             width={40}
                             height={40}
@@ -98,15 +98,15 @@ const NavContent = ({
                         <div className="flex flex-col">
                             <div className="relative h-10 w-full min-w-[160px]">
                                 <Image
-                                    src="/truthpill/logo-text-hor-dark.png"
-                                    alt="The Truth Pill"
+                                    src="/Pain2Purpose/logo-text-hor-dark.png"
+                                    alt="The Pain2Purpose"
                                     fill
                                     className="object-contain hidden dark:block"
                                     priority
                                 />
                                 <Image
-                                    src="/truthpill/logo-text-hor-light.png"
-                                    alt="The Truth Pill"
+                                    src="/Pain2Purpose/logo-text-hor-light.png"
+                                    alt="The Pain2Purpose"
                                     fill
                                     className="object-contain dark:hidden "
                                     priority
@@ -234,14 +234,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link href="/" className="flex items-center gap-2">
                     <div className="relative h-8 w-32">
                         <Image
-                            src="/truthpill/logo-text-hor-dark.png"
-                            alt="The Truth Pill"
+                            src="/Pain2Purpose/logo-text-hor-dark.png"
+                            alt="The Pain2Purpose"
                             fill
                             className="object-contain dark:hidden"
                         />
                         <Image
-                            src="/truthpill/logo-text-hor-light.png"
-                            alt="The Truth Pill"
+                            src="/Pain2Purpose/logo-text-hor-light.png"
+                            alt="The Pain2Purpose"
                             fill
                             className="object-contain hidden dark:block"
                         />
@@ -301,3 +301,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
     );
 }
+
+

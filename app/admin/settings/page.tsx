@@ -222,7 +222,7 @@ export default function SettingsPage() {
                                         value={form.email}
                                         onChange={e => setForm({ ...form, email: e.target.value })}
                                         className={cn(inputClasses, "pl-12")}
-                                        placeholder="admin@thetruthpill.org"
+                                        placeholder="admin@thePain2Purpose.org"
                                     />
                                 </div>
                             </div>
@@ -311,3 +311,5 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+

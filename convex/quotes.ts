@@ -35,3 +35,5 @@ export const listAll = query({
     return await ctx.db.query("quotes").order("desc").collect();
   },
 });
+
+

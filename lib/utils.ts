@@ -41,7 +41,7 @@ export function getAvatarUrl(name?: string, image?: string) {
 
 export function getOgImageUrl(title: string) {
   const cloudName = "dsqs5h1r3";
-  // The Truth Pill gradient: Sky Blue (#0ea5e9) to purple (#a855f7)
+  // The Pain2Purpose gradient: Sky Blue (#0ea5e9) to purple (#a855f7)
   const encodedTitle = encodeURIComponent(
     title.replace(/,/g, "%2C").replace(/\//g, "%2F"),
   );
@@ -78,3 +78,5 @@ export function slugify(text: string) {
     .replace(/^-+/, '')         // Trim - from start of text
     .replace(/-+$/, '');        // Trim - from end of text
 }
+
+

@@ -36,3 +36,5 @@ export function AdSlot({ position, className }: AdSlotProps) {
         </div>
     );
 }
+
+

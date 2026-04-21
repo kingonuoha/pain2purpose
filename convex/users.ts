@@ -39,12 +39,12 @@ export const register = mutation({
     // Queue Welcome Email
     await ctx.db.insert("emailQueue", {
       recipient: args.email,
-      subject: "Welcome to The Truth Pill! 🎯",
+      subject: "Welcome to The Pain2Purpose! 🎯",
       templateName: "welcome",
       templateData: {
         name: args.name,
-        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org",
-        unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
+        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org",
+        unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
       },
       status: "pending",
       scheduledFor: Date.now(),
@@ -100,13 +100,13 @@ export const store = mutation({
       // Queue Welcome Email for New OAuth User
       await ctx.db.insert("emailQueue", {
         recipient: args.email,
-        subject: "Welcome to The Truth Pill! 🎯",
+        subject: "Welcome to The Pain2Purpose! 🎯",
         templateName: "welcome",
         templateData: {
           name: args.name,
           siteUrl:
-            process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org",
-          unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
+            process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org",
+          unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
         },
         status: "pending",
         scheduledFor: Date.now(),
@@ -208,10 +208,10 @@ export const subscribeToNewsletter = mutation({
     // Queue Confirmation Email
     await ctx.db.insert("emailQueue", {
       recipient: args.email,
-      subject: "Action Required: Confirm your subscription to The Truth Pill",
+      subject: "Action Required: Confirm your subscription to The Pain2Purpose",
       templateName: "confirm_subscription",
       templateData: {
-        confirmUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/confirm-subscription?token=${token}`,
+        confirmUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/confirm-subscription?token=${token}`,
       },
       status: "pending",
       scheduledFor: Date.now(),
@@ -287,27 +287,17 @@ export const getMeFullSecure = query({
 
     if (!user) return null;
 
-    const bookmarks = await ctx.db
-      .query("bookmarks")
-      .withIndex("by_user_article", (q) => q.eq("userId", user._id))
-      .collect();
-
     const comments = await ctx.db
       .query("comments")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
-      .collect();
-
-    const reactions = await ctx.db
-      .query("reactions")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .collect();
 
     return {
       ...user,
       stats: {
-        bookmarks: bookmarks.length,
+        bookmarks: 0,
         comments: comments.length,
-        reactions: reactions.length,
+        reactions: 0,
       },
     };
   },
@@ -325,13 +315,7 @@ export const deleteAccount = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Clean up related data (optional but good practice)
-    const bookmarks = await ctx.db
-      .query("bookmarks")
-      .withIndex("by_user_article", (q) => q.eq("userId", user._id))
-      .collect();
-    for (const b of bookmarks) await ctx.db.delete(b._id);
-
+    // Clean up related data
     const comments = await ctx.db
       .query("comments")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))

@@ -91,3 +91,5 @@ export const getRecentActivity = query({
     return activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
   },
 });
+
+

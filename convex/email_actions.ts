@@ -38,7 +38,7 @@ const templates: Record<string, string> = {
       <div style="padding: 60px 50px; color: #09090b; line-height: 1.8;">
         <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 24px;">Reality starts here, {{name}}.</h2>
         <p style="font-size: 16px; color: #4b5563; margin-bottom: 24px;">
-          You've just taken the first step toward unfiltered reality. <strong>The Truth Pill</strong> is not just a publication; it&apos;s a recalibration of the human experience.
+          You've just taken the first step toward unfiltered reality. <strong>The Pain2Purpose</strong> is not just a publication; it&apos;s a recalibration of the human experience.
         </p>
         <p style="font-size: 16px; color: #4b5563; margin-bottom: 48px;">
           Expect insights that stir the mind and research that challenges the comfortable lies of modern existence.
@@ -48,11 +48,11 @@ const templates: Record<string, string> = {
         </div>
         <div style="border-top: 1px solid #f1f5f9; padding-top: 40px;">
           <p style="font-size: 14px; color: #94a3b8; margin: 0;">In pursuit of truth,</p>
-          <p style="font-size: 16px; font-weight: 900; color: #09090b; margin: 8px 0 0 0;">The Truth Pill Editorial</p>
+          <p style="font-size: 16px; font-weight: 900; color: #09090b; margin: 8px 0 0 0;">The Pain2Purpose Editorial</p>
         </div>
       </div>
       <div style="background: #f8fafc; padding: 48px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 20px 0;">&copy; 2026 The Truth Pill. Evolution is mandatory.</p>
+        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 20px 0;">&copy; 2026 The Pain2Purpose. Evolution is mandatory.</p>
         <div style="display: inline-block;">
           <a href="{{unsubscribeUrl}}" style="color: #2563eb; text-decoration: none; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #dbeafe;">Silence these signals</a>
         </div>
@@ -82,7 +82,7 @@ const templates: Record<string, string> = {
         </div>
       </div>
       <div style="background: #f8fafc; padding: 40px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">&copy; 2026 The Truth Pill. Deciphering the Human Experience.</p>
+        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">&copy; 2026 The Pain2Purpose. Deciphering the Human Experience.</p>
         <a href="{{unsubscribeUrl}}" style="color: #64748b; text-decoration: none; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">Unsubscribe</a>
       </div>
     </div>
@@ -93,7 +93,7 @@ const templates: Record<string, string> = {
         <img src="{{siteUrl}}/illustrations/Messaging.svg" alt="Confirm Illustration" style="width: 200px; height: auto; margin-bottom: 48px; opacity: 1;" />
         <h1 style="font-size: 32px; font-weight: 900; color: #09090b; margin-bottom: 16px; letter-spacing: -0.02em;">Verify Connection</h1>
         <p style="color: #64748b; font-size: 17px; line-height: 1.7; margin-bottom: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
-          You&apos;re one step away from joining <strong>The Truth Pill</strong>. Please confirm your subscription to activate our intelligence stream.
+          You&apos;re one step away from joining <strong>The Pain2Purpose</strong>. Please confirm your subscription to activate our intelligence stream.
         </p>
         <a href="{{confirmUrl}}" style="background: #2563eb; color: white; padding: 20px 48px; border-radius: 18px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; display: inline-block; shadow: 0 10px 20px rgba(37, 99, 235, 0.3);">Confirm Subscription</a>
         <p style="margin-top: 48px; font-size: 13px; color: #94a3b8;">If you did not initiate this protocol, please ignore this transmission.</p>
@@ -106,7 +106,7 @@ const templates: Record<string, string> = {
         <img src="{{siteUrl}}/illustrations/Secure-login.svg" alt="Reset Illustration" style="width: 200px; height: auto; margin-bottom: 48px; opacity: 1;" />
         <h1 style="font-size: 32px; font-weight: 900; color: #09090b; margin-bottom: 16px; letter-spacing: -0.02em;">Identity Reset</h1>
         <p style="color: #64748b; font-size: 17px; line-height: 1.7; margin-bottom: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
-          An identity reset for <strong>The Truth Pill</strong> was requested. This secure link will remain active for 60 minutes.
+          An identity reset for <strong>The Pain2Purpose</strong> was requested. This secure link will remain active for 60 minutes.
         </p>
         <a href="{{resetUrl}}" style="background: #09090b; color: white; padding: 20px 48px; border-radius: 18px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; display: inline-block;">Reset Password</a>
         <p style="margin-top: 48px; font-size: 13px; color: #94a3b8;">If you did not authorize this recalibration, secure your account immediately.</p>
@@ -131,7 +131,7 @@ const templates: Record<string, string> = {
         </p>
       </div>
       <div style="background: #f8fafc; padding: 32px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0;">&copy; 2026 The Truth Pill. Evolution is mandatory.</p>
+        <p style="font-size: 12px; color: #94a3b8; margin: 0;">&copy; 2026 The Pain2Purpose. Evolution is mandatory.</p>
       </div>
     </div>
   `,
@@ -170,7 +170,7 @@ export const processQueue = internalAction({
         const html = renderTemplate(email.templateName, email.templateData);
 
         await transporter.sendMail({
-          from: `"The Truth Pill" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+          from: `"The Pain2Purpose" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
           to: email.recipient,
           subject: email.subject,
           html,
@@ -211,13 +211,13 @@ export const sendTestEmail = action({
 
     try {
       await transporter.sendMail({
-        from: `"The Truth Pill" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+        from: `"The Pain2Purpose" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: args.recipient,
-        subject: "The Truth Pill - Test Email",
+        subject: "The Pain2Purpose - Test Email",
         html: `
           <div style="padding: 20px; font-family: sans-serif; text-align: center;">
             <h1 style="color: #0ea5e9;">Test Successful!</h1>
-            <p>If you're reading this, your SMTP configuration for <strong>The Truth Pill</strong> is working correctly.</p>
+            <p>If you're reading this, your SMTP configuration for <strong>The Pain2Purpose</strong> is working correctly.</p>
             <div style="margin: 20px; padding: 10px; background: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%); color: white; display: inline-block; border-radius: 8px;">
               Email System Online
             </div>
@@ -251,15 +251,15 @@ export const requestPasswordReset = action({
     if (!userId) return { success: true }; // Don't leak existence
 
     const transporter = getTransporter();
-    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/auth/reset-password?token=${token}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/auth/reset-password?token=${token}`;
 
     const html = renderTemplate("reset_password", { resetUrl });
 
     try {
       await transporter.sendMail({
-        from: `"The Truth Pill" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+        from: `"The Pain2Purpose" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
         to: args.email,
-        subject: "Reset your password - The Truth Pill",
+        subject: "Reset your password - The Pain2Purpose",
         html,
       });
       return { success: true };
@@ -269,3 +269,5 @@ export const requestPasswordReset = action({
     }
   },
 });
+
+

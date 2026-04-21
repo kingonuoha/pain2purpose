@@ -1,157 +1,155 @@
 import { mutation } from "./_generated/server";
 
-export const seedData = mutation({
-  args: {},
+export const seedServices = mutation({
   handler: async (ctx) => {
-    // 1. Create a default author if not exists
-    let author = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", "admin@thetruthpill.org"))
-      .unique();
-
-    if (!author) {
-      const authorId = await ctx.db.insert("users", {
-        name: "Truth Seeker",
-        email: "admin@thetruthpill.org",
-        role: "admin",
-        provider: "email",
-        newsletterSubscribed: true,
+    const services = [
+      {
+        title: "Individual Counselling",
+        slug: "individual-counselling",
+        shortDescription:
+          "One-on-one therapeutic support tailored to your unique challenges and goals.",
+        fullDescription: `<p>Individual counselling provides a safe, confidential space where you can explore your thoughts, feelings, and experiences with a trained professional. Sandra works collaboratively with you to understand the root of your challenges and develop practical strategies for moving forward.</p>
+        <p>Whether you're dealing with anxiety, low self-esteem, relationship difficulties, or simply feeling stuck, individual counselling helps you gain clarity, build resilience, and reconnect with your sense of purpose.</p>`,
+        icon: "User",
+        coverImage: "",
+        order: 1,
+        isActive: true,
         createdAt: Date.now(),
-      });
-      author = await ctx.db.get(authorId);
-    }
-
-    if (!author) throw new Error("Failed to create author");
-
-    // 2. Create categories if not exist
-    const categoryData = [
-      {
-        name: "Human Behavior",
-        slug: "human-behavior",
-        description: "Decoding the psychological patterns, cognitive biases, and behavioral loops that shape our lives.",
       },
       {
-        name: "Relationships",
-        slug: "relationships",
-        description: "Navigating the complexities of human connection, intimacy, and social dynamics.",
+        title: "Grief & Loss Support",
+        slug: "grief-and-loss-support",
+        shortDescription:
+          "Guided healing for those navigating the complex journey of loss and bereavement.",
+        fullDescription: `<p>Grief is one of the most profound human experiences, and yet many of us are expected to navigate it alone. Sandra's grief support sessions provide a compassionate, non-judgmental space where your pain is honoured and your healing is prioritised.</p>
+        <p>Drawing on her own lived experience of loss, Sandra understands that grief doesn't follow a timeline. Together, you will work through your emotions at your own pace, finding ways to carry your loss while still moving toward a meaningful life.</p>`,
+        icon: "Heart",
+        coverImage: "",
+        order: 2,
+        isActive: true,
+        createdAt: Date.now(),
       },
       {
-        name: "Emotional Clarity",
-        slug: "emotional-clarity",
-        description: "Achieving mental focus and emotional intelligence through self-awareness and regulation.",
+        title: "Autism & Family Support",
+        slug: "autism-and-family-support",
+        shortDescription:
+          "Specialist support for families raising children on the autism spectrum.",
+        fullDescription: `<p>Raising a child on the autism spectrum is a journey of immense love, and immense challenge. Sandra brings both professional expertise and personal experience as a parent to this work, offering families a space to be heard, understood, and equipped.</p>
+        <p>Sessions focus on helping parents and caregivers manage stress, improve communication within the family, advocate confidently for their child, and find community and meaning in their journey.</p>`,
+        icon: "Users",
+        coverImage: "",
+        order: 3,
+        isActive: true,
+        createdAt: Date.now(),
       },
       {
-        name: "Power Dynamics",
-        slug: "power-dynamics",
-        description: "Understanding the invisible structures of influence, authority, and social hierarchy.",
+        title: "Resilience Coaching",
+        slug: "resilience-coaching",
+        shortDescription:
+          "Build emotional strength and rediscover purpose after hardship or adversity.",
+        fullDescription: `<p>Resilience is not the absence of pain — it is the ability to move through pain and emerge stronger. Sandra's resilience coaching combines therapeutic techniques with practical goal-setting to help you rebuild confidence, redefine your identity, and step into your next chapter.</p>
+        <p>This service is ideal for individuals transitioning through major life changes, recovering from burnout, or seeking to transform a difficult season into a foundation for growth.</p>`,
+        icon: "Zap",
+        coverImage: "",
+        order: 4,
+        isActive: true,
+        createdAt: Date.now(),
       },
       {
-        name: "Observant Mind",
-        slug: "observant-mind",
-        description: "Cultivating a perspective of deep observation, presence, and philosophical inquiry.",
-      },
-    ];
-
-    const savedCategories = [];
-    for (const cat of categoryData) {
-      let existing = await ctx.db
-        .query("categories")
-        .withIndex("by_slug", (q) => q.eq("slug", cat.slug))
-        .unique();
-
-      if (!existing) {
-        const id = await ctx.db.insert("categories", {
-          ...cat,
-          articleCount: 0,
-          createdAt: Date.now(),
-        });
-        existing = await ctx.db.get(id);
-      }
-      if (existing) savedCategories.push(existing);
-    }
-
-    // 3. Create 5 blog articles
-    const articles = [
-      {
-        title: "The Illusion of Certainty",
-        slug: "illusion-of-certainty",
-        excerpt:
-          "Why our brain craves absolute truths in an inherently uncertain world.",
-        content:
-          "## The Human Need for Order\n\nWe live in a world of complexity, yet we seek simplicity. This article explores why certainty is often a comfort rather than a reality...",
-        coverImage:
-          "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200",
-        categoryId: savedCategories[0]._id,
-      },
-      {
-        title: "Neuroscience of Belief",
-        slug: "neuroscience-of-belief",
-        excerpt:
-          "How neural pathways form the bedrock of our strongest convictions.",
-        content:
-          "## Wiring the Mind\n\nOur beliefs are not just abstract thoughts; they are physical structures in our brain. Understanding how they form is crucial for growth...",
-        coverImage:
-          "https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=1200",
-        categoryId: savedCategories[2]._id,
-      },
-      {
-        title: "Quantum Reality: Beyond Observation",
-        slug: "quantum-reality-beyond-observation",
-        excerpt:
-          "Exploring the strange world where variables don't exist until measured.",
-        content:
-          "## The Observer Effect\n\nIn the quantum realm, the act of looking changes what is seen. This fundamental truth challenges our traditional view of the objective world...",
-        coverImage:
-          "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=1200",
-        categoryId: savedCategories[1]._id,
-      },
-      {
-        title: "The Architecture of Social Control",
-        slug: "architecture-of-social-control",
-        excerpt:
-          "How modern digital structures subtly shape our behavior and choices.",
-        content:
-          "## Soft Power\n\nControl in the 21st century is not about force; it is about architecture. The platforms we use every day are designed with specific outcomes in mind...",
-        coverImage:
-          "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200",
-        categoryId: savedCategories[3]._id,
-      },
-      {
-        title: "Stoicism in the Age of Noise",
-        slug: "stoicism-age-of-noise",
-        excerpt:
-          "Ancient wisdom for maintaining internal clarity in a chaotic digital environment.",
-        content:
-          "## Finding Silence\n\nMarcus Aurelius never had a smartphone, yet his meditations on internal peace are more relevant today than ever before...",
-        coverImage:
-          "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200",
-        categoryId: savedCategories[0]._id,
+        title: "PR & Narrative Coaching",
+        slug: "pr-and-narrative-coaching",
+        shortDescription:
+          "Help communicating your story clearly and authentically to the world.",
+        fullDescription: `<p>Your story is your power. Sandra's unique background in public relations combined with her counselling expertise enables her to help clients articulate their personal and professional narratives with clarity, confidence, and authenticity.</p>
+        <p>Whether you're building a personal brand, preparing for media appearances, writing your memoir, or simply learning to speak your truth, this coaching will help you find and own your voice.</p>`,
+        icon: "MessageSquare",
+        coverImage: "",
+        order: 5,
+        isActive: true,
+        createdAt: Date.now(),
       },
     ];
 
-    for (const art of articles) {
+    for (const service of services) {
+      // Avoid duplicate seeds if they exist
       const existing = await ctx.db
-        .query("articles")
-        .withIndex("by_slug", (q) => q.eq("slug", art.slug))
-        .unique();
-
+        .query("services")
+        .filter((q) => q.eq(q.field("slug"), service.slug))
+        .first();
       if (!existing) {
-        await ctx.db.insert("articles", {
-          ...art,
-          authorId: author._id,
-          status: "published",
-          source: "human",
-          viewCount: Math.floor(Math.random() * 1000),
-          uniqueViewCount: Math.floor(Math.random() * 500),
-          readingTime: 5,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          publishedAt: Date.now(),
-          isFeatured: Math.random() > 0.5,
-        });
+        await ctx.db.insert("services", service);
       }
     }
 
-    return "Seeding completed successfully!";
+    return { seeded: services.length };
   },
 });
+
+export const seedCategories = mutation({
+  handler: async (ctx) => {
+    // First clear existing Pain2Purpose categories
+    const existing = await ctx.db.query("categories").collect();
+    for (const cat of existing) {
+      await ctx.db.delete(cat._id);
+    }
+
+    const categories = [
+      {
+        name: "Healing & Recovery",
+        slug: "healing-and-recovery",
+        description: "Stories and insights on the journey back to wholeness.",
+        coverImage: "",
+        articleCount: 0,
+        createdAt: Date.now(),
+      },
+      {
+        name: "Grief & Loss",
+        slug: "grief-and-loss",
+        description: "Navigating bereavement and finding meaning after loss.",
+        coverImage: "",
+        articleCount: 0,
+        createdAt: Date.now(),
+      },
+      {
+        name: "Autism & Family",
+        slug: "autism-and-family",
+        description: "Resources and reflections for families on the spectrum journey.",
+        coverImage: "",
+        articleCount: 0,
+        createdAt: Date.now(),
+      },
+      {
+        name: "Resilience & Growth",
+        slug: "resilience-and-growth",
+        description: "Building strength, purpose, and forward momentum.",
+        coverImage: "",
+        articleCount: 0,
+        createdAt: Date.now(),
+      },
+      {
+        name: "Mental Wellness",
+        slug: "mental-wellness",
+        description: "Practical tools and perspectives for everyday emotional health.",
+        coverImage: "",
+        articleCount: 0,
+        createdAt: Date.now(),
+      },
+      {
+        name: "Sandra's Journal",
+        slug: "sandras-journal",
+        description: "Personal reflections and stories from Sandra Opara.",
+        coverImage: "",
+        articleCount: 0,
+        createdAt: Date.now(),
+      },
+    ];
+
+    for (const category of categories) {
+      await ctx.db.insert("categories", category);
+    }
+
+    return { seeded: categories.length };
+  },
+});
+
+

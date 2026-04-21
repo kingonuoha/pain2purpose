@@ -9,7 +9,7 @@ export function SplitFeature() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <div className="order-2 lg:order-1">
                         <span className="text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-[0.3em] mb-4 block">
-                            Why The Truth Pill?
+                            Why The Pain2Purpose?
                         </span>
                         <h2 className="text-4xl md:text-5xl font-serif font-black text-gray-900 dark:text-white mb-8 leading-tight">
                             We provide the tools to <span className="italic">decipher</span> reality.
@@ -79,3 +79,5 @@ export function SplitFeature() {
         </section>
     );
 }
+
+

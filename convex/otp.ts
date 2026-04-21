@@ -50,12 +50,12 @@ export const generateOtp = mutation({
       recipient: args.email,
       subject:
         args.type === "password_reset"
-          ? "Reset Your Password - The Truth Pill"
-          : "Verify Password Change - The Truth Pill",
+          ? "Reset Your Password - The Pain2Purpose"
+          : "Verify Password Change - The Pain2Purpose",
       templateName: "otp_verification",
       templateData: {
         otpCode: code,
-        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org",
+        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org",
       },
       status: "pending",
       scheduledFor: Date.now(),
@@ -132,3 +132,5 @@ export const verifyOtpAndChangePassword = mutation({
     return { success: true, message: "Password updated successfully" };
   },
 });
+
+

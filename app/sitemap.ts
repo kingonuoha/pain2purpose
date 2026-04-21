@@ -6,7 +6,7 @@ import { slugify } from "@/lib/utils";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org";
 
   interface ArticleWithMeta {
     slug: string;
@@ -79,3 +79,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...topicEntries,
   ];
 }
+
+

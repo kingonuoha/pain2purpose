@@ -8,10 +8,10 @@ export const getSiteSettings = query({
     if (!settings) {
       // Return minimal defaults if none exist yet
       return {
-        siteName: "The Truth Pill",
+        siteName: "Pain2Purpose",
         siteDescription:
-          "Deciphering the human experience through deep psychological research and unfiltered insights.",
-        email: "",
+          "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through life's complex journeys.",
+        email: "enquiries@counsellingp2p.com",
         phone: "",
         socials: {
           facebook: "",
@@ -22,7 +22,7 @@ export const getSiteSettings = query({
           linkedin: "",
           github: "",
         },
-        footerText: "Unfiltered Evolution.",
+        footerText: "From Pain to Purpose.",
       };
     }
     return settings;
@@ -65,3 +65,5 @@ export const updateSiteSettings = mutation({
     }
   },
 });
+
+

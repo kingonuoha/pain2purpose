@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/empty-state";
 export const revalidate = 60; // ISR: Revalidate every 60 seconds
 
 export const metadata: Metadata = {
-    title: "Article Categories | The Truth Pill",
+    title: "Article Categories | The Pain2Purpose",
     description: "Discover deep psychological research and unfiltered insights across our core pillars.",
     openGraph: {
         title: "Explore Article Categories",
@@ -38,7 +38,7 @@ export default async function CategoriesPage() {
         "@type": "CollectionPage",
         "name": "Article Categories",
         "description": "Discover deep psychological research and unfiltered insights across our core pillars.",
-        "url": "https://thetruthpill.org/category",
+        "url": "https://thePain2Purpose.org/category",
     };
 
     return (
@@ -123,3 +123,5 @@ function CategoryCard({ category }: { category: Category }) {
         </Link>
     );
 }
+
+

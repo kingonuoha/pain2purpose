@@ -720,10 +720,10 @@ export const queueNewArticleAlerts = internalMutation({
         templateData: {
           articleTitle: article.title,
           excerpt: article.excerpt || "",
-          articleUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/${article.slug}`,
-          authorName: author?.name || "The Truth Pill",
+          articleUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/${article.slug}`,
+          authorName: author?.name || "The Pain2Purpose",
           categoryName: category?.name || "Psychology",
-          unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thetruthpill.org"}/unsubscribe?email=${encodeURIComponent(user.email)}`,
+          unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/unsubscribe?email=${encodeURIComponent(user.email)}`,
         },
         status: "pending",
         scheduledFor: Date.now(),
@@ -1143,13 +1143,13 @@ export const saveAIDraft = internalMutation({
       // Fallback: create/get system AI author
       const aiAuthor = await ctx.db
         .query("users")
-        .withIndex("by_email", (q) => q.eq("email", "ai@thetruthpill.org"))
+        .withIndex("by_email", (q) => q.eq("email", "ai@thePain2Purpose.org"))
         .unique();
 
       if (!aiAuthor) {
         authorId = await ctx.db.insert("users", {
-          name: "TruthPill AI",
-          email: "ai@thetruthpill.org",
+          name: "Pain2Purpose AI",
+          email: "ai@thePain2Purpose.org",
           role: "admin",
           provider: "system",
           newsletterSubscribed: false,
@@ -1230,47 +1230,8 @@ export const getByAuthor = query({
   },
 });
 
-export const getBookmarkedArticles = query({
-  args: { email: v.optional(v.string()) },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    const email = identity?.email || args.email;
-    if (!email) return [];
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .unique();
 
-    if (!user) return [];
-
-    const bookmarks = await ctx.db
-      .query("bookmarks")
-      .withIndex("by_user_article", (q) => q.eq("userId", user._id))
-      .take(200); // Safety cap for bookmarks per user
-
-    const articles = await Promise.all(
-      bookmarks.map(async (b) => {
-        const article = await ctx.db.get(b.articleId);
-        if (!article) return null;
-
-        const author = await ctx.db.get(article.authorId);
-        const category = article.categoryId
-          ? await ctx.db.get(article.categoryId)
-          : null;
-
-        return {
-          ...article,
-          authorName: author?.name || "Unknown Author",
-          authorImage: author?.profileImage,
-          categoryName: category?.name || "Uncategorized",
-        };
-      }),
-    );
-
-    return articles.filter((a): a is NonNullable<typeof a> => a !== null);
-  },
-});
 
 
 
