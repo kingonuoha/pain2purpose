@@ -100,6 +100,7 @@ export const list = query({
           authorName: author?.name || "Unknown Author",
           authorImage: author?.profileImage,
           categoryName: category?.name || "Uncategorized",
+          updatedAt: article.updatedAt,
         };
       }),
     );
@@ -444,8 +445,9 @@ export const create = mutation({
     coverImageAlt: v.optional(v.string()),
     adminEmail: v.optional(v.string()),
     authorId: v.optional(v.id("users")),
+    publishedAt: v.optional(v.number()),
   },
-  handler: async (ctx, { adminEmail, authorId: providedAuthorId, ...args }) => {
+  handler: async (ctx, { adminEmail, authorId: providedAuthorId, publishedAt: providedPublishedAt, ...args }) => {
     // Validation for non-drafts
     if (args.status !== "draft") {
       if (!args.excerpt) throw new Error("Excerpt is required for publishing");
@@ -494,7 +496,8 @@ export const create = mutation({
       .withIndex("by_email", (q) => q.eq("email", email))
       .unique();
 
-    if (!user || user.role !== "admin") throw new Error("Unauthorized");
+    if (!user) throw new Error(`Unauthorized: No user found for ${email}`);
+    if (user.role !== "admin") throw new Error(`Unauthorized: User ${email} has role "${user.role}", but "admin" is required.`);
 
     const now = Date.now();
     const articleId = await ctx.db.insert("articles", {
@@ -504,9 +507,9 @@ export const create = mutation({
       viewCount: 0,
       uniqueViewCount: 0,
       readingTime: Math.ceil((args.content || "").length / 1300),
-      createdAt: now,
+      createdAt: providedPublishedAt || now,
       updatedAt: now,
-      publishedAt: args.status === "published" ? now : undefined,
+      publishedAt: args.status === "published" ? (providedPublishedAt || now) : undefined,
     });
 
     if (args.status === "published") {
@@ -576,6 +579,7 @@ export const update = mutation({
     coverImageAlt: v.optional(v.string()),
     adminEmail: v.optional(v.string()),
     authorId: v.optional(v.id("users")),
+    publishedAt: v.optional(v.number()),
   },
   handler: async (ctx, { id, adminEmail, ...args }) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -647,7 +651,7 @@ export const update = mutation({
     }
 
     if (args.status === "published" && existing.status !== "published") {
-      patch.publishedAt = Date.now();
+      patch.publishedAt = args.publishedAt || Date.now();
       await ctx.scheduler.runAfter(0, internal.articles.queueNewArticleAlerts, {
         articleId: id,
       });

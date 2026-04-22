@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 interface EmptyStateProps {
     title: string;
@@ -10,57 +9,30 @@ interface EmptyStateProps {
     action?: React.ReactNode;
 }
 
-export function EmptyState({ 
-    title, 
-    description, 
+export function EmptyState({
+    title,
+    description,
     illustration = "Nothing-here.svg",
-    action 
+    action
 }: EmptyStateProps) {
     return (
-        <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="relative w-64 h-64 mb-8"
-            >
+        <div className="text-center py-5">
+            <div className="mb-4" style={{ width: "180px", height: "180px", margin: "0 auto 1.5rem" }}>
                 <Image
                     src={`/illustrations/${illustration}`}
                     alt={title}
-                    fill
-                    className="object-contain opacity-80"
+                    width={180}
+                    height={180}
+                    style={{ objectFit: "contain", opacity: 0.8 }}
                 />
-            </motion.div>
-            
-            <motion.h3 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-2xl font-serif font-bold text-gray-900 dark:text-white mb-4"
-            >
-                {title}
-            </motion.h3>
-            
-            <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-gray-500 dark:text-gray-400 max-w-md mb-8"
-            >
-                {description}
-            </motion.p>
-            
+            </div>
+            <h3 className="section_heading_text" style={{ fontSize: "1.5rem" }}>{title}</h3>
+            <p className="section_heading_description">{description}</p>
             {action && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
+                <div className="btn_wrap">
                     {action}
-                </motion.div>
+                </div>
             )}
         </div>
     );
 }
-
-

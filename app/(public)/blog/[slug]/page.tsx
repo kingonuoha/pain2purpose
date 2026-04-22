@@ -1,0 +1,42 @@
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+import { ArticleContent } from "./ArticleDetail";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getOgImageUrl, truncate } from "@/lib/utils";
+import { JoinedArticle } from "@/components/blog-grid";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const article = await fetchQuery(api.articles.getBySlug, { slug });
+
+    if (!article) return { title: "Article Not Found | Pain2Purpose" };
+
+    return {
+        title: `${article.title} | Pain2Purpose`,
+        description: article.metaDescription || truncate(article.excerpt || "", 160),
+        openGraph: {
+            title: article.title,
+            description: article.metaDescription || truncate(article.excerpt || "", 160),
+            images: [getOgImageUrl(article.title)],
+            type: "article",
+            publishedTime: new Date(article.publishedAt || article.createdAt).toISOString(),
+            authors: [article.authorName || "Sandra Opara"],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: article.title,
+            description: article.metaDescription || truncate(article.excerpt || "", 160),
+            images: [getOgImageUrl(article.title)],
+        },
+    };
+}
+
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const article = await fetchQuery(api.articles.getBySlug, { slug });
+
+    if (!article) notFound();
+
+    return <ArticleContent initialArticle={article as unknown as JoinedArticle} slug={slug} />;
+}

@@ -43,19 +43,19 @@ export function RelatedArticles({ categoryId, excludeId, lean = false }: Related
                 {filteredArticles.map((article) => (
                     <Link
                         key={article._id}
-                        href={`/${article.slug}`}
+                        href={`/blog/${article.slug}`}
                         className="group flex gap-4 items-start"
                     >
                         <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
                             <Image
-                                src={article.coverImage || ""}
+                                src={(article.coverImage && (article.coverImage.startsWith('/') || article.coverImage.startsWith('http'))) ? article.coverImage : "/assets/images/blogs/small_blog_image_1.jpg"}
                                 alt={article.title}
                                 fill
                                 className="object-cover transition-transform duration-700 group-hover:scale-110"
                             />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-serif font-bold text-zinc-900 group-hover:text-sky-blue transition-colors leading-tight mb-1 line-clamp-2">
+                            <h4 className="text-sm font-serif font-bold text-zinc-900 group-hover:text-p2p-sage transition-colors leading-tight mb-1 line-clamp-2">
                                 {article.title}
                             </h4>
                             <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
@@ -77,22 +77,22 @@ export function RelatedArticles({ categoryId, excludeId, lean = false }: Related
             {filteredArticles.map((article) => (
                 <Link
                     key={article._id}
-                    href={`/${article.slug}`}
+                    href={`/blog/${article.slug}`}
                     className="group"
                 >
                     <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all">
                         <Image
-                            src={article.coverImage || ""}
+                            src={(article.coverImage && (article.coverImage.startsWith('/') || article.coverImage.startsWith('http'))) ? article.coverImage : "/assets/images/blogs/blog_image_1-min.jpg"}
                             alt={article.title}
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <h3 className="text-lg font-serif font-bold text-zinc-900 group-hover:text-sky-blue transition-colors leading-tight mb-2">
+                    <h3 className="text-lg font-serif font-bold text-zinc-900 group-hover:text-p2p-sage transition-colors leading-tight mb-2">
                         {article.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-sky-blue text-[10px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-2 text-p2p-sage text-[10px] font-black uppercase tracking-widest">
                         Read Now <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                     </div>
                 </Link>
