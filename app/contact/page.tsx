@@ -1,65 +1,93 @@
 "use client";
 
-import { Mail, Send, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { Navbar } from "@/components/layout/Navbar";
+import { PageHero } from "@/components/layout/PageHero";
+import { Mail, Send, Phone } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const contactSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    serviceInterest: z.string().optional(),
+    message: z.string().min(10, "Message must be at least 10 characters"),
+});
+
+type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function ContactPage() {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const submitContact = useMutation(api.contact.submit);
+    
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<ContactFormValues>({
+        resolver: zodResolver(contactSchema),
+    });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        // Simulate sending
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.success("Message channeled", {
-            description: "Your signal has been received. We will decode and respond shortly.",
-        });
-        setName("");
-        setEmail("");
-        setMessage("");
-        setIsSubmitting(false);
+    const onSubmit = async (data: ContactFormValues) => {
+        try {
+            await submitContact(data);
+            toast.success("Message Sent", {
+                description: "Your message has been received. Sandra will respond shortly.",
+            });
+            reset();
+        } catch (error) {
+            toast.error("Submission Failed", {
+                description: "Something went wrong. Please try again or call us directly.",
+            });
+            console.error(error);
+        }
     };
 
     return (
-        <div className="min-h-screen bg-white dark:bg-background-950 pt-32 pb-20 px-6 transition-colors duration-500">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-white">
+            <Navbar solid />
+            <PageHero 
+                title="Contact Us" 
+                breadcrumb={[{ label: "Contact", href: "/contact" }]} 
+            />
+            
+            <div className="max-w-7xl mx-auto px-6 py-24">
                 <div className="flex flex-col lg:flex-row gap-20">
                     <div className="lg:w-1/2">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                         >
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-blue mb-4">Direct Channel</h4>
-                            <h1 className="text-6xl font-serif font-black text-zinc-900 dark:text-white mb-8 italic tracking-tight">
-                                Reach <span className="text-school-purple">The Source</span>.
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-p2p-sage mb-4">Get in Touch</h4>
+                            <h1 className="text-6xl font-serif font-black text-p2p-charcoal mb-8 italic tracking-tight">
+                                Book Your <span className="text-p2p-sage">Session</span>.
                             </h1>
-                            <p className="text-xl text-zinc-500 dark:text-zinc-400 mb-12 leading-relaxed font-serif italic max-w-lg">
-                                Have a discovery to share? A mystery to solve? Or just want to bridge the gap? Our frequency is open.
+                            <p className="text-xl text-zinc-500 mb-12 leading-relaxed font-serif italic max-w-lg">
+                                Ready to take the next step on your journey? Reach out to schedule a consultation or ask any questions about our services.
                             </p>
 
                             <div className="space-y-8">
                                 <div className="flex items-center gap-6 group">
-                                    <div className="w-14 h-14 rounded-2xl bg-zinc-50 dark:bg-cardflex items-center justify-center border border-zinc-100 dark:border-zinc-800 group-hover:bg-sky-blue group-hover:text-white transition-all duration-500">
+                                    <div className="w-14 h-14 rounded-2xl bg-p2p-soft-green flex items-center justify-center group-hover:bg-p2p-sage group-hover:text-white transition-all duration-500">
                                         <Mail size={24} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Electronic Mail</p>
-                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">connect@thePain2Purpose.org</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Email Address</p>
+                                        <p className="text-lg font-bold text-p2p-charcoal">sandra@counsellingp2p.com</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-6 group">
-                                    <div className="w-14 h-14 rounded-2xl bg-zinc-50 dark:bg-cardflex items-center justify-center border border-zinc-100 dark:border-zinc-800 group-hover:bg-school-purple group-hover:text-white transition-all duration-500">
-                                        <MessageSquare size={24} />
+                                    <div className="w-14 h-14 rounded-2xl bg-p2p-soft-green flex items-center justify-center group-hover:bg-p2p-sage group-hover:text-white transition-all duration-500">
+                                        <Phone size={24} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Encoded Frequency</p>
-                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">@Pain2Purpose_hq</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Phone Number</p>
+                                        <p className="text-lg font-bold text-p2p-charcoal">08033444411 (NG)</p>
                                     </div>
                                 </div>
                             </div>
@@ -70,51 +98,63 @@ export default function ContactPage() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-zinc-50 dark:bg-background-900/50 p-10 rounded-[40px] border border-zinc-100 dark:border-zinc-800/50 backdrop-blur-sm"
+                            className="bg-p2p-soft-green/30 p-10 rounded-[40px] border border-p2p-soft-green/50 backdrop-blur-sm"
                         >
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-p2p-charcoal/40 ml-4">Full Name</label>
+                                    <input
+                                        {...register("name")}
+                                        placeholder="Enter your name"
+                                        className={`w-full bg-white border ${errors.name ? 'border-red-400' : 'border-p2p-soft-green'} rounded-2xl p-5 outline-none focus:ring-2 focus:ring-p2p-sage/50 transition-all font-medium text-p2p-charcoal`}
+                                    />
+                                    {errors.name && <p className="text-[10px] text-red-500 font-bold ml-4 uppercase">{errors.name.message}</p>}
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-4">Identity</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-p2p-charcoal/40 ml-4">Email Address</label>
                                         <input
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            placeholder="Your name"
-                                            required
-                                            className="w-full bg-white dark:bg-background-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 outline-none focus:ring-2 focus:ring-sky-blue/50 transition-all font-medium text-zinc-900 dark:text-white"
+                                            {...register("email")}
+                                            placeholder="Enter your email"
+                                            className={`w-full bg-white border ${errors.email ? 'border-red-400' : 'border-p2p-soft-green'} rounded-2xl p-5 outline-none focus:ring-2 focus:ring-p2p-sage/50 transition-all font-medium text-p2p-charcoal`}
                                         />
+                                        {errors.email && <p className="text-[10px] text-red-500 font-bold ml-4 uppercase">{errors.email.message}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-4">Coordinate</label>
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="Your email"
-                                            required
-                                            className="w-full bg-white dark:bg-background-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 outline-none focus:ring-2 focus:ring-sky-blue/50 transition-all font-medium text-zinc-900 dark:text-white"
-                                        />
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-p2p-charcoal/40 ml-4">Service Interest</label>
+                                        <select
+                                            {...register("serviceInterest")}
+                                            className="w-full bg-white border border-p2p-soft-green rounded-2xl p-5 outline-none focus:ring-2 focus:ring-p2p-sage/50 transition-all font-medium text-p2p-charcoal appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Select a service</option>
+                                            <option value="grief">Grief & Loss</option>
+                                            <option value="transitions">Life Transitions</option>
+                                            <option value="relationships">Relationships</option>
+                                            <option value="trauma">Trauma Recovery</option>
+                                            <option value="emotions">Emotional Regulation</option>
+                                            <option value="growth">Personal Growth</option>
+                                        </select>
                                     </div>
                                 </div>
+                                
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-4">The Signal</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-p2p-charcoal/40 ml-4">Your Message</label>
                                     <textarea
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        placeholder="What truths shall we explore?"
-                                        required
+                                        {...register("message")}
+                                        placeholder="How can Sandra support you today?"
                                         rows={6}
-                                        className="w-full bg-white dark:bg-background-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 outline-none focus:ring-2 focus:ring-sky-blue/50 transition-all font-medium text-zinc-900 dark:text-white resize-none"
+                                        className={`w-full bg-white border ${errors.message ? 'border-red-400' : 'border-p2p-soft-green'} rounded-3xl p-6 outline-none focus:ring-2 focus:ring-p2p-sage/50 transition-all font-medium text-p2p-charcoal resize-none`}
                                     />
+                                    {errors.message && <p className="text-[10px] text-red-500 font-bold ml-4 uppercase">{errors.message.message}</p>}
                                 </div>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-xs hover:bg-sky-blue dark:hover:bg-sky-blue hover:text-white transition-all duration-500 shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
+                                    className="w-full bg-p2p-charcoal text-white py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-xs hover:bg-p2p-sage transition-all duration-500 shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
                                 >
-                                    {isSubmitting ? "Transmitting..." : (
-                                        <>Initiate Connection <Send size={14} /></>
+                                    {isSubmitting ? "Sending..." : (
+                                        <>Send Message <Send size={14} /></>
                                     )}
                                 </button>
                             </form>

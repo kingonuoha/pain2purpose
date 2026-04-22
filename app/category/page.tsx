@@ -2,7 +2,7 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/layout/Navbar";
 import { Id } from "@/convex/_generated/dataModel";
 import { DynamicCategoryImage } from "@/components/dynamic-category-image";
 import { Metadata } from "next";

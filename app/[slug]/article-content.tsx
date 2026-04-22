@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/layout/Navbar";
 import { Calendar, User, Clock, ChevronRight, ChevronUp, Eye } from "lucide-react";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation } from "convex/react";

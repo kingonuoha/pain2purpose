@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/layout/Navbar";
 
 export const metadata = {
     title: "Privacy Policy | The Pain2Purpose",

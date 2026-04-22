@@ -12,7 +12,7 @@ import {
     Trash2, Loader2, Sparkles,
     ArrowRight, Lock, Eye, EyeOff, Activity
 } from "lucide-react";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/layout/Navbar";
 import { toast } from "sonner";
 import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";

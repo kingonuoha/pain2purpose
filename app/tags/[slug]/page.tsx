@@ -1,7 +1,7 @@
 
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/layout/Navbar";
 import Link from "next/link";
 import { Clock, ArrowRight, Tag as TagIcon } from "lucide-react";
 import Image from "next/image";

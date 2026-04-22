@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Calendar, BookOpen, Clock, User, Facebook, Twitter, Instagram, Mail } from "lucide-react";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 interface JoinedArticle extends Doc<"articles"> {
     categoryName: string;
