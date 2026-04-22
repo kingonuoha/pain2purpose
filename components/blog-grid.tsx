@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, ChevronDown, Eye, Search } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
 import { BlogSkeleton } from "./skeletons";
-import { getCloudinaryUrl, getAvatarUrl } from "@/lib/utils";
+import { getCloudinaryUrl } from "@/lib/utils";
 import { EmptyState } from "./empty-state";
 
 interface BlogGridProps {
@@ -21,9 +20,12 @@ export type JoinedArticle = {
     title: string;
     slug: string;
     excerpt?: string;
+    content?: string;
+    tags?: string[];
     coverImage?: string;
     publishedAt?: number;
     createdAt?: number;
+    updatedAt?: number;
     viewCount?: number;
     categoryId?: Id<"categories">;
     categoryName?: string;
@@ -49,17 +51,14 @@ export function BlogGrid({ categoryId, pillar, type, initialArticles }: BlogGrid
 
     if (!articles || articles.length === 0) {
         return (
-            <EmptyState 
-                title="No Insights Found" 
-                description="We couldn't find any articles matching your current filter. Try exploring a different pillar or topic."
+            <EmptyState
+                title="No Articles Found"
+                description="No articles found matching your current filter."
                 illustration="No-results-found.svg"
                 action={
-                    <Link 
-                        href="/"
-                        className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
-                    >
-                        <Search size={14} />
-                        Explore All Truths
+                    <Link href="/" className="btn btn-primary">
+                        <span className="btn_text" data-text="Back to Home">Back to Home</span>
+                        <span className="btn_icon"><i className="fa-solid fa-arrow-up-right"></i></span>
                     </Link>
                 }
             />
@@ -68,91 +67,87 @@ export function BlogGrid({ categoryId, pillar, type, initialArticles }: BlogGrid
 
     const hasMore = status === "CanLoadMore";
 
-    const handleLoadMore = () => {
-        loadMore(6);
-    };
-
     return (
         <div className="w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+            <div className="row">
                 {articles.map((article: JoinedArticle) => (
-                    <article key={article._id} className="group flex flex-col items-start">
-                        <div className="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-700 mb-6 border border-gray-100 dark:border-gray-800">
-                            <Image
-                                src={getCloudinaryUrl(article.coverImage || "", "w_800,c_fill,q_auto,f_auto")}
-                                alt={article.title}
-                                fill
-                                className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                                unoptimized
-                            />
-                            <div className="absolute top-4 right-4">
-                                <span className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm border border-gray-100 dark:border-gray-800">
-                                    {article.categoryName}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-3 px-2 flex-grow">
-                            <Link href={`/${article.slug}`}>
-                                <h2 className="text-xl md:text-2xl font-serif font-black leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                    {article.title}
-                                </h2>
-                            </Link>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 leading-relaxed font-medium">
-                                {article.excerpt}
-                            </p>
-                        </div>
-
-                        <div className="flex items-center justify-between w-full mt-6 pt-6 border-t border-gray-100 dark:border-gray-800 px-2">
-                            <Link href={`/author/${article.authorId}`} className="flex items-center gap-2 group/author">
-                                <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 relative">
+                    <div key={article._id} className="col-md-6 mb-4">
+                        <div className="blog_item h-100 d-flex flex-column border-0 shadow-sm rounded-4 overflow-hidden bg-white transition-all hover-lift">
+                            <div className="blog_image">
+                                <Link className="blog_image_wrap ratio ratio-16x9 d-block overflow-hidden position-relative" href={`/blog/${article.slug}`}>
                                     <Image
-                                        src={getAvatarUrl(article.authorName || "Author", article.authorImage)}
-                                        alt={article.authorName || "Author"}
+                                        src={getCloudinaryUrl(
+                                            (article.coverImage && (article.coverImage.startsWith('/') || article.coverImage.startsWith('http'))) 
+                                                ? article.coverImage 
+                                                : "/assets/images/blogs/blog_image_1-min.jpg", 
+                                            "w_800,c_fill,q_auto,f_auto"
+                                        )}
+                                        alt={article.title}
                                         fill
-                                        className="object-cover"
+                                        style={{ objectFit: 'cover' }}
+                                        className="object-fit-cover"
+                                        unoptimized
                                     />
+                                </Link>
+                            </div>
+                            <div className="blog_content p-4 d-flex flex-column flex-grow-1">
+                                <div className="author_byline d-flex align-items-center mb-3">
+                                    <div className="author_image me-2">
+                                        <Image 
+                                            src="/assets/images/new_pics/sandra-square (1).png" 
+                                            alt="Sandra Opara" 
+                                            width={32} 
+                                            height={32} 
+                                            className="rounded-circle object-cover"
+                                            style={{ width: '32px', height: '32px' }}
+                                        />
+                                    </div>
+                                    <span className="author_name fw-bold text-uppercase tracking-wider" style={{ fontSize: '10px', color: 'var(--p2p-sage)' }}>Sandra Opara</span>
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-gray-100 group-hover/author:text-blue-600 transition-colors">{article.authorName || "Author"}</span>
-                            </Link>
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1.5 text-gray-400">
-                                    <Eye size={12} className="text-blue-500" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest">{article.viewCount || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-gray-400">
-                                    <Calendar size={12} />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest">
-                                        {new Date(article.publishedAt || article.createdAt || 0).toLocaleDateString('en-US', {
-                                            month: 'short',day: 'numeric'
+                                {article.categoryName && (
+                                    <ul className="post_category unordered_list mb-2">
+                                        <li><Link href="#!" className="text-decoration-none text-muted small">{article.categoryName}</Link></li>
+                                    </ul>
+                                )}
+                                <ul className="post_meta unordered_list mb-3 small text-muted">
+                                    <li>
+                                        {new Date(article.publishedAt || article.createdAt || 0).toLocaleDateString("en-US", {
+                                            day: "numeric", month: "long", year: "numeric"
                                         })}
-                                    </span>
+                                    </li>
+                                    {article.viewCount !== undefined && (
+                                        <li>{article.viewCount} Views</li>
+                                    )}
+                                </ul>
+                                <h3 className="item_title h5 fw-bold mb-3">
+                                    <Link href={`/blog/${article.slug}`} className="text-dark text-decoration-none">{article.title}</Link>
+                                </h3>
+                                {article.excerpt && <p className="text-muted small mb-4 flex-grow-1 line-clamp-3">{article.excerpt}</p>}
+                                <div className="mt-auto pt-3 border-top">
+                                    <Link className="btn-link d-inline-flex align-items-center gap-2 text-decoration-none fw-bold" style={{ color: 'var(--p2p-sage)' }} href={`/blog/${article.slug}`}>
+                                        <span className="btn_text">Read More</span>
+                                        <span className="btn_icon"><i className="fa-solid fa-arrow-up-right"></i></span>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
-                    </article>
+                    </div>
                 ))}
             </div>
 
-            <div className="mt-20 flex justify-center">
-                {hasMore ? (
-                    <button
-                        onClick={handleLoadMore}
-                        className="flex items-center gap-2 px-10 py-4 rounded-full bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all duration-300 group shadow-xl shadow-blue-500/20 active:scale-95"
-                    >
-                        Load More Articles
-                        <ChevronDown size={14} className="group-hover:translate-y-1 transition-transform" />
-                    </button>
-                ) : (
-                    <div className="flex flex-col items-center gap-4 py-10 opacity-60">
-                        <div className="text-center">
-                            <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]">End of Archive</p>
-                        </div>
-                    </div>
-                )}
-            </div>
+            {hasMore && (
+                <div className="pagination_wrap mt-5">
+                    <ul className="pagination_nav unordered_list justify-content-center">
+                        <li>
+                            <button onClick={() => loadMore(6)} className="btn btn-primary btn-sm">
+                                Load More
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            )}
         </div>
     );
 }
 
-
+export default BlogGrid;

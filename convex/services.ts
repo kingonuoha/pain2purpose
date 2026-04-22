@@ -11,6 +11,15 @@ export const list = query({
   },
 });
 
+export const listAll = query({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("services")
+      .withIndex("by_order")
+      .collect();
+  },
+});
+
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -59,3 +68,5 @@ export const update = mutation({
 });
 
 
+
+// Triggering Convex reload.

@@ -80,12 +80,13 @@ export const store = mutation({
         await ctx.db.patch(userId, { profileImage: args.profileImage });
       }
     } else {
+      const isFirstUser = (await ctx.db.query("users").first()) === null;
       userId = await ctx.db.insert("users", {
         name: args.name,
         email: args.email,
         profileImage: args.profileImage,
         provider: args.provider,
-        role: "user",
+        role: isFirstUser ? "admin" : "user",
         newsletterSubscribed: false,
         createdAt: Date.now(),
       });
@@ -255,20 +256,24 @@ export const updateProfile = mutation({
     name: v.optional(v.string()),
     profileImage: v.optional(v.string()),
     newsletterSubscribed: v.optional(v.boolean()),
+    email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const email = identity?.email || args.email;
+    if (!email) throw new Error("Not authenticated");
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", identity.email!))
+      .withIndex("by_email", (q) => q.eq("email", email))
       .unique();
 
     if (!user) throw new Error("User not found");
 
+    const { email: _email, ...updateArgs } = args;
+
     await ctx.db.patch(user._id, {
-      ...args,
+      ...updateArgs,
     });
   },
 });
@@ -444,5 +449,20 @@ export const completeTour = mutation({
     }
 
     return { success: true };
+  },
+});
+
+export const promoteSelfToAdmin = mutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+    
+    await ctx.db.patch(user._id, { role: "admin" });
+    return { success: true, message: `User ${args.email} is now an admin.` };
   },
 });

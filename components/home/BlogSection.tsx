@@ -4,7 +4,6 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock } from "lucide-react";
 
 export function BlogSection() {
     const listResult = useQuery(api.articles.list, { 
@@ -13,59 +12,66 @@ export function BlogSection() {
     const articles = listResult?.page || [];
 
     return (
-        <section className="py-32 bg-white">
-            <div className="max-w-7xl mx-auto px-6 md:px-10">
-                <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-8">
-                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-p2p-charcoal italic">Latest Articles</h2>
-                    <Link 
-                        href="/articles"
-                        className="bg-p2p-charcoal text-white px-10 py-5 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-p2p-sage transition-all shadow-xl shadow-p2p-charcoal/10 active:scale-95 flex items-center gap-3"
-                    >
-                        Read More Articles <ArrowRight size={16} />
-                    </Link>
+        <section className="blog_section section_space_lg">
+            <div className="container">
+                <div className="section_heading text-center">
+                    <h2 className="section_heading_text">Our Latest Articles</h2>
+                    <p className="section_heading_description">
+                        Deep truths, delivered. Join seekers getting weekly insights on healing and growth.
+                    </p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="row">
                     {articles.map((article) => (
-                        <div key={article._id} className="group">
-                            <Link href={`/articles/${article.slug}`} className="block relative aspect-[16/10] rounded-[40px] overflow-hidden mb-8 shadow-xl">
-                                <Image
-                                    src={article.coverImage || "/p2p/hero-main.jpg"}
-                                    alt={article.title}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                />
-                                <div className="absolute top-6 left-6">
-                                    <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-p2p-sage">
-                                        Insights
-                                    </span>
+                        <div key={article._id} className="col-lg-4 col-md-6 col-sm-6">
+                            <div className="blog_item">
+                                <Link className="item_image" href={`/blog/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: 'var(--bs-border-radius)' }}>
+                                    <Image
+                                        src={(article.coverImage && (article.coverImage.startsWith('/') || article.coverImage.startsWith('http'))) ? article.coverImage : "/assets/images/blogs/blog_image_1-min.jpg"}
+                                        alt={article.title}
+                                        width={400}
+                                        height={280}
+                                        style={{ width: '100%', height: '280px', objectFit: 'cover', display: 'block' }}
+                                    />
+                                </Link>
+                                <div className="item_content">
+                                    <div className="author_byline d-flex align-items-center mb-3">
+                                        <div className="author_image me-2">
+                                            <Image 
+                                                src="/assets/images/new_pics/sandra-square (1).png" 
+                                                alt="Sandra Opara" 
+                                                width={40} 
+                                                height={40} 
+                                                className="rounded-full object-cover"
+                                                style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                            />
+                                        </div>
+                                        <span className="author_name text-xs font-bold uppercase tracking-wider" style={{ fontSize: '11px', color: 'var(--p2p-sage)' }}>Sandra Opara</span>
+                                    </div>
+                                    <ul className="post_meta unordered_list">
+                                        <li>{new Date(article.createdAt).toLocaleDateString()}</li>
+                                        <li><Link href="/blog">Insight</Link></li>
+                                    </ul>
+                                    <h3 className="item_title">
+                                        <Link href={`/blog/${article.slug}`}>{article.title}</Link>
+                                    </h3>
+                                    <Link className="btn-link" href={`/blog/${article.slug}`}>
+                                        <span className="btn_text">Read More</span>
+                                        <span className="btn_icon"><i className="fa-solid fa-arrow-up-right"></i></span>
+                                    </Link>
                                 </div>
-                            </Link>
-                            
-                            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-p2p-sage mb-4 opacity-70">
-                                <span className="flex items-center gap-1.5"><Clock size={12} /> {new Date(article.createdAt).toLocaleDateString()}</span>
-                                <span className="w-1 h-1 bg-p2p-sage rounded-full" />
-                                <span>5 min read</span>
                             </div>
-
-                            <h3 className="text-2xl font-serif font-bold text-p2p-charcoal mb-4 italic group-hover:text-p2p-sage transition-colors leading-tight">
-                                <Link href={`/articles/${article.slug}`}>{article.title}</Link>
-                            </h3>
-                            
-                            <p className="text-gray-500 text-sm leading-relaxed mb-8 line-clamp-2 font-medium">
-                                {article.excerpt}
-                            </p>
-
-                            <Link 
-                                href={`/articles/${article.slug}`}
-                                className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-p2p-sage hover:gap-4 transition-all"
-                            >
-                                Read More <ArrowRight size={16} />
-                            </Link>
                         </div>
                     ))}
+                </div>
+                <div className="btn_wrap text-center">
+                    <Link className="btn btn-primary" href="/blog">
+                        <span className="btn_text" data-text="View All Articles">View All Articles</span>
+                        <span className="btn_icon"><i className="fa-solid fa-arrow-up-right"></i></span>
+                    </Link>
                 </div>
             </div>
         </section>
     );
 }
+
+export default BlogSection;

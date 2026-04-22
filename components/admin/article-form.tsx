@@ -41,6 +41,7 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
 
     // For date picker
     const [scheduledDate, setScheduledDate] = useState("");
+    const [publishedDate, setPublishedDate] = useState("");
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -81,6 +82,11 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
             // Format to YYYY-MM-DDTHH:MM for datetime-local
             const formatted = date.toISOString().slice(0, 16);
             setScheduledDate(formatted);
+        }
+        if (initialData?.publishedAt) {
+            const date = new Date(initialData.publishedAt);
+            const formatted = date.toISOString().slice(0, 16);
+            setPublishedDate(formatted);
         }
     }, [initialData]);
 
@@ -287,6 +293,11 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
             scheduledTimestamp = new Date(scheduledDate).getTime();
         }
 
+        let publishedTimestamp = undefined;
+        if (publishedDate) {
+            publishedTimestamp = new Date(publishedDate).getTime();
+        }
+
         setIsSubmitting(true);
         try {
             if (isEditing) {
@@ -311,6 +322,7 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                     tags: formData.tags,
                     type: formData.type,
                     scheduledFor: scheduledTimestamp,
+                    publishedAt: publishedTimestamp,
                     adminEmail: (session?.user?.email as string) || undefined,
                 });
                 toast.success("Article updated successfully");
@@ -335,6 +347,7 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                     tags: formData.tags,
                     type: formData.type,
                     scheduledFor: scheduledTimestamp,
+                    publishedAt: publishedTimestamp,
                     adminEmail: (session?.user?.email as string) || undefined,
                 });
                 toast.success("Article created successfully");
@@ -894,6 +907,21 @@ export default function ArticleForm({ isEditing = false, initialData }: ArticleF
                                             type="datetime-local"
                                             value={scheduledDate}
                                             onChange={(e) => setScheduledDate(e.target.value)}
+                                            className="w-full bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-2.5 font-bold text-sm outline-none dark:text-zinc-100"
+                                        />
+                                        <Calendar className="absolute right-4 top-2.5 text-zinc-400 dark:text-zinc-500 pointer-events-none" size={16} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {formData.status === "published" && (
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Backdate Publication (Optional)</label>
+                                    <div className="relative">
+                                        <input
+                                            type="datetime-local"
+                                            value={publishedDate}
+                                            onChange={(e) => setPublishedDate(e.target.value)}
                                             className="w-full bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-2.5 font-bold text-sm outline-none dark:text-zinc-100"
                                         />
                                         <Calendar className="absolute right-4 top-2.5 text-zinc-400 dark:text-zinc-500 pointer-events-none" size={16} />

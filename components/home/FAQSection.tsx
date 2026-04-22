@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus } from "lucide-react";
-import Image from "next/image";
 
 const faqs = [
     {
@@ -28,81 +25,35 @@ export function FAQSection() {
     const [activeIndex, setActiveIndex] = useState<number | null>(0);
 
     return (
-        <section className="py-32 bg-p2p-cream overflow-hidden">
-            <div className="max-w-7xl mx-auto px-6 md:px-10">
-                <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-                    
-                    {/* Images Group (col-lg-6) */}
-                    <div className="lg:w-1/2 relative">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-4 pt-12">
-                                <FAQImage src="/p2p/hero-main.jpg" height="h-64" />
-                                <FAQImage src="/p2p/sandra-about.jpg" height="h-48" />
-                            </div>
-                            <div className="space-y-4">
-                                <FAQImage src="/p2p/sandra-portrait.jpg" height="h-48" />
-                                <FAQImage src="/p2p/hero-main.jpg" height="h-64" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Content (col-lg-6) */}
-                    <div className="lg:w-1/2">
-                        <div className="mb-12">
-                            <h2 className="text-4xl md:text-5xl font-serif font-bold text-p2p-charcoal mb-4 italic leading-tight">
-                                The most popular questions to discuss mental health
-                            </h2>
-                        </div>
-
-                        <div className="space-y-4">
-                            {faqs.map((faq, index) => (
-                                <div
-                                    key={index}
-                                    className={`rounded-3xl border transition-all duration-500 overflow-hidden ${
-                                        activeIndex === index ? "border-p2p-sage bg-white shadow-xl" : "border-p2p-soft-green/30 bg-white/50"
-                                    }`}
+        <section className="faq_section section_space_lg">
+            <div className="container">
+                <div className="section_heading text-center">
+                    <h2 className="section_heading_text">Frequently Asked Questions</h2>
+                </div>
+                <div className="accordion" id="faq_accordion">
+                    {faqs.map((faq, index) => (
+                        <div key={index} className="accordion-item">
+                            <h2 className="accordion-header">
+                                <button 
+                                    className={`accordion-button ${activeIndex === index ? "" : "collapsed"}`} 
+                                    type="button"
+                                    onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+                                    aria-expanded={activeIndex === index}
                                 >
-                                    <button
-                                        onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                                        className="w-full flex items-center justify-between p-8 text-left outline-none"
-                                    >
-                                        <span className="text-lg font-serif font-bold text-p2p-charcoal">{faq.question}</span>
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
-                                            activeIndex === index ? "bg-p2p-sage text-white" : "bg-p2p-soft-green text-p2p-sage"
-                                        }`}>
-                                            {activeIndex === index ? <Minus size={18} /> : <Plus size={18} />}
-                                        </div>
-                                    </button>
-
-                                    <AnimatePresence>
-                                        {activeIndex === index && (
-                                            <motion.div
-                                                initial={{ height: 0, opacity: 0 }}
-                                                animate={{ height: "auto", opacity: 1 }}
-                                                exit={{ height: 0, opacity: 0 }}
-                                                transition={{ duration: 0.3 }}
-                                            >
-                                                <div className="px-8 pb-8 text-gray-500 font-medium leading-relaxed">
-                                                    {faq.answer}
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                                    {faq.question}
+                                </button>
+                            </h2>
+                            <div className={`accordion-collapse collapse ${activeIndex === index ? "show" : ""}`}>
+                                <div className="accordion-body">
+                                    {faq.answer}
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    </div>
-
+                    ))}
                 </div>
             </div>
         </section>
     );
 }
 
-function FAQImage({ src, height }: { src: string; height: string }) {
-    return (
-        <div className={`relative ${height} rounded-[32px] overflow-hidden shadow-xl`}>
-            <Image src={src} alt="FAQ Visual" fill className="object-cover" />
-        </div>
-    );
-}
+export default FAQSection;
