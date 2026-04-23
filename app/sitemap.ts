@@ -4,7 +4,8 @@ import { api } from "@/convex/_generated/api";
 import { JoinedArticle } from "@/components/blog-grid";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com";
+  const rawBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com";
+  const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
 
   // Fetch articles
   const articlesResult = await fetchQuery(api.articles.list, {
@@ -14,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const articleUrls = articles.map((article) => ({
     url: `${baseUrl}/blog/${article.slug}`,
-    lastModified: new Date(article.updatedAt || article.publishedAt || Date.now()),
+    lastModified: new Date(article.publishedAt || article.updatedAt || Date.now()),
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));

@@ -6,7 +6,7 @@ import Script from "next/script";
  * GTM Container ID
  * This is hardcoded as per user request to use the provided ID.
  */
-const GTM_ID = "GTM-5776WXM2";
+const GTM_ID = "GTM-KNJ52RTK";
 
 /**
  * GTMHead component to be placed as high as possible in the <head> of the page.

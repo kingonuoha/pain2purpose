@@ -226,8 +226,9 @@ async function runSeedArticles(ctx: MutationCtx) {
       uniqueViewCount: (post.publishedAt || 0) > 1767225600000
           ? Math.floor(Math.random() * 30) + 10
           : Math.floor(Math.random() * 100) + 50,
-      readingTime: post.readingTime,      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      readingTime: post.readingTime,
+      createdAt: post.publishedAt || Date.now(),
+      updatedAt: post.publishedAt || Date.now(),
       isFeatured: post.isFeatured,
       isArchived: post.isArchived,
     };
