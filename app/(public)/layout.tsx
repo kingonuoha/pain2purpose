@@ -20,6 +20,7 @@ import { Toaster } from "sonner";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { ThemeShortcut } from "@/components/theme-shortcut";
 import Script from "next/script";
+import { GTMBody, GTMHead } from "@/components/google-tag-manager";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -83,8 +84,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+         <GTMHead/>
       </head>
       <body className={`${dmSans.variable} ${playfair.variable}`}>
+        <GTMBody/>
         <ConvexClientProvider>
           <SmoothScroll>
             <Suspense fallback={null}>
