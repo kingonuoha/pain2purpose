@@ -13,6 +13,7 @@ const ICON_MAP: Record<string, string> = {
     "anxiety": "/assets/images/icons/icon_brain_plus.svg",
     "trauma": "/assets/images/icons/icon_head_plus.svg",
     "growth": "/assets/images/icons/icon_head_children.svg",
+    "autism": "/assets/images/icons/icon_brain.svg",
 };
 
 export function ServicesGrid() {

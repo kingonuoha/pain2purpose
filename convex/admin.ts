@@ -12,6 +12,7 @@ export const getDashboardStats = query({
   args: {},
   handler: async (ctx) => {
     const stats = await ctx.db.query("globalStats").first();
+    const testimonialCount = await ctx.db.query("testimonials").collect();
     
     if (!stats) {
       return {
@@ -21,6 +22,7 @@ export const getDashboardStats = query({
         totalUniqueViews: 0,
         totalReach: 0,
         pendingCommentsCount: 0,
+        testimonialCount: testimonialCount.length,
       };
     }
 
@@ -37,6 +39,7 @@ export const getDashboardStats = query({
       totalUniqueViews: stats.totalUniqueViews,
       totalReach: 0, // visitorTracking is too large to .collect(), needs a counter
       pendingCommentsCount: stats.pendingCommentsCount,
+      testimonialCount: testimonialCount.length,
     };
   },
 });

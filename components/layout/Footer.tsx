@@ -2,8 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export function Footer() {
+    const settings = useQuery(api.site_settings.getSiteSettings);
+    const currentYear = new Date().getFullYear();
+
+    const socialLinks = [
+        { icon: "fa-facebook-f", url: settings?.socials?.facebook },
+        { icon: "fa-instagram", url: settings?.socials?.instagram },
+        { icon: "fa-twitter", url: settings?.socials?.twitter },
+        { icon: "fa-whatsapp", url: settings?.phone ? `https://wa.me/${settings.phone.replace(/[^0-9]/g, '')}` : null },
+    ].filter(link => link.url);
+
     return (
         <footer className="site_footer bg_primary">
             <div className="container">
@@ -62,16 +74,19 @@ export function Footer() {
                         </div>
                         <div className="col-lg-3">
                             <ul className="social_links unordered_list justify-content-center justify-content-lg-end">
-                                <li><a href="#!"><i className="fa-brands fa-facebook-f"></i></a></li>
-                                <li><a href="#!"><i className="fa-brands fa-instagram"></i></a></li>
-                                <li><a href="#!"><i className="fa-brands fa-twitter"></i></a></li>
-                                <li><a href="#!"><i className="fa-brands fa-whatsapp"></i></a></li>
+                                {socialLinks.map((link, idx) => (
+                                    <li key={idx}>
+                                        <a href={link.url || '#!'} target="_blank" rel="noopener noreferrer">
+                                            <i className={`fa-brands ${link.icon}`}></i>
+                                        </a>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div className="copyright_widget text-center">
-                    <p className="copyright_text m-0">© <b>Pain2Purpose</b> Template All rights reserved Copyrights 2025</p>
+                    <p className="copyright_text m-0">© <b>Pain2Purpose</b> All rights reserved Copyrights 2021 - {currentYear}</p>
                 </div>
             </div>
         </footer>

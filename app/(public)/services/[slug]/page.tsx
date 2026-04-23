@@ -74,30 +74,15 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                                 />
 
                                 <div className="row mb-5">
-                                    <div className="col-md-6">
+                                    <div className="col-md-12">
                                         <div className="service_author">
                                             <div className="author_image">
-                                                <Image src="/assets/images/meta/author_image_3-min.png" alt="Sandra Opara" width={100} height={100} />
+                                                <Image src="/assets/images/new_pics/sandra-square (1).png" alt="Sandra Opara" width={100} height={100} className="object-cover aspect-square" />
                                             </div>
                                             <div className="author_content">
                                                 <h4 className="author_name">Sandra Opara</h4>
                                                 <span className="author_designation">Therapist</span>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="service_cost_info">
-                                            <h4 className="title_text">Service Cost:</h4>
-                                            <ul className="info_list unordered_list_block">
-                                                <li>
-                                                    <span className="info_icon"><i className="fa-solid fa-circle-check"></i></span>
-                                                    <span className="info_text">Initial Consultation: Free</span>
-                                                </li>
-                                                <li>
-                                                    <span className="info_icon"><i className="fa-solid fa-circle-check"></i></span>
-                                                    <span className="info_text">Standard Session: £50 - £80</span>
-                                                </li>
-                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -216,6 +201,16 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
                                 <div className="sidebar_widget bg_primary_light">
                                     <div className="contact_info_box">
+                                        <div className="author_image_sidebar mb-4">
+                                            <Image 
+                                                src="/assets/images/new_pics/sandra-square (9).png" 
+                                                alt="Sandra Opara" 
+                                                width={400} 
+                                                height={400} 
+                                                className="rounded-[30px] shadow-sm" 
+                                                style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+                                            />
+                                        </div>
                                         <h3 className="sidebar_widget_title">
                                             <span className="title_icon">
                                                 <Image src="/assets/images/site_logo/favourite_icon.svg" alt="Icon" width={20} height={20} />
@@ -223,7 +218,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                                             <span className="title_text">Need Urgent Support?</span>
                                         </h3>
                                         <p>
-                                            If you&apos;re in crisis or need immediate assistance, please reach out directly.
+                                            If you&apos;re in crisis or need immediate assistance, please reach out directly. I am here to support you.
                                         </p>
                                         <ul className="contact_info_list unordered_list_block">
                                             <li>

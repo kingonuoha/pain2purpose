@@ -27,10 +27,12 @@ import type * as otp from "../otp.js";
 import type * as pillars from "../pillars.js";
 import type * as quotes from "../quotes.js";
 import type * as seed from "../seed.js";
+import type * as seeds_articles_data from "../seeds/articles_data.js";
 import type * as seeds_seedBlogPosts from "../seeds/seedBlogPosts.js";
 import type * as services from "../services.js";
 import type * as site_settings from "../site_settings.js";
 import type * as stats from "../stats.js";
+import type * as testimonials from "../testimonials.js";
 import type * as users from "../users.js";
 
 import type {
@@ -59,10 +61,12 @@ declare const fullApi: ApiFromModules<{
   pillars: typeof pillars;
   quotes: typeof quotes;
   seed: typeof seed;
+  "seeds/articles_data": typeof seeds_articles_data;
   "seeds/seedBlogPosts": typeof seeds_seedBlogPosts;
   services: typeof services;
   site_settings: typeof site_settings;
   stats: typeof stats;
+  testimonials: typeof testimonials;
   users: typeof users;
 }>;
 

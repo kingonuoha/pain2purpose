@@ -21,9 +21,9 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
                     {children}
                     <ProgressBar
                         height="4px"
-                        color="#3b82f6"
-                        options={{ showSpinner: true }}
-                        shallowRouting={false}
+                        color="#2D5A50"
+                        options={{ showSpinner: false }}
+                        shallowRouting={true}
                     />
                 </ThemeProvider>
             </ConvexProvider>

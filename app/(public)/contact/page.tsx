@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -17,10 +17,22 @@ const contactSchema = z.object({
     message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
+interface SiteSettings {
+    phone?: string;
+    email?: string;
+    address?: string;
+    socials?: {
+        facebook?: string;
+        instagram?: string;
+        twitter?: string;
+    };
+}
+
 type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function ContactPage() {
     const submitContact = useMutation(api.contact.submit);
+    const settings = useQuery(api.site_settings.getSiteSettings) as SiteSettings | undefined;
     
     const {
         register,
@@ -45,6 +57,13 @@ export default function ContactPage() {
             console.error(error);
         }
     };
+
+    const socialLinks = [
+        { icon: "fa-facebook-f", url: settings?.socials?.facebook },
+        { icon: "fa-instagram", url: settings?.socials?.instagram },
+        { icon: "fa-twitter", url: settings?.socials?.twitter },
+        { icon: "fa-whatsapp", url: settings?.phone ? `https://wa.me/${settings.phone.replace(/[^0-9]/g, '')}` : null },
+    ].filter(link => link.url);
 
     return (
         <main className="page_content">
@@ -138,18 +157,20 @@ export default function ContactPage() {
                                                     </div>
                                                     <div className="item_content">
                                                         <h3 className="item_title">Phone Number</h3>
-                                                        <p className="item_info mb-0">08033444411</p>
+                                                        <p className="item_info mb-0">{settings?.phone || "08033444411"}</p>
                                                     </div>
                                                 </li>
-                                                <li>
-                                                    <div className="item_icon">
-                                                        <i className="fa-solid fa-fax"></i>
-                                                    </div>
-                                                    <div className="item_content">
-                                                        <h3 className="item_title">Fax</h3>
-                                                        <p className="item_info mb-0">08033444411</p>
-                                                    </div>
-                                                </li>
+                                                {settings?.address && (
+                                                    <li>
+                                                        <div className="item_icon">
+                                                            <i className="fa-solid fa-location-dot"></i>
+                                                        </div>
+                                                        <div className="item_content">
+                                                            <h3 className="item_title">Office</h3>
+                                                            <p className="item_info mb-0">{settings.address}</p>
+                                                        </div>
+                                                    </li>
+                                                )}
                                             </ul>
                                         </div>
                                         <div className="col-md-6">
@@ -160,7 +181,7 @@ export default function ContactPage() {
                                                     </div>
                                                     <div className="item_content">
                                                         <h3 className="item_title">Email</h3>
-                                                        <p className="item_info mb-0">sandra@counsellingp2p.com</p>
+                                                        <p className="item_info mb-0">{settings?.email || "sandra@counsellingp2p.com"}</p>
                                                     </div>
                                                 </li>
                                                 <li>
@@ -177,10 +198,13 @@ export default function ContactPage() {
                                     </div>
                                     <h3 className="social_title">Follow Us:</h3>
                                     <ul className="social_links unordered_list">
-                                        <li><a className="bg-primary" href="#!"><i className="fa-brands fa-facebook-f"></i></a></li>
-                                        <li><a className="bg-primary" href="#!"><i className="fa-brands fa-instagram"></i></a></li>
-                                        <li><a className="bg-primary" href="#!"><i className="fa-brands fa-twitter"></i></a></li>
-                                        <li><a className="bg-primary" href="#!"><i className="fa-brands fa-whatsapp"></i></a></li>
+                                        {socialLinks.map((link, idx) => (
+                                            <li key={idx}>
+                                                <a className="bg-primary" href={link.url || '#!'} target="_blank" rel="noopener noreferrer">
+                                                    <i className={`fa-brands ${link.icon}`}></i>
+                                                </a>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             </div>

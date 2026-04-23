@@ -48,6 +48,7 @@ const NAV_GROUPS = [
         label: "Community",
         items: [
             { name: "Users", href: "/admin/users", icon: Users },
+            { name: "Testimonials", href: "/admin/testimonials", icon: Sparkles },
             { name: "Moderation", href: "/admin/comments", icon: MessageSquare },
             { name: "Emails", href: "/admin/emails", icon: Mail },
         ]

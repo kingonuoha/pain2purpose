@@ -10,6 +10,7 @@ import "../../public/assets/css/slick-theme.min.css";
 import "../../public/assets/css/magnific-popup.min.css";
 import "../../public/assets/css/odometer.min.css";
 import "../../public/assets/css/style.css";
+import "./public.css";
 import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { AuthRedirect } from "@/components/auth-redirect";
 import { Navbar } from "@/components/layout/Navbar";
@@ -65,11 +66,14 @@ export const metadata: Metadata = {
     images: ["/p2p-og-image.png"],
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/p2p/logo.png", type: "image/png" },
+    ],
+    shortcut: "/p2p/logo.png",
+    apple: "/p2p/logo.png",
   },
 };
+
 
 export default function RootLayout({
   children,

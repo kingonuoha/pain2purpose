@@ -35,6 +35,30 @@ body {
   min-height: 100vh;
 }
 
+/* Fix: Tailwind preflight strips Bootstrap navbar/collapse behavior */
+.navbar-collapse {
+  display: none !important;
+}
+@media (min-width: 992px) {
+  .navbar-collapse {
+    display: flex !important;
+  }
+}
+.navbar-collapse.show {
+  display: block !important;
+}
+.main_menu_list > li > a,
+.main_menu_list > li > a.nav-link {
+  color: var(--bs-dark, #293039) !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.main_menu_list > li:hover > a,
+.main_menu_list > li.active > a {
+  color: var(--bs-primary, #7c9a7e) !important;
+}
+
 html.lenis {
   height: auto;
 }
@@ -161,6 +185,61 @@ h6 {
   .category-badge {
     @apply text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm;
     background: var(--primary-gradient);
+  }
+
+  /* Bootstrap Overrides for Template Consistency */
+  .btn-primary {
+    background-color: var(--p2p-sage) !important;
+    border-color: var(--p2p-sage) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    font-size: 12px !important;
+  }
+
+  .btn-primary:hover {
+    background-color: #6b886d !important;
+    border-color: #6b886d !important;
+    box-shadow: 0 10px 20px rgba(124, 154, 126, 0.3) !important;
+  }
+
+  .form-control, .form-select {
+    @apply !rounded-xl !border-border !bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all !py-3 !px-4;
+  }
+
+  .accordion-button:not(.collapsed) {
+    @apply !bg-primary/5 !text-primary;
+  }
+  
+  .accordion-button:focus {
+    @apply !shadow-none !border-primary/20;
+  }
+
+  /* Premium Comment Styling */
+  .comment_item {
+    @apply !bg-white !p-6 md:!p-8 !rounded-[2rem] !border !border-border !shadow-sm !mb-6 transition-all hover:shadow-md;
+  }
+  
+  .author_box_image {
+    overflow: hidden !important;
+  }
+  .author_box_image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .author_box_name {
+    @apply !font-serif !text-xl !font-black !text-p2p-charcoal !mb-1;
+  }
+
+  .comment_post_date {
+    @apply !text-xs !font-bold !uppercase !tracking-widest !text-muted-foreground !opacity-60;
+  }
+
+  .btn_reply {
+    @apply !flex !items-center !gap-2 !mt-4 !text-p2p-sage !font-bold !uppercase !tracking-widest !text-[10px] hover:opacity-70 transition-opacity;
   }
 }
 

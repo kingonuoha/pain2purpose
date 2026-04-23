@@ -63,7 +63,7 @@ export default async function Home() {
 
       <AboutTeaser />
 
-      <TestimonialSection />
+      {/* <TestimonialSection /> */}
 
       <ConsultationSection />
 
