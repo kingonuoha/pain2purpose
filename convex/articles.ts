@@ -45,6 +45,7 @@ export const list = query({
     categoryId: v.optional(v.id("categories")),
     pillar: v.optional(v.string()),
     type: v.optional(v.string()),
+    tag: v.optional(v.string()),
     _test: v.optional(v.string()), // Kept for compat
   },
   handler: async (ctx, args) => {
@@ -60,7 +61,7 @@ export const list = query({
 
     // Apply native DB filters
     const qBase = articleQuery.filter((q) => {
-      const conditions: ReturnType<typeof q.eq>[] = [];
+      const conditions = [];
       conditions.push(q.neq(q.field("isArchived"), true));
       
       if (args.categoryId) {
@@ -79,8 +80,16 @@ export const list = query({
 
     const result = await qBase.order("desc").paginate(args.paginationOpts);
 
+    // Filter by tag in JS since Convex doesn't support array-contains in filters natively
+    let filteredPage = result.page;
+    if (args.tag) {
+        filteredPage = filteredPage.filter(a => 
+            a.tags?.some(t => t.toLowerCase().replace(/\s+/g, '-') === args.tag!.toLowerCase())
+        );
+    }
+
     const projectedPage = await Promise.all(
-      result.page.map(async (article) => {
+      filteredPage.map(async (article) => {
         const author = await ctx.db.get(article.authorId);
         const category = article.categoryId
           ? await ctx.db.get(article.categoryId)

@@ -13,6 +13,7 @@ interface BlogGridProps {
     categoryId?: Id<"categories">;
     pillar?: string;
     type?: string;
+    tag?: string;
 }
 
 export type JoinedArticle = {
@@ -36,10 +37,10 @@ export type JoinedArticle = {
     readingTime?: number;
 };
 
-export function BlogGrid({ categoryId, pillar, type, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
+export function BlogGrid({ categoryId, pillar, type, tag, initialArticles }: BlogGridProps & { initialArticles?: JoinedArticle[] }) {
     const { results, status, loadMore } = usePaginatedQuery(
         api.articles.list,
-        { categoryId, pillar, type },
+        { categoryId, pillar, type, tag },
         { initialNumItems: initialArticles?.length || 6 }
     );
 

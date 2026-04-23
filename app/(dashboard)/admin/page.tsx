@@ -138,13 +138,11 @@ export default function AdminDashboard() {
                     delay={0.3}
                 />
                 <StatCard
-                    label="New Reflections"
-                    value={stats.pendingCommentsCount.toString()}
-                    subValue="Needs Moderation"
-                    icon={MessageSquare}
-                    trend="-2.1%"
-                    trendUp={false}
-                    color="sand"
+                    label="Success Stories"
+                    value={stats.testimonialCount.toString()}
+                    subValue="Active Testimonials"
+                    icon={Sparkles}
+                    color="sage"
                     delay={0.4}
                 />
             </div>

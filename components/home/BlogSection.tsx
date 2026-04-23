@@ -24,7 +24,7 @@ export function BlogSection() {
                     {articles.map((article) => (
                         <div key={article._id} className="col-lg-4 col-md-6 col-sm-6">
                             <div className="blog_item">
-                                <Link className="item_image" href={`/blog/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: 'var(--bs-border-radius)' }}>
+                                <Link className="blog_image_wrap" href={`/blog/${article.slug}`}>
                                     <Image
                                         src={(article.coverImage && (article.coverImage.startsWith('/') || article.coverImage.startsWith('http'))) ? article.coverImage : "/assets/images/blogs/blog_image_1-min.jpg"}
                                         alt={article.title}
@@ -33,7 +33,7 @@ export function BlogSection() {
                                         style={{ width: '100%', height: '280px', objectFit: 'cover', display: 'block' }}
                                     />
                                 </Link>
-                                <div className="item_content">
+                                <div className="blog_content">
                                     <div className="author_byline d-flex align-items-center mb-3">
                                         <div className="author_image me-2">
                                             <Image 
@@ -55,7 +55,7 @@ export function BlogSection() {
                                         <Link href={`/blog/${article.slug}`}>{article.title}</Link>
                                     </h3>
                                     <Link className="btn-link" href={`/blog/${article.slug}`}>
-                                        <span className="btn_text">Read More</span>
+                                        <span className="btn_text" data-text="Read More">Read More</span>
                                         <span className="btn_icon"><i className="fa-solid fa-arrow-up-right"></i></span>
                                     </Link>
                                 </div>

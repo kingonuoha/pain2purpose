@@ -14,25 +14,29 @@ const QUOTES = [
         text: "Love is the bridge between you and everything.",
         author: "Rumi",
         topic: "Love",
-        icon: <Heart className="text-red-400" size={24} />
+        icon: <Heart className="text-red-400" size={24} />,
+        image: "/assets/images/new_pics/sandra- (1).png"
     },
     {
         text: "Family is not an important thing. It's everything.",
         author: "Michael J. Fox",
         topic: "Family",
-        icon: <Users className="text-blue-400" size={24} />
+        icon: <Users className="text-blue-400" size={24} />,
+        image: "/assets/images/new_pics/sandra- (2).png"
     },
     {
         text: "The good life is a process, not a state of being.",
         author: "Carl Rogers",
         topic: "Life",
-        icon: <Sun className="text-yellow-400" size={24} />
+        icon: <Sun className="text-yellow-400" size={24} />,
+        image: "/assets/images/new_pics/sandra- (3).png"
     },
     {
         text: "Healing takes courage, and we all have courage, even if we have to dig a little to find it.",
         author: "Tori Amos",
         topic: "Friends",
-        icon: <LifeBuoy className="text-p2p-sage" size={24} />
+        icon: <LifeBuoy className="text-p2p-sage" size={24} />,
+        image: "/assets/images/new_pics/sandra- (4).png"
     }
 ];
 
@@ -110,16 +114,11 @@ export default function SignInPage() {
                         {/* Placeholder for images - User will provide actual paths */}
                         <div className="w-full h-full bg-gray-200 dark:bg-gray-900 animate-pulse">
                             <Image
-                                src={`/assets/images/placeholders/login-bg-${currentQuote + 1}.jpg`}
+                                src={QUOTES[currentQuote].image}
                                 alt="Inspirational background"
                                 fill
                                 className="object-cover"
                                 priority
-                                onError={(e) => {
-                                    // Fallback to a gradient if image not found
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a1a1a'/%3E%3Cstop offset='100%25' stop-color='%23333333'/%3E%3C/linearGradient%3E%3Crect width='100%25' height='100%25' fill='url(%23g)'/%3E%3C/svg%3E";
-                                }}
                             />
                         </div>
                     </motion.div>

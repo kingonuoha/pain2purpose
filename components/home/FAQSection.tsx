@@ -27,29 +27,51 @@ export function FAQSection() {
     return (
         <section className="faq_section section_space_lg">
             <div className="container">
-                <div className="section_heading text-center">
-                    <h2 className="section_heading_text">Frequently Asked Questions</h2>
-                </div>
-                <div className="accordion" id="faq_accordion">
-                    {faqs.map((faq, index) => (
-                        <div key={index} className="accordion-item">
-                            <h2 className="accordion-header">
-                                <button 
-                                    className={`accordion-button ${activeIndex === index ? "" : "collapsed"}`} 
-                                    type="button"
-                                    onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                                    aria-expanded={activeIndex === index}
-                                >
-                                    {faq.question}
-                                </button>
-                            </h2>
-                            <div className={`accordion-collapse collapse ${activeIndex === index ? "show" : ""}`}>
-                                <div className="accordion-body">
-                                    {faq.answer}
-                                </div>
+                <div className="row align-items-center">
+                    <div className="col-lg-6">
+                        <div className="images_group_widget">
+                            <ul className="unordered_list">
+                                <li>
+                                    <img src="/assets/images/faq/faq_img_1.png" alt="Counseling Session" />
+                                    <img src="/assets/images/faq/faq_img_2.png" alt="Therapy Space" />
+                                </li>
+                                <li>
+                                    <img src="/assets/images/faq/faq_img_3.png" alt="Growth and Healing" />
+                                    <img src="/assets/images/faq/faq_img_4.png" alt="Professional Support" />
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="col-lg-6">
+                        <div className="ps-lg-5">
+                            <div className="section_heading mb-lg-4 mb-2">
+                                <h2 className="section_heading_text mb-0">
+                                    Frequently Asked Questions
+                                </h2>
+                            </div>
+                            <div className="accordion" id="faq_accordion">
+                                {faqs.map((faq, index) => (
+                                    <div key={index} className="accordion-item">
+                                        <h2 className="accordion-header">
+                                            <button 
+                                                className={`accordion-button ${activeIndex === index ? "" : "collapsed"}`} 
+                                                type="button"
+                                                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+                                                aria-expanded={activeIndex === index}
+                                            >
+                                                {faq.question}
+                                            </button>
+                                        </h2>
+                                        <div className={`accordion-collapse collapse ${activeIndex === index ? "show" : ""}`}>
+                                            <div className="accordion-body">
+                                                <p className="m-0">{faq.answer}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
         </section>

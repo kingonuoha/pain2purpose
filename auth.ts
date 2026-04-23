@@ -91,9 +91,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
+  session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin",
   },
+  trustHost: true,
   debug: process.env.NODE_ENV === "development",
 });
 

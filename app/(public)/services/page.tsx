@@ -42,17 +42,24 @@ export default function ServicesPage() {
                     <div className="row align-items-center justify-content-lg-between">
                         <div className="col-lg-6 order-lg-last">
                             <div className="image_widget ps-lg-4">
-                                <Image src="/assets/images/about/about_image_10-min.jpg" alt="About Therapy" width={600} height={400} className="img-fluid" />
+                                <Image 
+                                    src="/assets/images/new_pics/sandra- (13).png" 
+                                    alt="Sandra Opara - Personalized Therapy" 
+                                    width={600} 
+                                    height={400} 
+                                    className="img-fluid shadow-lg" 
+                                    style={{ borderRadius: '0 80px 0 80px', objectFit: 'cover' }}
+                                />
                             </div>
                         </div>
                         <div className="col-lg-6">
                             <div className="about_content">
                                 <div className="section_heading mb-lg-5">
-                                    <h2 className="section_heading_text">
-                                        Personalized Therapy
+                                    <h2 className="section_heading_text italic">
+                                        Personalized Therapy from a <span className="text-[#7C9A7E]">Compassionate Expert</span>
                                     </h2>
                                     <p className="section_heading_description mb-0">
-                                        Our practice offers a range of specialized counseling services designed to meet you exactly where you are. We combine evidence-based techniques with deep compassion.
+                                        My practice offers a range of specialized counseling services designed to meet you exactly where you are. We combine evidence-based techniques with deep compassion to support your unique journey of healing and growth.
                                     </p>
                                 </div>
                                 <div className="row">
@@ -65,7 +72,7 @@ export default function ServicesPage() {
                                                 <h3 className="item_title">Compassionate Care</h3>
                                             </div>
                                             <p className="mb-0">
-                                                We lead with empathy, ensuring you feel seen, heard, and valued.
+                                                I lead with empathy, ensuring you feel seen, heard, and valued in every session.
                                             </p>
                                         </div>
                                     </div>
@@ -78,7 +85,7 @@ export default function ServicesPage() {
                                                 <h3 className="item_title">Ongoing Support</h3>
                                             </div>
                                             <p className="mb-0">
-                                                Consistent support to navigate your healing journey.
+                                                Consistent, professional support to navigate your healing journey at your own pace.
                                             </p>
                                         </div>
                                     </div>
@@ -91,7 +98,7 @@ export default function ServicesPage() {
                                                 <h3 className="item_title">Holistic Approach</h3>
                                             </div>
                                             <p className="mb-0">
-                                                We address the mind, body, and spirit for lasting healing.
+                                                Addressing the mind, body, and spirit for comprehensive and lasting healing.
                                             </p>
                                         </div>
                                     </div>
@@ -104,7 +111,7 @@ export default function ServicesPage() {
                                                 <h3 className="item_title">Confidentiality</h3>
                                             </div>
                                             <p className="mb-0">
-                                                A safe environment to express your truths without judgment.
+                                                A safe environment to express your truths without judgment or breach of trust.
                                             </p>
                                         </div>
                                     </div>
@@ -125,6 +132,57 @@ export default function ServicesPage() {
                 </div>
             </section>
             {/* About Section - End */}
+
+            {/* Why Sandra Section - Start */}
+            <section className="why_choose_section section_space_lg">
+                <div className="container">
+                    <div className="row align-items-center">
+                        <div className="col-lg-6">
+                            <div className="image_widget pe-lg-4">
+                                <Image 
+                                    src="/assets/images/new_pics/sandra- (6).png" 
+                                    alt="Sandra Opara - Expert Counselling" 
+                                    width={600} 
+                                    height={400} 
+                                    className="img-fluid" 
+                                    style={{ borderRadius: '80px 0 80px 0', objectFit: 'cover' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-lg-6">
+                            <div className="about_content">
+                                <div className="section_heading mb-lg-5">
+                                    <h2 className="section_heading_text italic">
+                                        Expert Counselling For <span className="text-[#7C9A7E]">Life&apos;s Challenges</span>
+                                    </h2>
+                                    <p className="section_heading_description">
+                                        I specialize in helping individuals and families navigate the most difficult moments of their lives. Whether you are dealing with grief, trauma, or the complexities of neurodivergence in the family, I am here to guide you toward purpose and peace.
+                                    </p>
+                                </div>
+                                <ul className="info_list unordered_list_block">
+                                    <li className="mb-3">
+                                        <span className="info_icon text-[#7C9A7E] mr-3"><i className="fa-solid fa-circle-check"></i></span>
+                                        <span className="info_text">Safe, Non-judgmental Environment</span>
+                                    </li>
+                                    <li className="mb-3">
+                                        <span className="info_icon text-[#7C9A7E] mr-3"><i className="fa-solid fa-circle-check"></i></span>
+                                        <span className="info_text">Tailored Therapeutic Strategies</span>
+                                    </li>
+                                    <li className="mb-3">
+                                        <span className="info_icon text-[#7C9A7E] mr-3"><i className="fa-solid fa-circle-check"></i></span>
+                                        <span className="info_text">Support for All Life Transitions</span>
+                                    </li>
+                                    <li className="mb-3">
+                                        <span className="info_icon text-[#7C9A7E] mr-3"><i className="fa-solid fa-circle-check"></i></span>
+                                        <span className="info_text">Focus on Long-term Empowerment</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {/* Why Sandra Section - End */}
 
             {/* Work Process Section - Start */}
             <section className="work_process_section section_space_lg">

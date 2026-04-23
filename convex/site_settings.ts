@@ -13,6 +13,7 @@ export const getSiteSettings = query({
           "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through life's complex journeys.",
         email: "enquiries@counsellingp2p.com",
         phone: "",
+        address: "",
         socials: {
           facebook: "",
           twitter: "",

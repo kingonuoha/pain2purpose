@@ -22,6 +22,7 @@ export default defineSchema({
     profileImage: v.optional(v.string()), // Cloudinary URL
     provider: v.string(), // google/email
     role: v.union(v.literal("admin"), v.literal("user")),
+    phone: v.optional(v.string()),
     emailVerified: v.optional(v.boolean()),
     newsletterSubscribed: v.boolean(),
     emailConfirmed: v.optional(v.boolean()),
@@ -286,6 +287,16 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_createdAt", ["createdAt"]),
+
+  testimonials: defineTable({
+    name: v.string(),
+    role: v.string(),
+    content: v.string(),
+    rating: v.number(),
+    avatar: v.optional(v.string()),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+  }).index("by_active", ["isActive"]),
 });
 
 

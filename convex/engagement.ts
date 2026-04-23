@@ -57,15 +57,68 @@ export const toggleBookmark = mutation({
 export const addComment = mutation({
   args: {
     articleId: v.id("articles"),
-    userEmail: v.string(),
     content: v.string(),
     parentId: v.optional(v.id("comments")),
+    guestInfo: v.optional(v.object({
+      name: v.string(),
+      email: v.string(),
+      phone: v.optional(v.string()),
+    })),
+    userEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.userEmail))
-      .unique();
+    let user;
+    
+    if (args.userEmail) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.userEmail!))
+        .unique();
+    } else if (args.guestInfo) {
+      const existing = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.guestInfo!.email))
+        .unique();
+      
+      if (existing) {
+        if (existing.provider === "google" || existing.password) {
+          throw new Error("This email is already registered. Please sign in to comment.");
+        }
+        user = existing;
+      } else {
+        // Create guest user
+        const userId = await ctx.db.insert("users", {
+          name: args.guestInfo.name,
+          email: args.guestInfo.email,
+          phone: args.guestInfo.phone,
+          provider: "email",
+          role: "user",
+          newsletterSubscribed: false,
+          createdAt: Date.now(),
+        });
+        user = await ctx.db.get(userId);
+
+        // Update globalStats
+        await ctx.scheduler.runAfter(0, internal.stats.incrementStats, {
+          update: { usersCount: 1 },
+        });
+
+        // Notify user to complete registration (placeholder for now)
+        await ctx.db.insert("emailQueue", {
+          recipient: args.guestInfo.email,
+          subject: "Finish your Pain2Purpose account creation",
+          templateName: "guest_welcome",
+          templateData: {
+            name: args.guestInfo.name,
+            siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com",
+          },
+          status: "pending",
+          scheduledFor: Date.now(),
+          retries: 0,
+        });
+      }
+    }
+
     if (!user) throw new Error("Unauthenticated");
 
     const commentId = await ctx.db.insert("comments", {
@@ -122,6 +175,7 @@ export const listComments = query({
           ...c,
           authorName: user?.name || "Unknown",
           authorImage: user?.profileImage,
+          authorRole: user?.role || "user",
         };
       }),
     );

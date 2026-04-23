@@ -2,6 +2,7 @@ import { ServicesGrid } from "@/components/home/ServicesGrid";
 import { ConsultationSection } from "@/components/home/ConsultationSection";
 import Link from "next/link";
 import Image from "next/image";
+import CertificateSection from "@/components/home/CertificateSection";
 
 export default function AboutPage() {
     return (
@@ -125,8 +126,8 @@ export default function AboutPage() {
                                 <Image 
                                     src="/assets/images/new_pics/sandra-square (11).png" 
                                     alt="Sandra Opara advocating for mental health awareness" 
-                                    width={600}
-                                    height={600}
+                                    width={600} 
+                                    height={600} 
                                     className="rounded-[30px] object-cover w-full shadow-2xl aspect-square"
                                 />
                             </div>
@@ -153,6 +154,7 @@ export default function AboutPage() {
             </section>
             {/* Speaking & Advocacy Section - End */}
 
+            <CertificateSection />
             {/* Work Process Section - Start */}
             <section className="work_process_section section_space_lg">
                 <div className="container">
@@ -161,12 +163,12 @@ export default function AboutPage() {
                             <div className="images_group_widget">
                                 <ul className="unordered_list">
                                     <li>
-                                        <Image src="/assets/images/about/about_image_6-min.png" alt="Counseling" width={300} height={300} className="rounded-[20px]" />
-                                        <Image src="/assets/images/about/about_image_7-min.png" alt="Counseling" width={300} height={300} className="rounded-[20px]" />
+                                        <Image src="/assets/images/new_pics/sandra-square (1).png" alt="Sandra Opara - Counseling" width={300} height={300} className="rounded-[20px]" />
+                                        <Image src="/assets/images/new_pics/sandra-square (14).png" alt="Sandra Opara - Therapy" width={300} height={300} className="rounded-[20px]" />
                                     </li>
                                     <li>
-                                        <Image src="/assets/images/about/about_image_8-min.png" alt="Counseling" width={300} height={300} className="rounded-[20px]" />
-                                        <Image src="/assets/images/about/about_image_9-min.png" alt="Counseling" width={300} height={300} className="rounded-[20px]" />
+                                        <Image src="/assets/images/new_pics/sandra-square (13).png" alt="Sandra Opara - Support" width={300} height={300} className="rounded-[20px]" />
+                                        <Image src="/assets/images/new_pics/sandra- (13).png" alt="Sandra Opara - Healing" width={300} height={300} className="rounded-[20px]" />
                                     </li>
                                 </ul>
                             </div>
