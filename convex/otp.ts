@@ -50,8 +50,8 @@ export const generateOtp = mutation({
       recipient: args.email,
       subject:
         args.type === "password_reset"
-          ? "Reset Your Password - The Pain2Purpose"
-          : "Verify Password Change - The Pain2Purpose",
+          ? "Reset Your Password - CounsellingP2P"
+          : "Verify Password Change - CounsellingP2P",
       templateName: "otp_verification",
       templateData: {
         otpCode: code,

@@ -19,8 +19,10 @@ const contactSchema = z.object({
 
 interface SiteSettings {
     phone?: string;
+    secondaryPhone?: string;
     email?: string;
     address?: string;
+    secondaryAddress?: string;
     socials?: {
         facebook?: string;
         instagram?: string;
@@ -157,20 +159,19 @@ export default function ContactPage() {
                                                     </div>
                                                     <div className="item_content">
                                                         <h3 className="item_title">Phone Number</h3>
-                                                        <p className="item_info mb-0">{settings?.phone || "08033444411"}</p>
+                                                        <p className="item_info mb-0">{settings?.phone || "08033444411"} (Whatspp only)</p>
+                                                        {settings?.secondaryPhone && <p className="item_info mb-0">{settings.secondaryPhone}</p>}
                                                     </div>
                                                 </li>
-                                                {settings?.address && (
-                                                    <li>
-                                                        <div className="item_icon">
-                                                            <i className="fa-solid fa-location-dot"></i>
-                                                        </div>
-                                                        <div className="item_content">
-                                                            <h3 className="item_title">Office</h3>
-                                                            <p className="item_info mb-0">{settings.address}</p>
-                                                        </div>
-                                                    </li>
-                                                )}
+                                                <li>
+                                                    <div className="item_icon">
+                                                        <i className="fa-solid fa-location-dot"></i>
+                                                    </div>
+                                                    <div className="item_content">
+                                                        <h3 className="item_title">Office</h3>
+                                                        <p className="item_info mb-0">{settings?.address || "10 Bishop okoye Street, Owerri, Imo State Nigeria."}</p>
+                                                    </div>
+                                                </li>
                                             </ul>
                                         </div>
                                         <div className="col-md-6">
@@ -181,7 +182,7 @@ export default function ContactPage() {
                                                     </div>
                                                     <div className="item_content">
                                                         <h3 className="item_title">Email</h3>
-                                                        <p className="item_info mb-0">{settings?.email || "sandra@counsellingp2p.com"}</p>
+                                                        <p className="item_info mb-0">{settings?.email || "info@counsellingp2p.com"}</p>
                                                     </div>
                                                 </li>
                                                 <li>
@@ -190,7 +191,7 @@ export default function ContactPage() {
                                                     </div>
                                                     <div className="item_content">
                                                         <h3 className="item_title">Location</h3>
-                                                        <p className="item_info mb-0">Lagos, Nigeria</p>
+                                                        <p className="item_info mb-0">{settings?.secondaryAddress || "Owerri, Nigeria"}</p>
                                                     </div>
                                                 </li>
                                             </ul>

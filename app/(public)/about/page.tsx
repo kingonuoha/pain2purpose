@@ -38,7 +38,7 @@ export default function AboutPage() {
                         <div className="col-lg-6 order-lg-last">
                             <div className="image_widget relative">
                                 <Image 
-                                    src="/assets/images/new_pics/sandra-square (10).png" 
+                                    src="/assets/images/new_pics/sandra-square (11).png" 
                                     alt="Sandra Opara speaking at a counselling event" 
                                     width={600}
                                     height={600}
@@ -124,7 +124,7 @@ export default function AboutPage() {
                         <div className="col-lg-6">
                             <div className="image_widget relative">
                                 <Image 
-                                    src="/assets/images/new_pics/sandra-square (11).png" 
+                                    src="/assets/images/new_pics/sandra-square (14).png" 
                                     alt="Sandra Opara advocating for mental health awareness" 
                                     width={600} 
                                     height={600} 

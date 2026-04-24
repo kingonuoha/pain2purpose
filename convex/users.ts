@@ -39,12 +39,12 @@ export const register = mutation({
     // Queue Welcome Email
     await ctx.db.insert("emailQueue", {
       recipient: args.email,
-      subject: "Welcome to The Pain2Purpose! 🎯",
+      subject: "Welcome to CounsellingP2P! 🎯",
       templateName: "welcome",
       templateData: {
         name: args.name,
-        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org",
-        unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
+        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com",
+        unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
       },
       status: "pending",
       scheduledFor: Date.now(),
@@ -101,13 +101,13 @@ export const store = mutation({
       // Queue Welcome Email for New OAuth User
       await ctx.db.insert("emailQueue", {
         recipient: args.email,
-        subject: "Welcome to The Pain2Purpose! 🎯",
+        subject: "Welcome to CounsellingP2P! 🎯",
         templateName: "welcome",
         templateData: {
           name: args.name,
           siteUrl:
-            process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org",
-          unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
+            process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com",
+          unsubscribeUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com"}/unsubscribe?email=${encodeURIComponent(args.email)}`,
         },
         status: "pending",
         scheduledFor: Date.now(),
@@ -209,10 +209,10 @@ export const subscribeToNewsletter = mutation({
     // Queue Confirmation Email
     await ctx.db.insert("emailQueue", {
       recipient: args.email,
-      subject: "Action Required: Confirm your subscription to The Pain2Purpose",
+      subject: "Action Required: Confirm your subscription to CounsellingP2P",
       templateName: "confirm_subscription",
       templateData: {
-        confirmUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/confirm-subscription?token=${token}`,
+        confirmUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com"}/confirm-subscription?token=${token}`,
       },
       status: "pending",
       scheduledFor: Date.now(),
@@ -270,7 +270,7 @@ export const updateProfile = mutation({
 
     if (!user) throw new Error("User not found");
 
-    const { email: _email, ...updateArgs } = args;
+    const { email: _, ...updateArgs } = args;
 
     await ctx.db.patch(user._id, {
       ...updateArgs,

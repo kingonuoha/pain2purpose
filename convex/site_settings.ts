@@ -13,7 +13,9 @@ export const getSiteSettings = query({
           "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through life's complex journeys.",
         email: "enquiries@counsellingp2p.com",
         phone: "",
+        secondaryPhone: "",
         address: "",
+        secondaryAddress: "",
         socials: {
           facebook: "",
           twitter: "",
@@ -36,7 +38,9 @@ export const updateSiteSettings = mutation({
     siteDescription: v.string(),
     email: v.string(),
     phone: v.optional(v.string()),
+    secondaryPhone: v.optional(v.string()),
     address: v.optional(v.string()),
+    secondaryAddress: v.optional(v.string()),
     socials: v.object({
       facebook: v.optional(v.string()),
       twitter: v.optional(v.string()),

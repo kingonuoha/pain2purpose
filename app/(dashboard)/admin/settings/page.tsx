@@ -62,6 +62,9 @@ export default function SettingsPage() {
         siteDescription: "",
         email: "",
         phone: "",
+        secondaryPhone: "",
+        address: "",
+        secondaryAddress: "",
         socials: {
             facebook: "",
             twitter: "",
@@ -89,6 +92,9 @@ export default function SettingsPage() {
                 siteDescription: settings.siteDescription || "",
                 email: settings.email || "",
                 phone: settings.phone || "",
+                secondaryPhone: settings.secondaryPhone || "",
+                address: settings.address || "",
+                secondaryAddress: settings.secondaryAddress || "",
                 socials: {
                     facebook: settings.socials?.facebook || "",
                     twitter: settings.socials?.twitter || "",
@@ -334,12 +340,12 @@ export default function SettingsPage() {
                                         value={form.email}
                                         onChange={e => setForm({ ...form, email: e.target.value })}
                                         className={cn(inputClasses, "pl-12")}
-                                        placeholder="admin@thePain2Purpose.org"
+                                        placeholder="info@counsellingp2p.com"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className={labelClasses}>Public Phone</label>
+                                <label className={labelClasses}>Primary Phone (Main/WhatsApp)</label>
                                 <div className="relative">
                                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                     <input
@@ -347,7 +353,49 @@ export default function SettingsPage() {
                                         value={form.phone}
                                         onChange={e => setForm({ ...form, phone: e.target.value })}
                                         className={cn(inputClasses, "pl-12")}
-                                        placeholder="+234 000 000 0000"
+                                        placeholder="08033444411"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className={labelClasses}>Secondary Phone (Intl/Other)</label>
+                                <div className="relative">
+                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <input
+                                        type="tel"
+                                        value={form.secondaryPhone}
+                                        onChange={e => setForm({ ...form, secondaryPhone: e.target.value })}
+                                        className={cn(inputClasses, "pl-12")}
+                                        placeholder="+1- 223- 364 8160"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <label className={labelClasses}>Primary Address</label>
+                                <div className="relative">
+                                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <input
+                                        type="text"
+                                        value={form.address}
+                                        onChange={e => setForm({ ...form, address: e.target.value })}
+                                        className={cn(inputClasses, "pl-12")}
+                                        placeholder="10 Bishop okoye Street, Owerri"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className={labelClasses}>Secondary Location/Label</label>
+                                <div className="relative">
+                                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <input
+                                        type="text"
+                                        value={form.secondaryAddress}
+                                        onChange={e => setForm({ ...form, secondaryAddress: e.target.value })}
+                                        className={cn(inputClasses, "pl-12")}
+                                        placeholder="Owerri, Nigeria"
                                     />
                                 </div>
                             </div>
