@@ -39,11 +39,13 @@ async function runSeedAdmin(ctx: MutationCtx) {
 async function runSeedSiteSettings(ctx: MutationCtx) {
   const existing = await ctx.db.query("siteSettings").first();
   const settings = {
-      siteName: "Pain2Purpose",
+      siteName: "CounsellingP2P",
       siteDescription: "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through life's complex transitions with compassion and evidence-based care.",
-      email: "hello@counsellingp2p.com",
-      phone: "+44 (0) 000 000 000",
-      address: "Professional Practice, Owerri / Online Worldwide",
+      email: "info@counsellingp2p.com",
+      phone: "08033444411",
+      secondaryPhone: "+1- 223- 364 8160, PA",
+      address: "10 Bishop okoye Street, Owerri, Imo State Nigeria.",
+      secondaryAddress: "Owerri, Nigeria",
       socials: {
         facebook: "https://facebook.com/pain2purpose",
         twitter: "https://twitter.com/pain2purpose",

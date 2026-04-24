@@ -10,11 +10,27 @@ export const submit = mutation({
     message: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("contactSubmissions", {
+    const submissionId = await ctx.db.insert("contactSubmissions", {
       ...args,
       status: "new",
       createdAt: Date.now(),
     });
+
+    // Queue confirmation email to user
+    await ctx.db.insert("emailQueue", {
+      recipient: args.email,
+      subject: "We've received your message - CounsellingP2P",
+      templateName: "contact_received",
+      templateData: {
+        name: args.name,
+        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://counsellingp2p.com",
+      },
+      status: "pending",
+      scheduledFor: Date.now(),
+      retries: 0,
+    });
+
+    return submissionId;
   },
 });
 

@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     const service = await fetchQuery(api.services.getBySlug, { slug });
     
-    if (!service) return { title: "Service Not Found | Pain2Purpose" };
+    if (!service) return { title: "Service Not Found | CounsellingP2P" };
 
     return {
         title: `${service.title} | Therapeutic Services`,
@@ -20,9 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const [service, allServices] = await Promise.all([
+    const [service, allServices, settings] = await Promise.all([
         fetchQuery(api.services.getBySlug, { slug }),
-        fetchQuery(api.services.listAll, {})
+        fetchQuery(api.services.listAll, {}),
+        fetchQuery(api.site_settings.getSiteSettings, {})
     ]);
 
     if (!service) notFound();
@@ -227,7 +228,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                                                 </div>
                                                 <div className="item_content">
                                                     <h4 className="item_title">Call Us:</h4>
-                                                    <span className="item_info">+44 (0) 000 000 000</span>
+                                                    <p className="item_info mb-0">{settings?.phone || "08033444411"} (Whatspp only)</p>
+                                                    <p className="item_info mb-0">+1- 223- 364 8160, PA</p>
                                                 </div>
                                             </li>
                                             <li>
@@ -236,7 +238,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                                                 </div>
                                                 <div className="item_content">
                                                     <h4 className="item_title">Email Us:</h4>
-                                                    <span className="item_info">hello@counsellingp2p.com</span>
+                                                    <span className="item_info">{settings?.email || "info@counsellingp2p.com"}</span>
                                                 </div>
                                             </li>
                                         </ul>
