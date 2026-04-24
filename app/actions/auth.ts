@@ -8,7 +8,7 @@ import { AuthError } from "next-auth";
 
 export async function registerUser(formData: FormData) {
   const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string).toLowerCase();
   const password = formData.get("password") as string;
   const subscribe = formData.get("subscribe") === "true";
 
@@ -42,7 +42,7 @@ export async function registerUser(formData: FormData) {
 }
 
 export async function loginUser(formData: FormData) {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string).toLowerCase();
   const password = formData.get("password") as string;
 
   if (!email || !password) {
@@ -105,7 +105,8 @@ export async function sendOtpAction(
   type: "password_reset" | "password_change",
 ) {
   try {
-    const result = await fetchMutation(api.otp.generateOtp, { email, type });
+    const lowerEmail = email.toLowerCase();
+    const result = await fetchMutation(api.otp.generateOtp, { email: lowerEmail, type });
     return {
       success: result.success,
       message: result.message,
@@ -148,8 +149,9 @@ export async function verifyAndChangePasswordAction(
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+    const lowerEmail = email.toLowerCase();
     const result = (await fetchMutation(api.otp.verifyOtpAndChangePassword, {
-      email,
+      email: lowerEmail,
       code,
       type,
       newPassword: hashedPassword,

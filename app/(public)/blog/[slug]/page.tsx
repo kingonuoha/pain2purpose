@@ -12,13 +12,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     if (!article) return { title: "Article Not Found | Pain2Purpose" };
 
+    const ogImage = article.coverImage || getOgImageUrl(article.title);
+
     return {
         title: `${article.title} | Pain2Purpose`,
         description: article.metaDescription || truncate(article.excerpt || "", 160),
         openGraph: {
             title: article.title,
             description: article.metaDescription || truncate(article.excerpt || "", 160),
-            images: [getOgImageUrl(article.title)],
+            images: [ogImage],
             type: "article",
             publishedTime: new Date(article.publishedAt || article.createdAt).toISOString(),
             authors: [article.authorName || "Sandra Opara"],
@@ -27,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             card: "summary_large_image",
             title: article.title,
             description: article.metaDescription || truncate(article.excerpt || "", 160),
-            images: [getOgImageUrl(article.title)],
+            images: [ogImage],
         },
     };
 }

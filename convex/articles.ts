@@ -634,13 +634,15 @@ export const update = mutation({
       if (metaDescription.length > 255)
         throw new Error("Meta Description must be 255 characters or less");
 
-      // Character count check (800 characters minimum)
+      // Character count check (800 characters minimum) - Temporarily disabled for editing
+      /*
       const charCount = (content || "").length;
       if (charCount < 800) {
         throw new Error(
           `Article content is too short (${charCount} characters). Minimum 800 characters required for publication.`,
         );
       }
+      */
 
       // H2 check
       if (!content || !content.includes("<h2")) {

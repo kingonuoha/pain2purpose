@@ -51,7 +51,7 @@ export default function SignUpPage() {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentQuote((prev) => (prev + 1) % QUOTES.length);
-        }, 5000);
+        }, 7000);
         return () => clearInterval(interval);
     }, []);
 
@@ -132,7 +132,7 @@ export default function SignUpPage() {
                                     {QUOTES[currentQuote].topic}
                                 </span>
                             </div>
-                            <h2 className="text-4xl xl:text-5xl font-serif italic font-medium text-white leading-tight mb-8">
+                            <h2 className="text-2xl xl:text-3xl font-serif italic font-medium text-white leading-tight mb-8">
                                 &ldquo;{QUOTES[currentQuote].text}&rdquo;
                             </h2>
                             <div className="flex items-center gap-4">
@@ -157,11 +157,15 @@ export default function SignUpPage() {
                     </div>
                 </div>
 
-                <Link href="/" className="absolute top-12 left-12 z-20 flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-900 font-black text-xl shadow-2xl transition-transform group-hover:scale-105">
-                        P
-                    </div>
-                    <span className="text-xl font-bold text-white tracking-tight">Pain2Purpose</span>
+                <Link href="/" className="absolute top-12 left-12 z-20 group">
+                    <Image 
+                        src="/p2p/logo.png" 
+                        alt="Pain2Purpose Logo" 
+                        width={180}
+                        height={60}
+                        className="h-10 w-auto brightness-0 invert" 
+                        priority
+                    />
                 </Link>
             </div>
 
@@ -170,10 +174,14 @@ export default function SignUpPage() {
                 <div className="max-w-md w-full">
                     <div className="mb-12 lg:hidden">
                         <Link href="/" className="inline-flex items-center gap-3 group">
-                            <div className="w-10 h-10 bg-p2p-sage rounded-xl flex items-center justify-center text-white font-black text-xl">
-                                P
-                            </div>
-                            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Pain2Purpose</span>
+                            <Image 
+                                src="/p2p/logo.png" 
+                                alt="Pain2Purpose Logo" 
+                                width={140}
+                                height={45}
+                                className="h-8 w-auto dark:brightness-0 dark:invert" 
+                                priority
+                            />
                         </Link>
                     </div>
 
