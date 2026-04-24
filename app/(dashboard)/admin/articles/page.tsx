@@ -478,7 +478,7 @@ export default function AdminArticlesPage() {
                                         {!article.isArchived ? (
                                             <>
                                                 <Link
-                                                    href={`/${article.slug}`}
+                                                    href={`/blog/${article.slug}`}
                                                     target="_blank"
                                                     className="p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-400 hover:text-blue-600 transition-all hover:scale-110"
                                                     title="Preview"
@@ -632,7 +632,7 @@ export default function AdminArticlesPage() {
                                                 {!article.isArchived ? (
                                                     <>
                                                         <Link
-                                                            href={`/${article.slug}`}
+                                                            href={`/blog/${article.slug}`}
                                                             target="_blank"
                                                             className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-400 hover:text-blue-600 transition-all"
                                                             title="Preview"

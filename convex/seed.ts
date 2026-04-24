@@ -8,13 +8,13 @@ import { BLOG_POSTS } from "./seeds/articles_data";
  */
 
 async function runSeedAdmin(ctx: MutationCtx) {
-  const email = "Kingonuoha01@gmail.com";
+  const email = "kingonuoha01@gmail.com";
   const existing = await ctx.db
     .query("users")
     .filter((q) => q.eq(q.field("email"), email))
     .first();
   
-  const passwordHash = "$2a$12$R9h/NrLqvH89Pa39AnK.O.WInS.S/N4u7uUu.vYp2O9uUu.vYp2O";
+  const passwordHash = "$2b$12$bbIr.8PONHDE5jPoXIOXK.wmnixidQ53UHijTA9.f1x1UvYjAZIJ2";
 
   if (existing) {
       await ctx.db.patch(existing._id, { 

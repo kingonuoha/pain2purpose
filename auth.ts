@@ -20,8 +20,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const emailStr = (credentials.email as string).toLowerCase();
         const user = await fetchQuery(api.users.currentUser, {
-          email: credentials.email as string,
+          email: emailStr,
         });
 
         if (!user || !user.password) return null;
