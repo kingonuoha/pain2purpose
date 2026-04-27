@@ -2,7 +2,14 @@ import { ServicesGrid } from "@/components/home/ServicesGrid";
 import { ConsultationSection } from "@/components/home/ConsultationSection";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 import CertificateSection from "@/components/home/CertificateSection";
+
+export const metadata: Metadata = {
+    title: "About Sandra Opara | Pain2Purpose Counselling",
+    description: "Learn about Sandra Opara, a Licensed Professional Counsellor with 15+ years experience helping individuals find purpose through pain and life transitions.",
+    keywords: ["Sandra Opara", "LPC", "family transitions", "about Pain2Purpose", "counselling expert"],
+};
 
 export default function AboutPage() {
     return (

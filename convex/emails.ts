@@ -147,13 +147,43 @@ export const generateWeeklyNewsletter = internalMutation({
   },
 });
 
+import { paginationOptsValidator } from "convex/server";
+
 export const getEmailLogs = query({
   args: {
-    limit: v.optional(v.number()),
+    paginationOpts: paginationOptsValidator,
+    status: v.optional(v.union(v.literal("sent"), v.literal("failed"), v.literal("pending"), v.literal("sending"))),
+    search: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const limit = args.limit ?? 50;
-    return await ctx.db.query("emailQueue").order("desc").take(limit);
+    let q;
+    
+    if (args.search) {
+      q = ctx.db.query("emailQueue")
+        .withSearchIndex("search_emails", (q) => {
+          const search = q.search("recipient", args.search!);
+          return args.status ? search.eq("status", args.status) : search;
+        });
+    } else if (args.status) {
+      q = ctx.db.query("emailQueue").withIndex("by_status", (q) => q.eq("status", args.status!)).order("desc");
+    } else {
+      q = ctx.db.query("emailQueue").order("desc");
+    }
+
+    return await q.paginate(args.paginationOpts);
+  },
+});
+
+export const getEmailStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("emailQueue").collect();
+    return {
+      total: all.length,
+      sent: all.filter(e => e.status === "sent").length,
+      failed: all.filter(e => e.status === "failed").length,
+      pending: all.filter(e => e.status === "pending").length,
+    };
   },
 });
 
@@ -163,6 +193,7 @@ export const getEmailById = query({
     return await ctx.db.get(args.id);
   },
 });
+
 export const retryEmail = mutation({
   args: { id: v.id("emailQueue") },
   handler: async (ctx, args) => {
@@ -181,6 +212,43 @@ export const deleteEmail = mutation({
   args: { id: v.id("emailQueue") },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
+  },
+});
+
+import { renderTemplate } from "./email_templates";
+
+export const renderPreview = query({
+  args: { id: v.id("emailQueue") },
+  handler: async (ctx, args) => {
+    const email = await ctx.db.get(args.id);
+    if (!email) return null;
+    
+    const html = renderTemplate(email.templateName, email.templateData);
+    return {
+      html,
+      templateName: email.templateName,
+      subject: email.subject,
+    };
+  },
+});
+
+export const deleteMultiple = mutation({
+  args: { ids: v.array(v.id("emailQueue")) },
+  handler: async (ctx, args) => {
+    for (const id of args.ids) {
+      await ctx.db.delete(id);
+    }
+  },
+});
+
+export const deleteAll = mutation({
+  args: { confirm: v.boolean() },
+  handler: async (ctx, args) => {
+    if (!args.confirm) return;
+    const all = await ctx.db.query("emailQueue").collect();
+    for (const item of all) {
+      await ctx.db.delete(item._id);
+    }
   },
 });
 

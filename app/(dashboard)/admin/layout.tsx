@@ -117,6 +117,7 @@ const NavContent = ({
                                     key={item.href}
                                     href={item.href}
                                     onClick={onClose}
+                                    id={`tour-nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                                     className={cn(
                                         "group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300",
                                         isActive

@@ -7,9 +7,23 @@ import { api } from "@/convex/_generated/api";
 
 import { slugify } from "@/lib/utils";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+
 export function Sidebar() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
     const categories = useQuery(api.categories.listAll) || [];
-    const topics = useQuery(api.articles.getAllTopics) || [];
+    const topics = (useQuery(api.articles.getAllTopics) || []).slice(0, 6);
 
     interface SidebarCategory {
         _id: string;
@@ -20,12 +34,20 @@ export function Sidebar() {
 
     return (
         <aside className="sidebar ps-lg-4">
-            <div className="form-group">
-                <input id="sidebar_search" className="form-control" type="search" name="search" placeholder="Search" />
+            <form onSubmit={handleSearch} className="form-group">
+                <input 
+                    id="sidebar_search" 
+                    className="form-control" 
+                    type="search" 
+                    name="search" 
+                    placeholder="Search" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
                 <button type="submit" className="input_icon">
                     <i className="fa-regular fa-magnifying-glass"></i>
                 </button>
-            </div>
+            </form>
             
             <div className="sidebar_widget">
                 <h3 className="sidebar_widget_title">

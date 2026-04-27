@@ -15,13 +15,13 @@ import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
     return (
-        <SessionProvider>
+        <SessionProvider refetchOnWindowFocus={false}>
             <ConvexProvider client={convex}>
                 <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
                     {children}
                     <ProgressBar
                         height="4px"
-                        color="#2D5A50"
+                        color="#2563eb"
                         options={{ showSpinner: false }}
                         shallowRouting={true}
                     />
@@ -30,5 +30,3 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
         </SessionProvider>
     );
 }
-
-

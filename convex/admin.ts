@@ -37,7 +37,7 @@ export const getDashboardStats = query({
       usersCount: stats.usersCount,
       totalViews: stats.totalViews,
       totalUniqueViews: stats.totalUniqueViews,
-      totalReach: 0, // visitorTracking is too large to .collect(), needs a counter
+      totalReach: stats.totalUniqueViews,
       pendingCommentsCount: stats.pendingCommentsCount,
       testimonialCount: testimonialCount.length,
     };

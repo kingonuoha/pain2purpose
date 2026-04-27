@@ -25,10 +25,13 @@ export const listAll = query({
     const categories = await ctx.db.query("categories").collect();
     return await Promise.all(
       categories.map(async (category) => {
-        const pillars = await ctx.db
-          .query("pillars")
-          .withIndex("by_categoryId", (q) => q.eq("categoryId", category._id))
-          .take(50);
+        const articles = await ctx.db
+          .query("articles")
+          .withIndex("by_status_category", (q) => 
+              q.eq("status", "published").eq("categoryId", category._id)
+          )
+          .filter(q => q.neq(q.field("isArchived"), true))
+          .collect();
 
         return {
           _id: category._id,
@@ -37,8 +40,7 @@ export const listAll = query({
           slug: category.slug,
           description: category.description,
           coverImage: category.coverImage,
-          articleCount: category.articleCount ?? 0,
-          pillarCount: pillars.length,
+          articleCount: articles.length,
           createdAt: category.createdAt,
         };
       }),

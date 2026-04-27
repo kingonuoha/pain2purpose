@@ -11,13 +11,12 @@ import {
     Sparkles,
     TrendingUp,
     Users,
+    Eye,
     ChevronRight,
-    Clock,
     MessageCircle,
     UserPlus,
     FileText,
-    MessageSquare,
-    Eye,
+    Clock
 } from "lucide-react";
 import {
     AreaChart,
@@ -32,12 +31,15 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTour } from "@/hooks/use-tour";
 
 export default function AdminDashboard() {
     const { data: session } = useSession();
     const stats = useQuery(api.admin.getDashboardStats);
     const activity = useQuery(api.admin.getRecentActivity, { limit: 8 });
     const trafficStats = useQuery(api.analytics.getTrafficStats, { days: 7 });
+
+    useTour("admin-dashboard", true);
 
     const isLoading = !stats || !activity || !trafficStats;
 
@@ -72,6 +74,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-12 pb-20"
+            id="tour-dashboard-root"
         >
             {/* Header Section */}
             <div className="relative group">
@@ -108,7 +111,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Metrics Ecosystem */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div id="tour-dashboard-stats" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     label="Blog Posts"
                     value={stats.articles.published.toString()}
@@ -150,7 +153,7 @@ export default function AdminDashboard() {
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Reach Dynamics Observatory */}
                 <div className="lg:col-span-2 space-y-8">
-                    <div className="bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 shadow-sm relative group overflow-hidden">
+                    <div id="tour-dashboard-traffic" className="bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 shadow-sm relative group overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full -mr-32 -mt-32" />
 
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 relative z-10">
@@ -268,7 +271,7 @@ export default function AdminDashboard() {
 
                 {/* Live Stream: Real-time Pulses */}
                 <div className="space-y-4">
-                    <div className="bg-white/60 dark:bg-zinc-950/60 backdrop-blur-3xl p-8 rounded-[3rem] border border-zinc-100 dark:border-zinc-800/50 shadow-sm h-full flex flex-col transition-all duration-500">
+                    <div id="tour-dashboard-activity" className="bg-white/60 dark:bg-zinc-950/60 backdrop-blur-3xl p-8 rounded-[3rem] border border-zinc-100 dark:border-zinc-800/50 shadow-sm h-full flex flex-col transition-all duration-500">
                         <div className="flex items-center justify-between mb-10 pb-6 border-b border-zinc-50 dark:border-zinc-900">
                             <div className="space-y-1">
                                 <h3 className="text-3xl font-serif font-black text-zinc-950 dark:text-white italic">Recent Activity</h3>

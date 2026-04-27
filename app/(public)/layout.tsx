@@ -42,6 +42,10 @@ export const metadata: Metadata = {
   },
   description:
     "Therapeutic counselling support for healing, growth, and finding meaning. Sandra Opara supports individuals through grief, loss, and family challenges.",
+  keywords: ["counselling", "therapy", "grief support", "Sandra Opara", "Pain2Purpose", "mental health", "Pennsylvania counselling"],
+  alternates: {
+    canonical: "./",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

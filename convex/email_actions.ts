@@ -1,179 +1,10 @@
 "use node";
 
 import { v } from "convex/values";
-import { action, internalAction } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import nodemailer from "nodemailer";
-
-const getTransporter = () => {
-  const host = process.env.EMAIL_HOST;
-  const port = parseInt(process.env.EMAIL_PORT || "587");
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
-
-  if (!host || !user || !pass) {
-    throw new Error("Missing email configuration environment variables");
-  }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: {
-      user,
-      pass,
-    },
-    pool: true, // Use pooling for better performance
-  });
-};
-
-const templates: Record<string, string> = {
-  welcome: `
-    <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 32px; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);">
-      <div style="background: #09090b; padding: 80px 40px; text-align: center; position: relative;">
-        <img src="{{siteUrl}}/illustrations/Welcome.svg" alt="Welcome Illustration" style="width: 240px; height: auto; margin-bottom: 40px; opacity: 1; display: block; margin-left: auto; margin-right: auto;" />
-        <h1 style="color: white; margin: 0; font-family: 'Georgia', serif; font-size: 36px; letter-spacing: -0.03em; line-height: 1.2;">Welcome to <span style="color: #2563eb;">CounsellingP2P</span>.</h1>
-        <p style="color: #a1a1aa; font-size: 14px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 900;">Initiation Protocol Complete</p>
-      </div>
-      <div style="padding: 60px 50px; color: #09090b; line-height: 1.8;">
-        <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 24px;">Reality starts here, {{name}}.</h2>
-        <p style="font-size: 16px; color: #4b5563; margin-bottom: 24px;">
-          You've just taken the first step toward unfiltered reality. <strong>CounsellingP2P</strong> is not just a publication; it&apos;s a recalibration of the human experience.
-        </p>
-        <p style="font-size: 16px; color: #4b5563; margin-bottom: 48px;">
-          Expect insights that stir the mind and research that challenges the comfortable lies of modern existence.
-        </p>
-        <div style="text-align: center; margin-bottom: 60px;">
-          <a href="{{siteUrl}}" style="background: #2563eb; color: white; padding: 22px 44px; border-radius: 20px; text-decoration: none; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.15em; display: inline-block; box-shadow: 0 20px 30px -10px rgba(37, 99, 235, 0.4);">Access Your Dashboard</a>
-        </div>
-        <div style="border-top: 1px solid #f1f5f9; padding-top: 40px;">
-          <p style="font-size: 14px; color: #94a3b8; margin: 0;">In pursuit of truth,</p>
-          <p style="font-size: 16px; font-weight: 900; color: #09090b; margin: 8px 0 0 0;">The CounsellingP2P Editorial</p>
-        </div>
-      </div>
-      <div style="background: #f8fafc; padding: 48px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 20px 0;">&copy; 2026 CounsellingP2P. Evolution is mandatory.</p>
-        <div style="display: inline-block;">
-          <a href="{{unsubscribeUrl}}" style="color: #2563eb; text-decoration: none; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #dbeafe;">Silence these signals</a>
-        </div>
-      </div>
-    </div>
-  `,
-  newsletter: `
-    <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 32px; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.08);">
-      <div style="background: #09090b; padding: 48px; text-align: center; position: relative;">
-        <img src="{{siteUrl}}/illustrations/Newsletter.svg" alt="Newsletter Illustration" style="width: 180px; height: auto; margin-bottom: 32px; opacity: 1;" />
-        <h1 style="color: white; margin: 0; font-family: 'Georgia', serif; font-size: 28px;">Weekly Transmission</h1>
-        <p style="color: #2563eb; font-size: 12px; margin-top: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4em;">The Observational Pulse</p>
-      </div>
-      <div style="padding: 50px;">
-        <div style="background: #f8fafc; border-radius: 28px; padding: 40px; margin-bottom: 48px; border: 2px solid #eff6ff; position: relative;">
-          <p style="margin: 0; font-family: 'Georgia', serif; font-style: italic; color: #0f172a; font-size: 20px; line-height: 1.7; position: relative; z-index: 10;">"{{quoteText}}"</p>
-          <p style="margin: 24px 0 0 0; color: #2563eb; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">— {{quoteAuthor}}</p>
-        </div>
-        
-        <div style="margin-bottom: 40px;">
-          <h3 style="font-size: 12px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 32px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">Top Intelligence Nodes</h3>
-          {{articlesHtml}}
-        </div>
-        
-        <div style="text-align: center; margin-top: 60px;">
-          <a href="{{siteUrl}}" style="background: #09090b; color: white; padding: 20px 48px; border-radius: 18px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.15em; display: inline-block;">Return to Source</a>
-        </div>
-      </div>
-      <div style="background: #f8fafc; padding: 40px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">&copy; 2026 CounsellingP2P. Deciphering the Human Experience.</p>
-        <a href="{{unsubscribeUrl}}" style="color: #64748b; text-decoration: none; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">Unsubscribe</a>
-      </div>
-    </div>
-  `,
-  confirm_subscription: `
-    <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 32px; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.05);">
-      <div style="padding: 80px 50px; text-align: center;">
-        <img src="{{siteUrl}}/illustrations/Messaging.svg" alt="Confirm Illustration" style="width: 200px; height: auto; margin-bottom: 48px; opacity: 1;" />
-        <h1 style="font-size: 32px; font-weight: 900; color: #09090b; margin-bottom: 16px; letter-spacing: -0.02em;">Verify Connection</h1>
-        <p style="color: #64748b; font-size: 17px; line-height: 1.7; margin-bottom: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
-          You&apos;re one step away from joining <strong>CounsellingP2P</strong>. Please confirm your subscription to activate our intelligence stream.
-        </p>
-        <a href="{{confirmUrl}}" style="background: #2563eb; color: white; padding: 20px 48px; border-radius: 18px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; display: inline-block; shadow: 0 10px 20px rgba(37, 99, 235, 0.3);">Confirm Subscription</a>
-        <p style="margin-top: 48px; font-size: 13px; color: #94a3b8;">If you did not initiate this protocol, please ignore this transmission.</p>
-      </div>
-    </div>
-  `,
-  reset_password: `
-    <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 32px; overflow: hidden;">
-      <div style="padding: 80px 50px; text-align: center;">
-        <img src="{{siteUrl}}/illustrations/Secure-login.svg" alt="Reset Illustration" style="width: 200px; height: auto; margin-bottom: 48px; opacity: 1;" />
-        <h1 style="font-size: 32px; font-weight: 900; color: #09090b; margin-bottom: 16px; letter-spacing: -0.02em;">Identity Reset</h1>
-        <p style="color: #64748b; font-size: 17px; line-height: 1.7; margin-bottom: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
-          An identity reset for <strong>CounsellingP2P</strong> was requested. This secure link will remain active for 60 minutes.
-        </p>
-        <a href="{{resetUrl}}" style="background: #09090b; color: white; padding: 20px 48px; border-radius: 18px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; display: inline-block;">Reset Password</a>
-        <p style="margin-top: 48px; font-size: 13px; color: #94a3b8;">If you did not authorize this recalibration, secure your account immediately.</p>
-      </div>
-    </div>
-  `,
-  otp_verification: `
-    <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 32px; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);">
-      <div style="background: #09090b; padding: 60px 40px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-family: 'Georgia', serif; font-size: 32px; letter-spacing: -0.03em;">Verification Code</h1>
-        <p style="color: #a1a1aa; font-size: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 900;">Security Protocol</p>
-      </div>
-      <div style="padding: 60px 50px; text-align: center; color: #09090b;">
-        <p style="font-size: 16px; color: #4b5563; margin-bottom: 40px;">
-          Use the following code to complete your security protocol. This code will expire in 10 minutes.
-        </p>
-        <div style="background: #f1f5f9; border-radius: 20px; padding: 32px; display: inline-block; margin-bottom: 40px; border: 2px solid #e2e8f0;">
-          <span style="font-size: 42px; font-weight: 900; color: #2563eb; letter-spacing: 0.25em; font-family: 'Courier New', monospace;">{{otpCode}}</span>
-        </div>
-        <p style="font-size: 14px; color: #94a3b8; margin-top: 40px;">
-          If you did not request this code, please secure your account immediately.
-        </p>
-      </div>
-      <div style="background: #f8fafc; padding: 32px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0;">&copy; 2026 CounsellingP2P. Evolution is mandatory.</p>
-      </div>
-    </div>
-  `,
-  contact_received: `
-    <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 32px; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);">
-      <div style="background: #f8fafc; padding: 60px 40px; text-align: center; border-bottom: 1px solid #f1f5f9;">
-        <h1 style="color: #09090b; margin: 0; font-family: 'Georgia', serif; font-size: 32px; letter-spacing: -0.03em;">We've Received Your Message</h1>
-        <p style="color: #64748b; font-size: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 900;">CounsellingP2P Support</p>
-      </div>
-      <div style="padding: 60px 50px; color: #09090b; line-height: 1.8;">
-        <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 20px;">Hi {{name}},</h2>
-        <p style="font-size: 16px; color: #4b5563; margin-bottom: 24px;">
-          Thank you for reaching out to us. We have received your request and will get back to you as soon as possible.
-        </p>
-        <p style="font-size: 16px; color: #4b5563; margin-bottom: 32px; font-style: italic; border-left: 4px solid #2563eb; padding-left: 20px; background: #f0f7ff; padding-top: 15px; padding-bottom: 15px;">
-          {{quote}}
-        </p>
-        <p style="font-size: 16px; color: #4b5563; margin-bottom: 24px;">
-          Your journey towards healing and purpose is important, and we are honored to be a part of it.
-        </p>
-        
-        <div style="margin-top: 40px; border-top: 1px solid #f1f5f9; padding-top: 40px;">
-          <h3 style="font-size: 14px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 20px;">While You Wait</h3>
-          <p style="font-size: 15px; color: #4b5563; margin-bottom: 20px;">
-            Feel free to explore our latest insights and reflections on our blog:
-          </p>
-          <div style="text-align: center;">
-            <a href="{{siteUrl}}/blog" style="background: #2563eb; color: white; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block;">Visit Our Blog</a>
-          </div>
-        </div>
-
-        <div style="margin-top: 60px; border-top: 1px solid #f1f5f9; padding-top: 40px;">
-          <p style="font-size: 14px; color: #94a3b8; margin: 0;">Warmly,</p>
-          <p style="font-size: 16px; font-weight: 900; color: #09090b; margin: 8px 0 0 0;">The CounsellingP2P Team</p>
-        </div>
-      </div>
-      <div style="background: #f8fafc; padding: 32px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0;">&copy; 2026 CounsellingP2P. Find Beauty in the Brokenness.</p>
-      </div>
-    </div>
-  `,
-};
+import { renderTemplate } from "./email_templates";
 
 const MOTIVATIONAL_QUOTES = [
   '"The wound is the place where the Light enters you." — Rumi',
@@ -187,12 +18,17 @@ const MOTIVATIONAL_QUOTES = [
   '"Your present circumstances don\'t determine where you can go; they merely determine where you start." — Nido Qubein',
 ];
 
-const renderTemplate = (name: string, data: Record<string, string>) => {
-  let html = templates[name] || templates["welcome"];
-  for (const [key, value] of Object.entries(data)) {
-    html = html.replace(new RegExp(`{{${key}}}`, "g"), value);
-  }
-  return html;
+const getTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: Number(process.env.EMAIL_PORT),
+    secure: Number(process.env.EMAIL_PORT) === 465,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    pool: true,
+  });
 };
 
 export const processQueue = internalAction({
@@ -226,7 +62,7 @@ export const processQueue = internalAction({
         const html = renderTemplate(email.templateName, templateData);
 
         await transporter.sendMail({
-          from: `"${process.env.EMAIL_FROM || "CounsellingP2P"}" <${process.env.EMAIL_USER}>`,
+          from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_USER}>`,
           to: email.recipient,
           subject: email.subject,
           html,
@@ -238,92 +74,19 @@ export const processQueue = internalAction({
           status: "sent",
           sentAt: Date.now(),
         });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        console.error(
-          `Failed to send email to ${email.recipient}:`,
-          errorMessage,
-        );
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error(`Failed to send email to ${email.recipient}:`, error);
 
-        const shouldRetry = email.retries < 3;
+        // Update status to failed
+        const retryIncrement = email.retries < 3;
         await ctx.runMutation(internal.emails.updateEmailStatus, {
           id: email._id,
-          status: shouldRetry ? "pending" : "failed",
+          status: retryIncrement ? "pending" : "failed",
           error: errorMessage,
-          retryIncrement: true,
+          retryIncrement,
         });
       }
     }
   },
 });
-
-export const sendTestEmail = action({
-  args: {
-    recipient: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const transporter = getTransporter();
-
-    try {
-      await transporter.sendMail({
-        from: `"${process.env.EMAIL_FROM || "CounsellingP2P"}" <${process.env.EMAIL_USER}>`,
-        to: args.recipient,
-        subject: "CounsellingP2P - Test Email",
-        html: `
-          <div style="padding: 20px; font-family: sans-serif; text-align: center;">
-            <h1 style="color: #0ea5e9;">Test Successful!</h1>
-            <p>If you're reading this, your SMTP configuration for <strong>CounsellingP2P</strong> is working correctly.</p>
-            <div style="margin: 20px; padding: 10px; background: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%); color: white; display: inline-block; border-radius: 8px;">
-              Email System Online
-            </div>
-          </div>
-        `,
-      });
-      return { success: true };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      console.error("Test email failed:", errorMessage);
-      return { success: false, error: errorMessage };
-    }
-  },
-});
-
-export const requestPasswordReset = action({
-  args: { email: v.string() },
-  handler: async (ctx, args) => {
-    const token =
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
-    const expires = Date.now() + 3600000; // 1 hour
-
-    const userId = await ctx.runMutation(internal.users.setResetToken, {
-      email: args.email,
-      token,
-      expires,
-    });
-
-    if (!userId) return { success: true }; // Don't leak existence
-
-    const transporter = getTransporter();
-    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://thePain2Purpose.org"}/auth/reset-password?token=${token}`;
-
-    const html = renderTemplate("reset_password", { resetUrl });
-
-    try {
-      await transporter.sendMail({
-        from: `"${process.env.EMAIL_FROM || "CounsellingP2P"}" <${process.env.EMAIL_USER}>`,
-        to: args.email,
-        subject: "Reset your password - CounsellingP2P",
-        html,
-      });
-      return { success: true };
-    } catch (error) {
-      console.error("Failed to send reset email:", error);
-      return { success: false, error: "Failed to send email" };
-    }
-  },
-});
-
-

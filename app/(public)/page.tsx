@@ -1,7 +1,6 @@
 import { HeroSection } from "@/components/home/HeroSection";
 import { ServicesGrid } from "@/components/home/ServicesGrid";
 import { AboutTeaser } from "@/components/home/AboutTeaser";
-import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { ConsultationSection } from "@/components/home/ConsultationSection";
 import { BlogSection } from "@/components/home/BlogSection";
 import { FAQSection } from "@/components/home/FAQSection";
@@ -29,7 +28,19 @@ export const metadata: Metadata = {
   },
 };
 
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+import { JoinedArticle } from "@/components/blog-grid";
+
 export default async function Home() {
+  const [articlesData, servicesData] = await Promise.all([
+    fetchQuery(api.articles.list, { paginationOpts: { numItems: 3, cursor: null } }),
+    fetchQuery(api.services.list)
+  ]);
+
+  const articles = (articlesData?.page as JoinedArticle[]) || [];
+  const services = servicesData || [];
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -59,7 +70,7 @@ export default async function Home() {
       />
       <HeroSection />
       
-      <ServicesGrid />
+      <ServicesGrid initialServices={services} />
 
       <AboutTeaser />
 
@@ -67,7 +78,7 @@ export default async function Home() {
 
       <ConsultationSection />
 
-      <BlogSection />
+      <BlogSection initialArticles={articles} />
 
       <FAQSection />
 

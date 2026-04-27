@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -19,6 +20,19 @@ interface ArticleContentProps {
 
 export function ArticleContent({ initialArticle, slug }: ArticleContentProps) {
     const article = useQuery(api.articles.getBySlug, { slug }) || initialArticle;
+    const logView = useMutation(api.analytics.logArticleView);
+
+    useEffect(() => {
+        if (article?._id) {
+            let visitorId = localStorage.getItem("p2p_visitor_id");
+            if (!visitorId) {
+                visitorId = "v_" + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem("p2p_visitor_id", visitorId);
+            }
+            logView({ articleId: article._id, visitorId });
+        }
+    }, [article?._id, logView]);
+
     if (!article) return null;
 
     // recentArticlesResult used in Sidebar implicitly or for SEO/Preload

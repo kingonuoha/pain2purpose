@@ -109,6 +109,120 @@ export const TOUR_DEFINITIONS: TourConfig = {
       },
     },
   ],
+  "admin-dashboard": [
+    {
+      element: "#tour-dashboard-root",
+      popover: {
+        title: "The Pulse",
+        description: "Welcome to your command center. Here you can see a high-level overview of everything happening in your practice.",
+        side: "bottom",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-nav-analytics",
+      popover: {
+        title: "Deep Insights",
+        description: "Track your traffic, user engagement, and growth trends over time.",
+        side: "right",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-nav-blog-posts",
+      popover: {
+        title: "Content Management",
+        description: "Create, edit, and publish articles to your blog here.",
+        side: "right",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-nav-services",
+      popover: {
+        title: "Service Offerings",
+        description: "Manage the professional services you offer to your clients.",
+        side: "right",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-nav-contacts",
+      popover: {
+        title: "Lead Management",
+        description: "View and respond to all consultation requests and contact form submissions.",
+        side: "right",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-dashboard-stats",
+      popover: {
+        title: "Key Metrics",
+        description: "Your most important numbers, updated in real-time.",
+        side: "bottom",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-dashboard-traffic",
+      popover: {
+        title: "Visitor Flow",
+        description: "Visualize how people are interacting with your website.",
+        side: "top",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-dashboard-activity",
+      popover: {
+        title: "Real-time Activity",
+        description: "A live feed of every significant event happening on the platform.",
+        side: "left",
+        align: "start",
+      },
+    },
+  ],
+  "admin-services": [
+    {
+      element: "#tour-services-header",
+      popover: {
+        title: "Service Portfolio",
+        description: "Define the specific therapeutic areas and counseling services you provide.",
+        side: "bottom",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-services-list",
+      popover: {
+        title: "Active Services",
+        description: "Manage your existing services, update descriptions, or adjust pricing and availability.",
+        side: "top",
+        align: "start",
+      },
+    },
+  ],
+  "admin-contacts": [
+    {
+      element: "#tour-contacts-header",
+      popover: {
+        title: "Inbound Leads",
+        description: "Every time a user requests a consultation or sends a message, it ends up here.",
+        side: "bottom",
+        align: "start",
+      },
+    },
+    {
+      element: "#tour-contacts-filters",
+      popover: {
+        title: "Smart Filtering",
+        description: "Filter requests by status to stay on top of your follow-ups.",
+        side: "bottom",
+        align: "start",
+      },
+    },
+  ],
 };
 
 

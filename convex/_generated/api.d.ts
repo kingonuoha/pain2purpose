@@ -20,6 +20,7 @@ import type * as categories from "../categories.js";
 import type * as contact from "../contact.js";
 import type * as crons from "../crons.js";
 import type * as email_actions from "../email_actions.js";
+import type * as email_templates from "../email_templates.js";
 import type * as emails from "../emails.js";
 import type * as engagement from "../engagement.js";
 import type * as migrations from "../migrations.js";
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   contact: typeof contact;
   crons: typeof crons;
   email_actions: typeof email_actions;
+  email_templates: typeof email_templates;
   emails: typeof emails;
   engagement: typeof engagement;
   migrations: typeof migrations;

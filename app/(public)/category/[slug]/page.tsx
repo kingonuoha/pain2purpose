@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Sidebar } from "@/components/blog/Sidebar";
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
     const category = await fetchQuery(api.categories.getBySlug, { slug });

@@ -1,4 +1,6 @@
 "use client";
+// Metadata cannot be exported from a Client Component. 
+// Me move to layout or server wrapper soon.
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";

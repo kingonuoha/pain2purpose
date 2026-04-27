@@ -6,11 +6,14 @@ import { JoinedArticle } from "@/components/blog-grid";
 import Link from "next/link";
 import Image from "next/image";
 
+import { Sidebar } from "@/components/blog/Sidebar";
+
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "From Sandra's Desk | Pain2Purpose",
-  description: "Insights, reflections and healing resources from Sandra Opara — Pain2Purpose Counselling Practice.",
+  title: "From Sandra's Desk | Pain2Purpose Counselling Blog",
+  description: "Insights, reflections and healing resources from Sandra Opara. Explore articles on mental health, grief, relationships, and finding purpose after pain.",
+  keywords: ["counselling blog", "mental health resources", "Sandra Opara", "healing after grief", "relationship advice", "Pain2Purpose"],
 };
 
 export default async function BlogPage() {
@@ -53,69 +56,7 @@ export default async function BlogPage() {
             </div>
 
             <div className="col-lg-4">
-              <aside className="sidebar ps-lg-4">
-                <div className="form-group">
-                  <input id="sidebar_search" className="form-control" type="search" name="search" placeholder="Search" />
-                  <button type="submit" className="input_icon">
-                    <i className="fa-regular fa-magnifying-glass"></i>
-                  </button>
-                </div>
-                <div className="sidebar_widget">
-                  <h3 className="sidebar_widget_title">
-                    <span className="title_icon">
-                      <Image src="/assets/images/site_logo/favourite_icon.svg" alt="Icon" width={20} height={20} />
-                    </span>
-                    <span className="title_text">Categories</span>
-                  </h3>
-                  <ul className="post_category_list unordered_list_block">
-                    <li>
-                      <Link href="#!">
-                        <span className="category_name">Relationship</span>
-                        <span className="category_counter">12</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#!">
-                        <span className="category_name">Family Problem</span>
-                        <span className="category_counter">23</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#!">
-                        <span className="category_name">Couple Problem</span>
-                        <span className="category_counter">36</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#!">
-                        <span className="category_name">Parenting</span>
-                        <span className="category_counter">16</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#!">
-                        <span className="category_name">Depression</span>
-                        <span className="category_counter">17</span>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div className="sidebar_widget">
-                  <h3 className="sidebar_widget_title">
-                    <span className="title_icon">
-                      <Image src="/assets/images/site_logo/favourite_icon.svg" alt="Icon" width={20} height={20} />
-                    </span>
-                    <span className="title_text">Popular Tags</span>
-                  </h3>
-                  <ul className="post_tags unordered_list">
-                    <li><Link href="#!">Family Problem</Link></li>
-                    <li><Link href="#!">Therapy</Link></li>
-                    <li><Link href="#!">Teenagers</Link></li>
-                    <li><Link href="#!">Depression</Link></li>
-                    <li><Link href="#!">Life Balance</Link></li>
-                  </ul>
-                </div>
-              </aside>
+              <Sidebar />
             </div>
           </div>
         </div>
