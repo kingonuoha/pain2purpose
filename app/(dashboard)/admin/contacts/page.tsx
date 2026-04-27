@@ -6,6 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Mail, Phone, Calendar, MessageSquare } from "lucide-react";
+import { useTour } from "@/hooks/use-tour";
 
 type Submission = {
     _id: Id<"contactSubmissions">;
@@ -35,6 +36,8 @@ export default function AdminContactsPage() {
     );
     const updateStatus = useMutation(api.contact.updateStatus);
 
+    useTour("admin-contacts", true);
+
     const handleStatus = async (id: Id<"contactSubmissions">, status: Submission["status"]) => {
         setUpdating(id);
         try {
@@ -52,7 +55,7 @@ export default function AdminContactsPage() {
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div id="tour-contacts-header" className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-serif font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         Contact Submissions
@@ -67,7 +70,7 @@ export default function AdminContactsPage() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-0">
+            <div id="tour-contacts-filters" className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-0">
                 {(["all", "new", "read", "responded"] as const).map((tab) => (
                     <button
                         key={tab}

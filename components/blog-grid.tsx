@@ -117,7 +117,10 @@ export function BlogGrid({ categoryId, pillar, type, tag, initialArticles }: Blo
                                         })}
                                     </li>
                                     {article.viewCount !== undefined && (
-                                        <li>{article.viewCount} Views</li>
+                                        <li>
+                                            <i className="fa-regular fa-eye me-1"></i>
+                                            {article.viewCount} Views
+                                        </li>
                                     )}
                                 </ul>
                                 <h3 className="item_title h5 fw-bold mb-3">

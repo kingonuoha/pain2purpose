@@ -5,11 +5,13 @@ import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import Image from "next/image";
 
-export function BlogSection() {
-    const listResult = useQuery(api.articles.list, { 
+import { JoinedArticle } from "@/components/blog-grid";
+
+export function BlogSection({ initialArticles }: { initialArticles?: JoinedArticle[] }) {
+    const listResult = useQuery(api.articles.list, initialArticles ? "skip" : { 
         paginationOpts: { numItems: 3, cursor: null } 
     });
-    const articles = listResult?.page || [];
+    const articles = initialArticles || (listResult?.page as JoinedArticle[]) || [];
 
     return (
         <section className="blog_section section_space_lg">
@@ -48,8 +50,11 @@ export function BlogSection() {
                                         <span className="author_name text-xs font-bold uppercase tracking-wider" style={{ fontSize: '11px', color: 'var(--p2p-sage)' }}>Sandra Opara</span>
                                     </div>
                                     <ul className="post_meta unordered_list">
-                                        <li>{new Date(article.createdAt).toLocaleDateString()}</li>
-                                        <li><Link href="/blog">Insight</Link></li>
+                                        <li>{new Date(article.createdAt ?? 0).toLocaleDateString()}</li>
+                                        <li>
+                                            <i className="fa-regular fa-eye me-1"></i>
+                                            {article.viewCount || 0} Views
+                                        </li>
                                     </ul>
                                     <h3 className="item_title">
                                         <Link href={`/blog/${article.slug}`}>{article.title}</Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 const faqs = [
     {
@@ -32,12 +33,36 @@ export function FAQSection() {
                         <div className="images_group_widget">
                             <ul className="unordered_list">
                                 <li>
-                                    <img src="/assets/images/faq/faq_img_1.png" alt="Counseling Session" />
-                                    <img src="/assets/images/faq/faq_img_2.png" alt="Therapy Space" />
+                                    <Image 
+                                        src="/assets/images/new_pics/sandra-square (11).png" 
+                                        alt="Counseling Session" 
+                                        width={200} 
+                                        height={200} 
+                                        style={{ borderRadius: 'var(--bs-border-radius-xl)', objectFit: 'cover' }}
+                                    />
+                                    <Image 
+                                        src="/assets/images/new_pics/sandra-square (12).png" 
+                                        alt="Therapy Space" 
+                                        width={255} 
+                                        height={255} 
+                                        style={{ borderRadius: 'var(--bs-border-radius-xl)', objectFit: 'cover' }}
+                                    />
                                 </li>
                                 <li>
-                                    <img src="/assets/images/faq/faq_img_3.png" alt="Growth and Healing" />
-                                    <img src="/assets/images/faq/faq_img_4.png" alt="Professional Support" />
+                                    <Image 
+                                        src="/assets/images/new_pics/sandra-square (13).png" 
+                                        alt="Growth and Healing" 
+                                        width={255} 
+                                        height={255} 
+                                        style={{ borderRadius: 'var(--bs-border-radius-xl)', objectFit: 'cover' }}
+                                    />
+                                    <Image 
+                                        src="/assets/images/new_pics/sandra-square (14).png" 
+                                        alt="Professional Support" 
+                                        width={200} 
+                                        height={200} 
+                                        style={{ borderRadius: 'var(--bs-border-radius-xl)', objectFit: 'cover' }}
+                                    />
                                 </li>
                             </ul>
                         </div>

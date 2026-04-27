@@ -10,11 +10,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     const service = await fetchQuery(api.services.getBySlug, { slug });
     
-    if (!service) return { title: "Service Not Found | CounsellingP2P" };
+    if (!service) return { title: "Service Not Found | Pain2Purpose" };
+
+    const description = service.shortDescription || `Professional counselling and support for ${service.title}.`;
+    const image = service.coverImage || "/assets/images/services/service_details_image_1-min.jpg";
 
     return {
         title: `${service.title} | Therapeutic Services`,
-        description: service.shortDescription || `Professional counselling and support for ${service.title}.`,
+        description,
+        openGraph: {
+            title: `${service.title} | Pain2Purpose`,
+            description,
+            images: [image],
+            type: "website",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: service.title,
+            description,
+            images: [image],
+        }
     };
 }
 
@@ -28,8 +43,27 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
     if (!service) notFound();
 
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": service.title,
+        "description": service.shortDescription,
+        "provider": {
+            "@type": "Organization",
+            "name": "Pain2Purpose Counselling Practice",
+            "url": process.env.NEXT_PUBLIC_SITE_URL
+        },
+        "areaServed": "Pennsylvania, USA",
+        "serviceType": "Counselling"
+    };
+
     return (
-        <main className="page_content">
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <main className="page_content">
             {/* Page Banner - Start */}
             <section className="page_banner decoration_wrapper">
                 <div className="container">
@@ -257,5 +291,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
             <ConsultationSection />
         </main>
+        </>
     );
 }

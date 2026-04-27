@@ -16,8 +16,11 @@ const ICON_MAP: Record<string, string> = {
     "autism": "/assets/images/icons/icon_brain.svg",
 };
 
-export function ServicesGrid() {
-    const services = useQuery(api.services.list);
+import { Doc } from "@/convex/_generated/dataModel";
+
+export function ServicesGrid({ initialServices }: { initialServices?: Doc<"services">[] }) {
+    const services = useQuery(api.services.list, initialServices ? "skip" : undefined);
+    const data = initialServices || services;
 
     return (
         <section className="service_section section_space_lg">
@@ -29,7 +32,7 @@ export function ServicesGrid() {
                     </p>
                 </div>
                 <div className="row">
-                    {services?.map((service) => (
+                    {data?.map((service) => (
                         <div key={service._id} className="col-lg-4 col-md-6 col-sm-6">
                             <div className="service_item">
                                 <div className="item_icon" style={{ backgroundColor: 'var(--bs-primary-bg-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

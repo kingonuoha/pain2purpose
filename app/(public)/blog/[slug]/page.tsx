@@ -40,5 +40,42 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
     if (!article) notFound();
 
-    return <ArticleContent initialArticle={article as unknown as JoinedArticle} slug={slug} />;
+    const ogImage = article.coverImage || getOgImageUrl(article.title);
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": article.title,
+        "description": article.metaDescription || truncate(article.excerpt || "", 160),
+        "image": ogImage,
+        "datePublished": new Date(article.publishedAt || article.createdAt).toISOString(),
+        "dateModified": new Date(article.updatedAt || article.createdAt).toISOString(),
+        "author": {
+            "@type": "Person",
+            "name": article.authorName || "Sandra Opara",
+            "url": `${process.env.NEXT_PUBLIC_SITE_URL}/about`
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Pain2Purpose",
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${process.env.NEXT_PUBLIC_SITE_URL}/p2p/logo.png`
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${slug}`
+        }
+    };
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <ArticleContent initialArticle={article as unknown as JoinedArticle} slug={slug} />
+        </>
+    );
 }

@@ -6,6 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, ToggleLeft, ToggleRight, X, Save, HeartHandshake, Brain, MessageSquare, Users, User, Sun, Leaf, Shield, Smile, Sparkles, HelpingHand, Coffee, Bird, Anchor, ChevronDown } from "lucide-react";
+import { useTour } from "@/hooks/use-tour";
 
 const ICON_OPTIONS = [
     { label: "Heart & Handshake", value: "HeartHandshake", icon: HeartHandshake },
@@ -50,6 +51,8 @@ export default function AdminServicesPage() {
     const services = useQuery(api.services.listAll);
     const create = useMutation(api.services.create);
     const update = useMutation(api.services.update);
+
+    useTour("admin-services", true);
 
     const [editingId, setEditingId] = useState<Id<"services"> | null>(null);
     const [showCreate, setShowCreate] = useState(false);
@@ -114,7 +117,7 @@ export default function AdminServicesPage() {
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div id="tour-services-header" className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-serif font-bold text-gray-900 dark:text-white">Services</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage the services Sandra offers. Toggle to show/hide on the public site.</p>
@@ -144,7 +147,7 @@ export default function AdminServicesPage() {
             )}
 
             {/* Services List */}
-            <div className="space-y-4">
+            <div id="tour-services-list" className="space-y-4">
                 {services === undefined && (
                     <div className="space-y-3">
                         {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />)}

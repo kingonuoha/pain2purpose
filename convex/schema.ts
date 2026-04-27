@@ -201,7 +201,13 @@ export default defineSchema({
     sentAt: v.optional(v.float64()),
     error: v.optional(v.string()),
     retries: v.number(),
-  }).index("by_status_scheduled", ["status", "scheduledFor"]),
+  })
+    .index("by_status_scheduled", ["status", "scheduledFor"])
+    .index("by_status", ["status"])
+    .searchIndex("search_emails", {
+      searchField: "recipient",
+      filterFields: ["status"],
+    }),
   researchTopics: defineTable({
     topic: v.string(),
     categoryId: v.optional(v.id("categories")),
@@ -283,6 +289,7 @@ export default defineSchema({
     email: v.string(),
     phone: v.optional(v.string()),
     serviceInterest: v.optional(v.string()), // service slug or name
+    sessionDate: v.optional(v.string()), // requested date
     message: v.string(),
     status: v.union(v.literal("new"), v.literal("read"), v.literal("responded")),
     createdAt: v.number(),

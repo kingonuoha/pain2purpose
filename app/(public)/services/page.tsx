@@ -2,10 +2,22 @@ import { ServicesGrid } from "@/components/home/ServicesGrid";
 import { ConsultationSection } from "@/components/home/ConsultationSection";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 
-// /* eslint-disable @next/next/no-img-element */
+export const metadata: Metadata = {
+    title: "Therapeutic Services | Pain2Purpose Counselling",
+    description: "Specialized counselling services including individual therapy, grief support, neurodivergence counselling, and trauma-informed care with Sandra Opara.",
+    keywords: ["counselling services", "therapy PA", "grief support", "trauma therapy", "neurodivergence support", "Sandra Opara"],
+};
 
-export default function ServicesPage() {
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+
+export const revalidate = 60;
+
+export default async function ServicesPage() {
+    const services = await fetchQuery(api.services.list);
+
     return (
         <main className="page_content">
             {/* Page Banner - Start */}
@@ -33,7 +45,7 @@ export default function ServicesPage() {
             {/* Page Banner - End */}
 
             {/* Service Section - Start */}
-            <ServicesGrid />
+            <ServicesGrid initialServices={services} />
             {/* Service Section - End */}
 
             {/* About Section - Start */}
